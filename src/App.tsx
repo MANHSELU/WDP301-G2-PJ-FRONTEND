@@ -4,6 +4,10 @@ import Header from "./layouts/Header";
 import { HomePage } from "./pages/HomePage";
 import BustripLogin from "./pages/LoginPage";
 import BustripRegister from "./pages/RegisterPage";
+import BustripChangePassword from "./pages/ChangePass";
+import BusTripProfile from "./pages/ProfileUser";
+import ForgotPassword from "./pages/ForgotPassword";
+// import PhoneLogin from "./pages/OtpPage";
 
 export default function App() {
   return (
@@ -14,6 +18,11 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<BustripLogin />} />
             <Route path="/register" element={<BustripRegister />} />
+            {/* <Route path="/otpotp" element={<PhoneLogin />} /> */}
+            <Route path="/changePass" element={<BustripChangePassword />} />
+            <Route path="/profile" element={<BusTripProfile />} />
+
+            <Route path="/forgot" element={<ForgotPassword />} />
           </Route>
         </Routes>
       </AppLayout>

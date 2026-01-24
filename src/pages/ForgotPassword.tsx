@@ -20,20 +20,22 @@ declare global {
         confirmationResult?: ConfirmationResult;
     }
 }
+
 const Spinner = () => (
     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
 );
 
-const BustripRegister = () => {
-    const [fullName, setFullName] = useState<string>("");
+const ForgotPassword = () => {
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState("");
-    const [password, setPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
     const [loading, setLoading] = useState(false);
     const [showOTP, setShowOTP] = useState(false);
     const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+
+    const navigate = useNavigate();
 
     /* =====================
        SETUP CAPTCHA
@@ -49,7 +51,7 @@ const BustripRegister = () => {
     };
 
     /* =====================
-       SEND OTP
+       CHECK PHONE EXISTS
     ===================== */
     const checkPhoneExists = async (phone: string): Promise<boolean> => {
         try {
@@ -76,23 +78,29 @@ const BustripRegister = () => {
         }
     };
 
-
+    /* =====================
+       SEND OTP
+    ===================== */
     const sendOTP = async () => {
         if (!phone) {
             toast.error("Vui lòng nhập số điện thoại");
             return;
         }
-        const exists = await checkPhoneExists(phone);
 
-        if (exists) {
-            toast.error("Số điện thoại đã được đăng ký");
-            setLoading(false);
-            return;
-        }
         setLoading(true);
-        setupRecaptcha();
 
         try {
+            // Kiểm tra số điện thoại có tồn tại không
+            const exists = await checkPhoneExists(phone);
+
+            if (!exists) {
+                toast.error("Số điện thoại chưa được đăng ký");
+                setLoading(false);
+                return;
+            }
+
+            setupRecaptcha();
+
             const confirmation = await signInWithPhoneNumber(
                 auth,
                 "+" + phone,
@@ -126,7 +134,7 @@ const BustripRegister = () => {
             setShowOTP(false);
             toast.success("Xác thực số điện thoại thành công");
         } catch (err) {
-            console.log("lỗi chương trình trên là : ", err)
+            console.log("Lỗi xác thực OTP:", err);
             toast.error("OTP không đúng");
         } finally {
             setLoading(false);
@@ -134,110 +142,117 @@ const BustripRegister = () => {
     };
 
     /* =====================
-       REGISTER
+       RESET PASSWORD
     ===================== */
-    const navigate = useNavigate()
-    const handleRegister = async () => {
-        // 🔐 BẮT BUỘC OTP ĐÃ VERIFY
+    const handleResetPassword = async () => {
         if (!isPhoneVerified) {
             toast.error("Vui lòng xác thực số điện thoại");
             return;
         }
 
-        if (!fullName.trim()) {
-            toast.error("Vui lòng nhập họ tên");
+        if (newPassword.length < 9) {
+            toast.error("Mật khẩu phải từ 9 ký tự");
             return;
         }
 
-        if (password.length < 8) {
-            toast.error("Mật khẩu phải từ 8 ký tự");
-            return;
-        }
-
-        if (password !== confirmPassword) {
+        if (newPassword !== confirmPassword) {
             toast.error("Mật khẩu xác nhận không khớp");
             return;
         }
 
+        setLoading(true);
+
         try {
             const payload = {
-                name: fullName.trim(),
-                phone: phone,          // đã được OTP verify
-                password: password,
+                phone: phone,
+                password: newPassword, // ✅ FIX Ở ĐÂY
                 confirmPassword: confirmPassword,
             };
 
-            console.log("📦 Sending register payload:", payload);
+            console.log("📦 Sending reset password payload:", payload);
 
-            const res = await fetch("http://localhost:3000/api/customer/notcheck/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
+            const res = await fetch(
+                "http://localhost:3000/api/customer/notcheck/resetPass",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                }
+            );
 
             const data = await res.json();
 
             if (!res.ok) {
-                toast.error(data.message || "Đăng ký thất bại");
+                toast.error(data.message || "Đặt lại mật khẩu thất bại");
                 return;
             }
 
-            toast.success("Đăng ký thành công 🎉");
+            toast.success("Đặt lại mật khẩu thành công 🎉");
 
-            // 👉 OPTIONAL: redirect login
-            navigate("/login");
+            setTimeout(() => {
+                navigate("/login");
+            }, 1500);
 
         } catch (error) {
-            console.error("Register error:", error);
+            console.error("Reset password error:", error);
             toast.error("Không thể kết nối server");
+        } finally {
+            setLoading(false);
         }
     };
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-orange-100">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-orange-100 flex items-center justify-center p-4">
             <Toaster />
             <div id="recaptcha-container"></div>
 
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-6xl w-full">
                 <div className="bg-white rounded-3xl p-10 grid md:grid-cols-2 gap-8">
 
-                    {/* LEFT */}
+                    {/* LEFT - FORM */}
                     <div className="space-y-5">
-                        <h1 className="text-4xl font-bold">
-                            Đăng ký <span className="text-orange-500">Bustrip</span>
-                        </h1>
+                        <div>
+                            <h1 className="text-4xl font-bold">
+                                Quên mật khẩu
+                            </h1>
+                            <p className="text-gray-600 mt-2">
+                                Nhập số điện thoại để đặt lại mật khẩu của bạn
+                            </p>
+                        </div>
 
                         {/* PHONE */}
-                        <label className="text-sm font-medium">
-                            Số điện thoại
-                        </label>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Số điện thoại
+                            </label>
 
-                        <div className="flex gap-2 items-center">
-                            <div className="flex-1">
-                                <PhoneInput
-                                    country={"vn"}
-                                    value={phone}
-                                    onChange={setPhone}
-                                    inputClass="!w-full !h-[42px]"
-                                />
+                            <div className="flex gap-2 items-center">
+                                <div className="flex-1">
+                                    <PhoneInput
+                                        country={"vn"}
+                                        value={phone}
+                                        onChange={setPhone}
+                                        inputClass="!w-full !h-[42px]"
+                                        disabled={isPhoneVerified}
+                                    />
+                                </div>
+
+                                {!isPhoneVerified && (
+                                    <button
+                                        onClick={sendOTP}
+                                        disabled={loading}
+                                        className={`px-4 h-[42px] flex items-center justify-center gap-2
+                                            text-white text-sm rounded-md whitespace-nowrap
+                                            ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}
+                                        `}
+                                    >
+                                        {loading ? <Spinner /> : "Gửi OTP"}
+                                    </button>
+                                )}
                             </div>
-
-                            {!isPhoneVerified && (
-                                <button
-                                    onClick={sendOTP}
-                                    disabled={loading}
-                                    className={`px-4 h-[42px] flex items-center justify-center gap-2
-        text-white text-sm rounded-md whitespace-nowrap
-        ${loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}
-    `}
-                                >
-                                    {loading ? <Spinner /> : "Gửi OTP"}
-                                </button>
-
-                            )}
                         </div>
 
                         {/* OTP */}
@@ -255,13 +270,12 @@ const BustripRegister = () => {
                                     onClick={verifyOTP}
                                     disabled={loading}
                                     className={`px-4 flex items-center justify-center gap-2
-        text-white text-sm rounded-md
-        ${loading ? "bg-green-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}
-    `}
+                                        text-white text-sm rounded-md
+                                        ${loading ? "bg-green-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}
+                                    `}
                                 >
                                     {loading ? <Spinner /> : "Xác nhận"}
                                 </button>
-
                             </div>
                         )}
 
@@ -270,61 +284,57 @@ const BustripRegister = () => {
                                 ✔ Số điện thoại đã xác thực
                             </p>
                         )}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Họ và tên
-                            </label>
-                            <input
-                                type="text"
-                                value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                                placeholder="Nguyễn Văn A"
-                                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
-                            />
-                        </div>
-                        {/* PASSWORD */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Mật khẩu
-                            </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Ít nhất 8 ký tự"
-                                className="w-full px-4 py-3 border rounded-lg"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Nhập lại  Mật khẩu
-                            </label>
-                            <input
-                                type="password"
-                                placeholder="Xác nhận mật khẩu"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full border px-4 py-3 rounded"
-                            />
-                        </div>
 
-                        {/* REGISTER */}
-                        <button
-                            onClick={handleRegister}
-                            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold"
-                        >
-                            Đăng ký
-                        </button>
+                        {/* NEW PASSWORD - Only show after phone verified */}
+                        {isPhoneVerified && (
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Mật khẩu mới
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        placeholder="Ít nhất 8 ký tự"
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Nhập lại mật khẩu mới
+                                    </label>
+                                    <input
+                                        type="password"
+                                        placeholder="Xác nhận mật khẩu"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className="w-full border px-4 py-3 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
+                                    />
+                                </div>
+
+                                {/* RESET PASSWORD BUTTON */}
+                                <button
+                                    onClick={handleResetPassword}
+                                    disabled={loading}
+                                    className={`w-full py-3 rounded-lg font-semibold text-white
+                                        ${loading ? "bg-orange-400 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600"}
+                                    `}
+                                >
+                                    {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
+                                </button>
+                            </>
+                        )}
 
                         <p className="text-sm text-center">
-                            Đã có tài khoản?{" "}
-                            <Link to="/login" className="text-blue-600">
+                            Nhớ mật khẩu?{" "}
+                            <Link to="/login" className="text-blue-600 hover:underline">
                                 Đăng nhập
                             </Link>
                         </p>
                     </div>
 
-                    {/* RIGHT IMAGE */}
                     {/* RIGHT IMAGE */}
                     <div className="hidden md:flex items-center justify-center relative">
                         <div className="relative w-full min-h-[420px] flex items-center justify-center">
@@ -346,4 +356,4 @@ const BustripRegister = () => {
     );
 };
 
-export default BustripRegister;
+export default ForgotPassword;
