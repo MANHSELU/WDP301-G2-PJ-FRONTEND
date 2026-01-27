@@ -2,8 +2,16 @@ import { Link, Outlet } from "react-router-dom";
 import BustripLogo from "../components/BustripLogo";
 import Footer from "./Footer";
 import { NavLink } from "react-router-dom";
+import type { RootState } from "../store/store";
+import { useDispatch, useSelector } from "react-redux";
+import type { user } from "../model/user";
+import { loginSuccess } from "../store/slices/userSlice";
+import { useEffect, useState } from "react";
 
 export default function Header() {
+    const users = useSelector((state: RootState) => state.user.user as user);
+    const dispatch = useDispatch();
+    const [open, setOpen] = useState(false);
 
     const menus = [
         { label: "Trang chủ", path: "/" },
@@ -13,49 +21,58 @@ export default function Header() {
         { label: "Thêm", path: "/them" },
     ];
 
+    const token = localStorage.getItem("accessToken");
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await fetch(
+                    "http://localhost:3000/api/customer/check/getuser",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                if (!response.ok) return;
+
+                const dataProfile = await response.json();
+                dispatch(loginSuccess(dataProfile.data));
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        if (token) fetchProfile();
+    }, []);
+
     return (
         <>
-            <nav className="relative z-20 overflow-visible">
-                {/* Header background */}
-                <div
-                    className="
-          absolute inset-0
-          bg-gradient-to-r from-orange-50 via-pink-50 to-orange-50
-          z-0
-        "
-                />
+            <nav className="relative z-30">
+                {/* Background (KHÔNG ĂN CLICK) */}
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-50 via-pink-50 to-orange-50 pointer-events-none" />
 
-                {/* Header content */}
-                <div
-                    className="
-          relative z-10
-          max-w-7xl mx-auto
-          px-6
-          h-16
-          flex items-center justify-between
-        "
-                >
+                {/* Header */}
+                <div className="relative z-40 max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     {/* Logo */}
-                    <div className="flex items-center space-x-3 relative z-10">
-                        <div className="p-2">
-                            <BustripLogo className="w-14 h-14" />
-                        </div>
-                        <span className="text-orange-500 font-bold text-2xl">
+                    <div className="flex items-center space-x-2">
+                        <BustripLogo className="w-10 h-10 sm:w-14 sm:h-14" />
+                        <span className="text-orange-500 font-bold text-xl sm:text-2xl">
                             BUSTRIP
                         </span>
                     </div>
 
-                    {/* Navigation Links */}
+                    {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-8">
                         {menus.map((item) => (
                             <NavLink
                                 key={item.path}
                                 to={item.path}
                                 className={({ isActive }) =>
-                                    `transition-colors font-medium ${isActive
-                                        ? "text-orange-500"
-                                        : "text-gray-700 hover:text-orange-500"
-                                    }`
+                                    isActive
+                                        ? "text-orange-500 font-medium"
+                                        : "text-gray-700 hover:text-orange-500 font-medium"
                                 }
                             >
                                 {item.label}
@@ -63,37 +80,108 @@ export default function Header() {
                         ))}
                     </div>
 
+                    {/* Desktop Auth */}
+                    <div className="hidden md:flex items-center space-x-4">
+                        {!users ? (
+                            <>
+                                <Link to="/login" className="hover:text-orange-500">
+                                    Sign in
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    className="bg-orange-500 text-white px-4 py-2 rounded-lg"
+                                >
+                                    Sign up
+                                </Link>
+                            </>
+                        ) : (
+                            <div className="flex items-center space-x-2">
+                                <Link to={"profile"}>
+                                    <img
+                                        src={users.avatar?.url || "/avatar-default.png"}
+                                        className="w-9 h-9 rounded-full object-cover"
+                                    />
+                                </Link>
 
-                    {/* Auth Buttons */}
-                    <div className="flex items-center space-x-4">
-                        <Link to={"/register"} className="text-gray-700 hover:text-orange-500 transition-colors px-4 py-2">
-                            Sign in
-                        </Link>
-                        <Link to={"/login"} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors">
-                            Sign up
-                        </Link>
+                                <span className="text-sm font-medium">{users.name}</span>
+                                <button
+                                    onClick={() => {
+                                        localStorage.removeItem("accessToken");
+                                        window.location.href = "/";
+                                    }}
+                                    className="text-red-500 text-sm"
+                                >
+                                    Logout
+                                </button>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Mobile menu */}
-                    <div className="md:hidden">
-                        <button className="text-gray-700 hover:text-orange-500">
-                            <svg
-                                className="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 6h16M4 12h16M4 18h16"
-                                />
-                            </svg>
-                        </button>
-                    </div>
+                    {/* Mobile Button */}
+                    <button
+                        onClick={() => setOpen(!open)}
+                        className="md:hidden text-2xl text-gray-700 focus:outline-none"
+                        aria-label="Toggle menu"
+                    >
+                        ☰
+                    </button>
                 </div>
+
+                {/* Mobile Menu */}
+                {open && (
+                    <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-xl z-50">
+                        <div className="flex flex-col px-4 py-4 space-y-4">
+                            {menus.map((item) => (
+                                <NavLink
+                                    key={item.path}
+                                    to={item.path}
+                                    onClick={() => setOpen(false)}
+                                    className={({ isActive }) =>
+                                        isActive
+                                            ? "text-orange-500 font-medium"
+                                            : "text-gray-700 hover:text-orange-500 font-medium"
+                                    }
+                                >
+                                    {item.label}
+                                </NavLink>
+                            ))}
+
+                            <hr />
+
+                            {!users ? (
+                                <>
+                                    <Link
+                                        to="/login"
+                                        onClick={() => setOpen(false)}
+                                        className="text-gray-700"
+                                    >
+                                        Sign in
+                                    </Link>
+                                    <Link
+                                        to="/register"
+                                        onClick={() => setOpen(false)}
+                                        className="bg-orange-500 text-white text-center py-2 rounded-lg"
+                                    >
+                                        Sign up
+                                    </Link>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        localStorage.removeItem("accessToken");
+                                        window.location.href = "/";
+                                    }}
+                                    className="text-red-500 text-left"
+                                >
+                                    Logout
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
             </nav>
+
+
             <Outlet />
             <Footer />
         </>

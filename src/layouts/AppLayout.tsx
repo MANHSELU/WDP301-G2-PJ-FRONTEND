@@ -6,7 +6,7 @@ export default function AppLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="relative min-h-screen">
+        <div className="relative min-h-screen overflow-hidden">
             <BustripLogoBg />
 
             {/* CONTENT */}
@@ -14,6 +14,5 @@ export default function AppLayout({
                 {children}
             </div>
         </div>
-
     );
 }
