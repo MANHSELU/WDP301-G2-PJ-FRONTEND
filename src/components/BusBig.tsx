@@ -1,7 +1,7 @@
 export default function BustripLogoBg(
 ) {
     return (
-        <div className="absolute top-0 right-0 w-[840px] h-[840px] opacity-20 z-30 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[840px] h-[840px] opacity-20 z-0 pointer-events-none">
             <img
                 src="/images/vectorxe2.png"
                 className="absolute"
