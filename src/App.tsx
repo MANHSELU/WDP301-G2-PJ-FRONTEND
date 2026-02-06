@@ -4,6 +4,13 @@ import Header from "./layouts/Header";
 import { HomePage } from "./pages/Customer/HomePage";
 import BustripLogin from "./pages/Customer/LoginPage";
 import BustripRegister from "./pages/Customer/RegisterPage";
+import BustripChangePassword from "./pages/Customer/ChangePass";
+import BusTripProfile from "./pages/Customer/ProfileUser";
+import ForgotPassword from "./pages/Customer/ForgotPassword";
+import FaceLoginPage from "./pages/Driver/vefication";
+import TransportBooking from "./pages/Driver/Home";
+import { ViewTrip } from "./pages/Driver/ViewTrip";
+import TripDetailsDemo from "./pages/Driver/TripDetail";
 
 export default function App() {
   return (
@@ -14,10 +21,19 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<BustripLogin />} />
             <Route path="/register" element={<BustripRegister />} />
+            <Route path="/changePass" element={<BustripChangePassword />} />
+            <Route path="/profile" element={<BusTripProfile />} />
+            <Route path="/forgot" element={<ForgotPassword />} />
+            <Route path="/loginCamera" element={<FaceLoginPage />} />
+            <Route path="driverBooking" element={<TransportBooking />} >
+              <Route path="viewtrip" element={<ViewTrip />} />
+              <Route path="tripdetail" element={<TripDetailsDemo />} />
+
+            </Route>
+
           </Route>
         </Routes>
       </AppLayout>
-
     </>
   )
 }
