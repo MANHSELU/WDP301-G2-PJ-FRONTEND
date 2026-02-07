@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Trip {
     id: number;
@@ -131,9 +132,9 @@ export function ViewTrip() {
                                     <span className="text-sm font-medium">{trip.vehicleType}</span>
                                     <span className="text-sm text-gray-500 ml-2">{trip.date}</span>
                                 </div>
-                                <button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                                <Link to={"/driverBooking/tripdetail"} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
                                     Xác Nhận
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     ))}
