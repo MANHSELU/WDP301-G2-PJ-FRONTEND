@@ -144,7 +144,7 @@ export default function Home2() {
 
           <div className="bus-bob relative z-10">
             <img
-              src="/images/bus5.png"
+              src="/images/bus7.png"
               alt="Bus overlay"
               className="w-full object-contain"
               style={{
