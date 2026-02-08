@@ -79,7 +79,7 @@ export default function Home2() {
           </div>
 
           <nav className="hidden items-center gap-8 md:flex">
-            {["Trang chu", "Lich trinh", "Tra cuu ve", "Hoa don", "Them"].map(
+            {["Trang chủ", "Lịch trình", "Tra cứu vé", "Hóa đơn", "Thêm"].map(
               (item, idx) => (
                 <button
                   key={item}
@@ -101,13 +101,13 @@ export default function Home2() {
               type="button"
               className="rounded-xl border border-[#e6bc93] bg-[#fff4e8] px-4 py-2 text-sm font-semibold text-[#5f3e28] shadow-[0_8px_18px_-14px_rgba(165,96,35,0.7)] transition duration-200 hover:border-[#df9a5e] hover:bg-[#ffeddc] hover:text-[#b05e1b]"
             >
-              Sign in
+              Đăng kí
             </button>
             <button
               type="button"
               className="rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-2 text-sm font-bold text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
             >
-              Sign up
+              Đăng nhập
             </button>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function Home2() {
               </div>
               <div className="bus-driver-fit">
                 <img
-                  src="/images/1me1-cut-test.png"
+                  src="/images/1me1.png"
                   alt="Driver"
                   className="bus-driver-fit-img"
                 />
@@ -185,16 +185,16 @@ export default function Home2() {
             <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[360px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.46)_34%,rgba(255,255,255,0.18)_56%,rgba(255,255,255,0)_78%)] blur-[26px]" />
             <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[300px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(248,250,252,0.46)_0%,rgba(248,250,252,0.14)_58%,rgba(248,250,252,0)_84%)] blur-[18px]" />
             <h1 className="relative z-10 py-1 text-[48px] font-black leading-[0.95] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
-              <span className="block whitespace-nowrap">Tim va dat ngay</span>
-              <span className="mt-2 block whitespace-nowrap">nhung chuyen xe</span>
+              <span className="block whitespace-nowrap">Tìm và đặt ngay</span>
+              <span className="mt-2 block whitespace-nowrap">những chuyến xe</span>
               <span className="mt-2 block whitespace-nowrap font-extrabold italic">
-                <span className="text-[#0d142a]">that</span>{" "}
-                <span className="text-[#ff7a1b]">de dang</span>
+                <span className="text-[#0d142a]">thật</span>{" "}
+                <span className="text-[#ff7a1b]">Dễ Dàng</span>
               </span>
             </h1>
             <p className="relative z-10 max-w-[510px] text-base leading-relaxed text-[#475569] lg:text-lg">
-              Dat ve moi luc moi noi di vung ngan hanh trinh da dang va dich vu
-              chat luong cao nhat.
+              Đặt vé mọi lúc mọi nơi, đi vững ngàn hành trình đa dạng và dịch vụ
+              chắt lượng cao nhất.
             </p>
           </div>
         </div>
@@ -206,28 +206,28 @@ export default function Home2() {
             <div className="grid items-stretch gap-0 md:grid-cols-[1.35fr_1.35fr_1.05fr_0.85fr_max-content]">
               <FieldInput
                 icon={<MapPin size={14} />}
-                label="Diem di"
+                label="Điểm đi"
                 name="origin"
-                placeholder="Nhap diem di"
+                placeholder="Nhập điểm đi"
                 divider
               />
               <FieldInput
                 icon={<MapPin size={14} />}
-                label="Diem den"
+                label="Điểm đến"
                 name="destination"
-                placeholder="Nhap diem den"
+                placeholder="Nhập điểm đến"
                 divider
               />
               <FieldInput
                 icon={<CalendarDays size={14} />}
-                label="Ngay ve ve"
+                label="Ngày đặt vé"
                 name="departureDate"
                 type="date"
                 divider
               />
               <FieldInput
                 icon={<Users size={14} />}
-                label="So luong ve"
+                label="Số lượng vé"
                 name="tickets"
                 type="number"
                 defaultValue={1}
@@ -238,7 +238,7 @@ export default function Home2() {
                 type="button"
                 className="m-1.5 justify-self-start min-h-[52px] rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-8 text-sm font-bold text-white shadow-[0_18px_30px_-14px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
               >
-                Tim kiem
+                Tim kiếm
               </button>
             </div>
           </div>
@@ -249,10 +249,10 @@ export default function Home2() {
         <div className="mx-auto max-w-[1240px] px-4">
           <div className="mb-12 text-center">
             <p className="mb-5 inline-flex rounded-full bg-[#ffe8cf] px-4 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-[#e58e2b]">
-              Tuyen xe noi bat
+              Tuyến xe nổi bật
             </p>
             <h2 className="text-5xl font-black tracking-[-0.03em] text-[#2f2118]">
-              Cac tuyen xe pho bien hien nay
+              Các tuyến xe phổ biến hiện nay
             </h2>
           </div>
 
@@ -296,7 +296,7 @@ export default function Home2() {
                     type="button"
                     className="flex w-full items-center justify-center gap-2 rounded-[7px] bg-gradient-to-r from-[#f39a32] to-[#e77416] px-4 py-3 text-sm font-bold text-white shadow-[0_18px_30px_-16px_rgba(216,113,28,0.88)] transition duration-200 hover:from-[#f7a73f] hover:to-[#ee8528]"
                   >
-                    Rent Now
+                    Đặt vé ngay
                     <ArrowRight size={14} />
                   </button>
                 </div>
@@ -309,8 +309,8 @@ export default function Home2() {
               type="button"
               className="inline-flex items-center gap-2 rounded-full border border-[#e4bb94] bg-[#fff4e7] px-7 py-3 text-sm font-bold text-[#6a4932] shadow-[0_10px_22px_-16px_rgba(180,95,21,0.78)] transition duration-200 hover:border-[#d99861] hover:bg-[#ffe9d4] hover:text-[#a45b1f]"
             >
-              Xem tat ca cac chuyen
-              <ArrowRight size={15} />
+              Xem tất cả các chuyến
+                            <ArrowRight size={15} />
             </button>
           </div>
         </div>
