@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
                             <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
                                 <span className="text-orange-400 font-bold">B</span>
                             </div>
-                            <span className="text-xl font-bold">BUSTRIP</span>
+                            <span className="text-xl font-bold">COACHTRIP</span>
                         </div>
 
                         <div className="flex gap-3 text-sm justify-center sm:justify-start">
@@ -120,7 +120,7 @@ const Footer: React.FC = () => {
                 {/* Copyright */}
                 <div className="pt-6 border-t border-orange-300 text-center sm:text-left">
                     <p className="text-sm">
-                        Copyright 2023 · Bustrip , All Rights Reserved
+                        Copyright 2023 - CoachTrip, All Rights Reserved
                     </p>
                 </div>
             </div>
@@ -129,3 +129,4 @@ const Footer: React.FC = () => {
 };
 
 export default Footer;
+

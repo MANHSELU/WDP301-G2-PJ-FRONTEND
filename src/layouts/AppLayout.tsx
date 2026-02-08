@@ -1,3 +1,4 @@
+import { useLocation } from "react-router-dom";
 import BustripLogoBg from "../components/BusBig";
 
 export default function AppLayout({
@@ -5,9 +6,12 @@ export default function AppLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const location = useLocation();
+    const hideBg = location.pathname.startsWith("/home2");
+
     return (
         <div className="relative min-h-screen overflow-hidden">
-            <BustripLogoBg />
+            {!hideBg && <BustripLogoBg />}
 
             {/* CONTENT */}
             <div className="relative z-20">
