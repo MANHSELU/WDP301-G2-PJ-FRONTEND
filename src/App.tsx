@@ -11,6 +11,7 @@ import FaceLoginPage from "./pages/Driver/vefication";
 import TransportBooking from "./pages/Driver/Home";
 import { ViewTrip } from "./pages/Driver/ViewTrip";
 import TripDetailsDemo from "./pages/Driver/TripDetail";
+import FaceRegister from "./pages/Driver/RegisterAI";
 
 export default function App() {
   return (
@@ -25,10 +26,10 @@ export default function App() {
             <Route path="/profile" element={<BusTripProfile />} />
             <Route path="/forgot" element={<ForgotPassword />} />
             <Route path="/loginCamera" element={<FaceLoginPage />} />
+            <Route path="/registerCamera" element={<FaceRegister />} />
             <Route path="driverBooking" element={<TransportBooking />} >
               <Route path="viewtrip" element={<ViewTrip />} />
               <Route path="tripdetail" element={<TripDetailsDemo />} />
-
             </Route>
 
           </Route>
