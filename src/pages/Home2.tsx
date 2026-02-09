@@ -350,7 +350,7 @@ export default function Home2() {
               Tuyến xe nổi bật
             </p>
             <h2 className="text-5xl font-black tracking-[-0.03em] text-[#2f2118]">
-              Các tuyến xe phổ biến nhất hiện nay
+              Các tuyến xe phổ biến hiện nay
             </h2>
           </div>
 
