@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
+import { useNavigate } from "react-router-dom";
 
 type LivenessStep = "TURN_LEFT" | "TURN_RIGHT" | "BLINK" | "DONE";
 export default function FaceVerification() {
+    const token = localStorage.getItem("accessToken");
     const blinkStateRef = useRef<"OPEN" | "CLOSED">("OPEN");
 
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -20,7 +22,7 @@ export default function FaceVerification() {
     const [loggedIn, setLoggedIn] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const [modelsLoaded, setModelsLoaded] = useState(false);
-
+    const navigate = useNavigate()
     const safeSetStatus = (text: string) => {
         if (lastStatusRef.current !== text) {
             lastStatusRef.current = text;
@@ -230,9 +232,12 @@ export default function FaceVerification() {
             tempCanvas.getContext("2d")?.drawImage(videoRef.current!, 0, 0);
             const image = tempCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
 
-            const res = await fetch("http://localhost:3000/api/driver/notcheck/face-login", {
+            const res = await fetch("http://localhost:3000/api/driver/check/face-login", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
                 body: JSON.stringify({ image })
             });
             const data = await res.json();
@@ -242,6 +247,7 @@ export default function FaceVerification() {
                 setIsCompleted(true);
                 setStatus(`✅ Thành công (${data.similarity?.toFixed(1)}%)`);
                 stopCamera(true);
+                navigate("/driverBooking/viewtrip")
             } else {
                 safeSetStatus("❌ Không khớp, vui lòng thử lại");
                 updateStep("TURN_LEFT", "👈 Thử lại: Quay mặt sang trái");

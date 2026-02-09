@@ -1,58 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
-interface Trip {
-    id: number;
-    departureTime: string;
-    departureLocation: string;
-    arrivalTime: string;
-    arrivalLocation: string;
-    duration: string;
-    distance: string;
-    vehicleType: string;
-    date: string;
-}
-
-const trips: Trip[] = [
-    {
-        id: 1,
-        departureTime: '15:00',
-        departureLocation: 'An Hữu (Tiền Giang)',
-        arrivalTime: '17:00',
-        arrivalLocation: 'TP. Hồ Chí Minh',
-        duration: '2 giờ',
-        distance: '115km',
-        vehicleType: 'Limousine',
-        date: '28/1/2026',
-    },
-    {
-        id: 2,
-        departureTime: '13:00',
-        departureLocation: 'Huế',
-        arrivalTime: '15:00',
-        arrivalLocation: 'Đà Nẵng',
-        duration: '2 giờ',
-        distance: '96km',
-        vehicleType: 'Limousine',
-        date: '30/1/2026',
-    },
-    {
-        id: 3,
-        departureTime: '17:00',
-        departureLocation: 'TP. Hồ Chí Minh',
-        arrivalTime: '19:00',
-        arrivalLocation: 'Tiền Giang',
-        duration: '2 giờ',
-        distance: '115km',
-        vehicleType: 'Limousine',
-        date: '5/2/2026',
-    },
-];
+import type { Trip } from '../../model/trip';
+import API_TRIP from '../../services/Driver/trips-api';
 
 export function ViewTrip() {
+    const [trips, setTrip] = useState<Trip[]>([]);
+    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedTrip, setSelectedTrip] = useState<number | null>(null);
+    const [selectedTrip, setSelectedTrip] = useState<string | null>(null);
+
     const itemsPerPage = 1;
     const totalPages = Math.ceil(trips.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -66,47 +22,106 @@ export function ViewTrip() {
         setCurrentPage(prev => Math.min(totalPages, prev + 1));
     };
 
-    const handleSelectTrip = (tripId: number) => {
+    const handleSelectTrip = (tripId: string) => {
         setSelectedTrip(selectedTrip === tripId ? null : tripId);
     };
+
+    useEffect(() => {
+        const fetchTrips = async () => {
+            try {
+                const token = localStorage.getItem("accessToken");
+
+                const res = await fetch(`${API_TRIP.trips}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) throw new Error("Fetch trips failed");
+
+                const result = await res.json();
+                setTrip(result.data);
+            } catch (error) {
+                console.error("Lỗi lấy trips:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTrips();
+    }, []);
+
+    if (loading) return <p>Đang tải...</p>;
+    const hanldSumit = async (id: string) => {
+        try {
+            const token = localStorage.getItem("accessToken");
+
+            const res = await fetch(`${API_TRIP.trips}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ id })
+            });
+
+            if (!res.ok) throw new Error("Update trip failed");
+
+            const result = await res.json();
+            const updatedTrip = result.data; // trip vừa update
+
+            // 🔥 update lại state trips
+            setTrip(prevTrips =>
+                prevTrips.map(trip =>
+                    trip._id === updatedTrip._id ? updatedTrip : trip
+                )
+            );
+
+        } catch (error) {
+            console.error("Lỗi update trip:", error);
+        }
+    };
+
     return (
-        <>
+        <div className="w-full border border-black/10 rounded-3xl bg-white shadow-md p-8">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-8">
+                Danh sách Chuyến lái
+            </h2>
 
+            <div className="space-y-6">
+                {displayedTrips.map(trip => {
+                    const startTime = new Date(trip.departure_time);
 
-            {/* Main Content */}
-            <div
-                className="
-                w-full
-                border border-black/10
-                rounded-3xl
-                bg-white
-                shadow-md
-                p-8
-            "
-            >
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent mb-8">
-                    Danh sách Chuyến lái
-                </h2>
+                    const endTime =
+                        trip.drivers.length > 0
+                            ? new Date(trip.drivers[trip.drivers.length - 1].shift_end)
+                            : startTime;
 
-                {/* Trips Display */}
-                <div className="space-y-6">
-                    {displayedTrips.map(trip => (
+                    const durationMs = endTime.getTime() - startTime.getTime();
+                    const hours = Math.floor(durationMs / (1000 * 60 * 60));
+                    const minutes = Math.floor((durationMs / (1000 * 60)) % 60);
+
+                    return (
                         <div
-                            key={trip.id}
-                            className={`border-2 rounded-xl p-6 transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg ${selectedTrip === trip.id
+                            key={trip._id}
+                            className={`border-2 rounded-xl p-6 transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg ${selectedTrip === trip._id
                                 ? 'border-orange-500 bg-gradient-to-r from-orange-50 to-orange-100 shadow-lg'
                                 : 'border-orange-200 hover:border-orange-400 hover:shadow-lg'
                                 }`}
-                            onClick={() => handleSelectTrip(trip.id)}
+                            onClick={() => handleSelectTrip(trip._id)}
                         >
-                            {/* Header with times and locations */}
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex-1">
-                                    <div className="text-2xl font-bold text-gray-900">{trip.departureTime}</div>
-                                    <div className="text-sm text-gray-600 mt-1">{trip.departureLocation}</div>
+                                    <div className="text-2xl font-bold text-gray-900">
+                                        {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                    <div className="text-sm text-gray-600 mt-1">
+                                        {trip.route_id.start_id.name}
+                                    </div>
                                 </div>
 
-                                {/* Timeline/Route */}
                                 <div className="flex-1 px-8">
                                     <div className="flex items-center justify-center gap-2 mb-2">
                                         <div className="w-3 h-3 rounded-full border-2 border-green-500 bg-white"></div>
@@ -114,66 +129,84 @@ export function ViewTrip() {
                                         <div className="w-3 h-3 rounded-full border-2 border-orange-300 bg-white"></div>
                                     </div>
                                     <div className="text-center">
-                                        <div className="text-sm font-semibold text-gray-900">{trip.duration}</div>
-                                        <div className="text-sm text-gray-500">{trip.distance}</div>
+                                        <div className="text-sm font-semibold text-gray-900">
+                                            {hours}h {minutes}m
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                            {trip.route_id.distance_km} km
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div className="flex-1 text-right">
-                                    <div className="text-2xl font-bold text-gray-900">{trip.arrivalTime}</div>
-                                    <div className="text-sm text-gray-600 mt-1">{trip.arrivalLocation}</div>
+                                    <div className="text-2xl font-bold text-gray-900">
+                                        {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                    <div className="text-sm text-gray-600 mt-1">
+                                        {trip.route_id.stop_id.name}
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Vehicle and Date Info */}
                             <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                                 <div className="flex items-center gap-2 text-gray-600">
                                     <span className="text-sm">•</span>
-                                    <span className="text-sm font-medium">{trip.vehicleType}</span>
-                                    <span className="text-sm text-gray-500 ml-2">{trip.date}</span>
+                                    <span className="text-sm font-medium">
+                                        {trip.bus_id.bus_type_id.name ?? "Chưa có xe"}
+                                    </span>
+                                    <span className="text-sm text-gray-500 ml-2">
+                                        {new Date(trip.created_at).toLocaleDateString()}
+                                    </span>
                                 </div>
-                                <Link to={"/driverBooking/tripdetail"} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                    Xác Nhận
-                                </Link>
+                                {trip.status === "SCHEDULED" && (
+                                    <button
+                                        onClick={() => hanldSumit(trip._id)}
+                                        className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold px-8 py-2 rounded-lg"
+                                    >
+                                        Xác nhận
+                                    </button>
+                                )}
+
+                                {trip.status === "RUNNING" && (
+                                    <button
+                                        disabled
+                                        className="bg-blue-500 text-white font-bold px-8 py-2 rounded-lg"
+                                    >
+                                        Đang đi
+                                    </button>
+                                )}
+
+                                {trip.status === "FINISHED" && (
+                                    <button
+                                        disabled
+                                        className="bg-gray-400 text-white font-bold px-8 py-2 rounded-lg"
+                                    >
+                                        Đã kết thúc
+                                    </button>
+                                )}
+
+
                             </div>
                         </div>
-                    ))}
-                </div>
-
-                {/* Pagination */}
-                <div className="flex items-center justify-center gap-3 mt-10 p-6 bg-orange-50 rounded-xl border-2 border-orange-200">
-                    <button
-                        onClick={handlePrevious}
-                        disabled={currentPage === 1}
-                        className="p-2 rounded-lg hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-md"
-                    >
-                        <ChevronLeft size={22} className="text-orange-600 font-bold" />
-                    </button>
-
-                    <div className="flex gap-3">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                            <button
-                                key={page}
-                                onClick={() => setCurrentPage(page)}
-                                className={`w-10 h-10 rounded-lg font-bold transition-all duration-300 transform hover:scale-110 ${page === currentPage
-                                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
-                                    : 'bg-white text-orange-600 border-2 border-orange-300 hover:bg-orange-100'
-                                    }`}
-                            >
-                                {page}
-                            </button>
-                        ))}
-                    </div>
-
-                    <button
-                        onClick={handleNext}
-                        disabled={currentPage === totalPages}
-                        className="p-2 rounded-lg hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-md"
-                    >
-                        <ChevronRight size={22} className="text-orange-600 font-bold" />
-                    </button>
-                </div>
+                    );
+                })}
             </div>
-        </>
-    )
+
+            <div className="flex items-center justify-center gap-3 mt-10 p-6 bg-orange-50 rounded-xl border-2 border-orange-200">
+                <button onClick={handlePrevious} disabled={currentPage === 1}>
+                    <ChevronLeft size={22} />
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button key={page} onClick={() => setCurrentPage(page)}>
+                        {page}
+                    </button>
+                ))}
+
+                <button onClick={handleNext} disabled={currentPage === totalPages}>
+                    <ChevronRight size={22} />
+                </button>
+            </div>
+        </div>
+    );
 }
