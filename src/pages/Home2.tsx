@@ -4,7 +4,7 @@ import {
   MapPin,
   Users,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Footer from "../layouts/Footer";
 
 type RouteCard = {
@@ -13,6 +13,14 @@ type RouteCard = {
   title: string;
   image: string;
   rows: { city: string; fare: string }[];
+};
+
+type PromoCard = {
+  id: number;
+  image: string;
+  alt: string;
+  zoomY?: number;
+  position?: string;
 };
 
 const routeCards: RouteCard[] = [
@@ -62,67 +70,102 @@ const routeCards: RouteCard[] = [
   },
 ];
 
+const promoCards: PromoCard[] = [
+  { id: 1, image: "/images/km1.png", alt: "Khuyen mai 1", zoomY: 1.56, position: "50% 46%" },
+  { id: 2, image: "/images/km2.png", alt: "Khuyen mai 2", zoomY: 1.46, position: "50% 46%" },
+  { id: 3, image: "/images/km3.png", alt: "Khuyen mai 3", zoomY: 1.44, position: "50% 47%" },
+  { id: 4, image: "/images/km4.png", alt: "Khuyen mai 4", zoomY: 1.52, position: "50% 46%" },
+  { id: 5, image: "/images/km5.png", alt: "Khuyen mai 5", zoomY: 1.62, position: "50% 44%" },
+  { id: 6, image: "/images/km6.png", alt: "Khuyen mai 6", zoomY: 1.45, position: "50% 47%" },
+];
+
+const promoPageSize = 4;
+const promoPages = Array.from(
+  { length: Math.ceil(promoCards.length / promoPageSize) },
+  (_, pageIndex) =>
+    Array.from({ length: promoPageSize }, (_, slot) => {
+      const idx = (pageIndex * promoPageSize + slot) % promoCards.length;
+      return promoCards[idx];
+    })
+);
+
 export default function Home2() {
+  const [promoPage, setPromoPage] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setPromoPage((prev) => (prev + 1) % promoPages.length);
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
   return (
-    <div className="bg-[#ece7e2] text-[#2e1f16]">
-      <header className="border-b border-[#eee4dc] bg-white">
-        <div className="mx-auto flex h-[74px] w-full max-w-[1240px] items-center justify-between px-4">
-          <div className="relative -ml-[39px] flex h-14 w-[260px] items-center sm:-ml-[63px] lg:-ml-[111px]">
-            <img
-              src="/images/logo1.png"
-              alt="CoachTrip logo"
-              className="h-14 w-auto object-contain"
-            />
-            <span className="absolute left-[58px] top-1/2 -translate-y-1/2 text-[24px] font-black uppercase leading-none tracking-[-0.01em] text-[#f28320]">
-              COACHTRIP
-            </span>
-          </div>
+    <div className="overflow-x-hidden bg-[#ece7e2] text-[#2e1f16]">
 
-          <nav className="hidden items-center gap-8 md:flex">
-            {["Trang chủ", "Lịch trình", "Tra cứu vé", "Hóa đơn", "Thêm"].map(
-              (item, idx) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={`relative py-7 text-[13px] font-semibold ${
-                    idx === 0
-                      ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
-                      : "text-[#7c5f4a]"
-                  }`}
-                >
-                  {item}
-                </button>
-              )
-            )}
-          </nav>
-
-          <div className="hidden items-center gap-4 md:flex md:translate-x-3 lg:translate-x-14">
-            <button
-              type="button"
-              className="rounded-xl border border-[#e6bc93] bg-[#fff4e8] px-4 py-2 text-sm font-semibold text-[#5f3e28] shadow-[0_8px_18px_-14px_rgba(165,96,35,0.7)] transition duration-200 hover:border-[#df9a5e] hover:bg-[#ffeddc] hover:text-[#b05e1b]"
-            >
-              Đăng kí
-            </button>
-            <button
-              type="button"
-              className="rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-2 text-sm font-bold text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
-            >
-              Đăng nhập
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden bg-[#ece7e2]">
         <img
           src="/images/bg4.png"
           alt="Hero background"
           className="absolute inset-0 h-full w-full object-cover object-center"
           style={{ imageRendering: "auto" }}
         />
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent via-white/70 to-[#ece7e2]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-[96px] bg-gradient-to-b from-[#fefcfb]/90 via-[#fefcfb]/58 to-transparent" />
+        <div className="page-enter-nav absolute inset-x-0 top-0 z-40">
+          <div className="mx-auto flex h-[74px] w-full max-w-[1240px] items-center justify-between px-4">
+            <div className="relative -ml-[39px] flex h-14 w-[260px] items-center sm:-ml-[63px] lg:-ml-[111px]">
+              <img
+                src="/images/logo1.png"
+                alt="CoachTrip logo"
+                className="h-14 w-auto object-contain"
+              />
+              <span className="absolute left-[58px] top-1/2 -translate-y-1/2 text-[24px] font-black uppercase leading-none tracking-[-0.01em] text-[#f28320]">
+                COACHTRIP
+              </span>
+            </div>
+
+            <nav className="hidden items-center gap-8 md:flex">
+              {["Trang chủ", "Lịch trình", "Tra cứu vé", "Hóa đơn","Tin tức", "Thêm"].map(
+                (item, idx) => (
+                  <button
+                    key={item}
+                    type="button"
+                    className={`page-enter-nav-item relative py-7 text-[13px] font-semibold ${
+                      idx === 0
+                        ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
+                        : "text-[#7c5f4a]"
+                    }`}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
+            </nav>
+
+            <div className="hidden items-center gap-4 md:flex md:translate-x-3 lg:translate-x-14">
+              <button
+                type="button"
+                className="rounded-xl border border-[#e6bc93] bg-[#fff4e8] px-4 py-2 text-sm font-semibold text-[#5f3e28] shadow-[0_8px_18px_-14px_rgba(165,96,35,0.7)] transition duration-200 hover:border-[#df9a5e] hover:bg-[#ffeddc] hover:text-[#b05e1b]"
+              >
+                Đăng kí
+              </button>
+              <button
+                type="button"
+                className="rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-2 text-sm font-bold text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+              >
+                Đăng nhập
+              </button>
+            </div>
+          </div>
+        </div>
         <div className="absolute inset-0 bg-[linear-gradient(96deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.93)_34%,rgba(255,255,255,0.64)_56%,rgba(255,255,255,0.16)_78%,rgba(255,255,255,0)_100%)]" />
-        <div className="pointer-events-none absolute bottom-[5%] right-[2%] z-10 w-[66%] max-w-[860px] md:bottom-[2%] md:w-[62%]">
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#f3ece5] to-[#ece7e2]" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-[#ece7e2]" />
+        <div className="page-enter-bus pointer-events-none absolute bottom-[5%] right-[2%] z-10 w-[66%] max-w-[860px] md:bottom-[2%] md:w-[62%]">
           <div className="bus-aero-overlay absolute inset-[-16%] z-0">
             <span className="bus-cloud bus-cloud-1 absolute left-[-10%] top-[-10%] h-[28%] w-[68%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.25)_54%,rgba(255,255,255,0)_100%)] blur-[30px]" />
             <span className="bus-cloud bus-cloud-2 absolute left-[-20%] top-[28%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.66)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
@@ -174,22 +217,16 @@ export default function Home2() {
         </div>
  
  
-        <div className="absolute bottom-[18.5%] right-[9%] z-20 flex gap-2">
-          <span className="h-2 w-2 rounded-full bg-[#f39c45]" />
-          <span className="h-2 w-2 rounded-full bg-[#f39c45]" />
-          <span className="h-2 w-2 rounded-full bg-[#d5d3d2]" />
-        </div>
-
-        <div className="relative z-20 mx-auto flex min-h-[570px] w-full max-w-[1240px] items-center px-4 pb-24 pt-10 lg:min-h-[660px] lg:pt-6">
-          <div className="relative isolate -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
+        <div className="relative z-20 mx-auto flex min-h-[680px] w-full max-w-[1240px] items-center px-4 pb-24 pt-24 lg:min-h-[780px] lg:pt-20">
+          <div className="page-enter-copy relative isolate -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
             <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[360px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.46)_34%,rgba(255,255,255,0.18)_56%,rgba(255,255,255,0)_78%)] blur-[26px]" />
             <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[300px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(248,250,252,0.46)_0%,rgba(248,250,252,0.14)_58%,rgba(248,250,252,0)_84%)] blur-[18px]" />
-            <h1 className="relative z-10 py-1 text-[48px] font-black leading-[0.95] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
-              <span className="block whitespace-nowrap">Tìm và đặt ngay</span>
-              <span className="mt-2 block whitespace-nowrap">những chuyến xe</span>
-              <span className="mt-2 block whitespace-nowrap font-extrabold italic">
+            <h1 className="hero-title relative z-10 py-1 text-[48px] font-black leading-[1.05] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
+              <span className="hero-title-line block whitespace-nowrap">Tìm và đặt ngay</span>
+              <span className="hero-title-line mt-2 block whitespace-nowrap">những chuyến xe</span>
+              <span className="hero-title-line mt-2 block whitespace-nowrap font-extrabold italic">
                 <span className="text-[#0d142a]">thật</span>{" "}
-                <span className="text-[#ff7a1b]">Dễ Dàng</span>
+                <span className="hero-title-shimmer">Dễ Dàng</span>
               </span>
             </h1>
             <p className="relative z-10 max-w-[510px] text-base leading-relaxed text-[#475569] lg:text-lg">
@@ -200,7 +237,7 @@ export default function Home2() {
         </div>
       </section>
 
-      <section className="relative z-30 -mt-14">
+      <section className="page-enter-search relative z-30 -mt-14 bg-gradient-to-b from-transparent via-[#ece7e2]/75 to-[#ece7e2]">
         <div className="mx-auto w-full max-w-[1460px] px-3">
           <div className="w-full rounded-[10px] border border-[#f2e5d8] bg-white/95 p-2.5 shadow-[0_24px_35px_-24px_rgba(251,146,60,0.9)] backdrop-blur">
             <div className="grid items-stretch gap-0 md:grid-cols-[1.35fr_1.35fr_1.05fr_0.85fr_max-content]">
@@ -245,8 +282,69 @@ export default function Home2() {
         </div>
       </section>
 
-      <section className="bg-transparent pb-20 pt-12">
+      <section className="page-enter-content relative -mt-px bg-[#ece7e2] pb-20 pt-12">
         <div className="mx-auto max-w-[1240px] px-4">
+          <div className="mb-14">
+            <div className="mb-6 text-center">
+              <p className="mb-5 inline-flex rounded-full bg-[#ffe8cf] px-4 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-[#e58e2b]">
+                Khuyến mãi nổi bật
+              </p>
+            </div>
+
+            <div className="overflow-hidden">
+              <div
+                className="flex transition-transform duration-700 ease-out"
+                style={{ transform: `translateX(-${promoPage * 100}%)` }}
+              >
+                {promoPages.map((page, pageIndex) => (
+                  <div key={`promo-page-${pageIndex}`} className="w-full shrink-0">
+                    <div className="grid gap-6 lg:grid-cols-4">
+                      {page.map((promo, slotIndex) => (
+                        <article
+                          key={`promo-card-${pageIndex}-${slotIndex}-${promo.id}`}
+                          className="overflow-hidden rounded-[10px] border border-[#f3dcc6] bg-white shadow-[0_28px_45px_-40px_rgba(181,98,27,0.9)]"
+                        >
+                          <div className="h-[180px] w-full overflow-hidden bg-white">
+                            <img
+                              src={promo.image}
+                              alt={promo.alt}
+                              title=""
+                              draggable={false}
+                              className="block h-full w-full object-cover"
+                              style={{
+                                transform: `scale(1.02, ${promo.zoomY ?? 1.5})`,
+                                transformOrigin: "center",
+                                objectPosition: promo.position ?? "50% 46%",
+                              }}
+                            />
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {promoPages.length > 1 ? (
+              <div className="mt-5 flex items-center justify-center gap-2.5">
+                {promoPages.map((_, dotIndex) => (
+                  <button
+                    key={`promo-dot-${dotIndex}`}
+                    type="button"
+                    onClick={() => setPromoPage(dotIndex)}
+                    aria-label={`Xem khuyến mãi ${dotIndex + 1}`}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      promoPage === dotIndex
+                        ? "w-6 bg-[#f08d2c]"
+                        : "w-2.5 bg-[#d8c5b5] hover:bg-[#e7b98f]"
+                    }`}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+
           <div className="mb-12 text-center">
             <p className="mb-5 inline-flex rounded-full bg-[#ffe8cf] px-4 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-[#e58e2b]">
               Tuyến xe nổi bật
@@ -319,6 +417,130 @@ export default function Home2() {
       <Footer />
 
       <style>{`
+        .page-enter-nav,
+        .page-enter-copy,
+        .page-enter-bus,
+        .page-enter-search,
+        .page-enter-content {
+          opacity: 0;
+          will-change: transform, opacity;
+          animation-fill-mode: forwards;
+          animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .page-enter-nav {
+          animation-name: page-fade-down;
+          animation-duration: 0.92s;
+          animation-delay: 0.04s;
+        }
+
+        .page-enter-copy {
+          animation-name: page-fade-up;
+          animation-duration: 1.08s;
+          animation-delay: 0.2s;
+        }
+
+        .page-enter-bus {
+          animation-name: page-fade-right;
+          animation-duration: 1.2s;
+          animation-delay: 0.24s;
+        }
+
+        .page-enter-search {
+          animation-name: page-fade-up;
+          animation-duration: 0.96s;
+          animation-delay: 0.42s;
+        }
+
+        .page-enter-content {
+          animation-name: page-fade-up;
+          animation-duration: 0.96s;
+          animation-delay: 0.52s;
+        }
+
+        .page-enter-nav-item {
+          opacity: 0;
+          transform: translateY(-10px);
+          animation: page-fade-down 0.78s cubic-bezier(0.22, 1, 0.36, 1)
+            forwards;
+        }
+
+        .page-enter-nav-item:nth-child(1) {
+          animation-delay: 0.18s;
+        }
+
+        .page-enter-nav-item:nth-child(2) {
+          animation-delay: 0.24s;
+        }
+
+        .page-enter-nav-item:nth-child(3) {
+          animation-delay: 0.3s;
+        }
+
+        .page-enter-nav-item:nth-child(4) {
+          animation-delay: 0.36s;
+        }
+
+        .page-enter-nav-item:nth-child(5) {
+          animation-delay: 0.42s;
+        }
+
+        .page-enter-nav-item:nth-child(6) {
+          animation-delay: 0.48s;
+        }
+
+        .hero-title-line {
+          opacity: 0;
+          transform: translateY(14px);
+          animation: hero-title-reveal 1.12s cubic-bezier(0.2, 0.8, 0.2, 1)
+            forwards;
+        }
+
+        .hero-title-line:nth-child(1) {
+          animation-delay: 0.36s;
+        }
+
+        .hero-title-line:nth-child(2) {
+          animation-delay: 0.54s;
+        }
+
+        .hero-title-line:nth-child(3) {
+          animation-delay: 0.72s;
+        }
+
+        .hero-title-shimmer {
+          color: #ff7a1b;
+          display: inline-block;
+          line-height: 1.12;
+          padding-bottom: 0.14em;
+          margin-bottom: 0;
+          background-image: repeating-linear-gradient(
+            100deg,
+            #ff7a1b 0px,
+            #ff7a1b 120px,
+            #ff9226 185px,
+            #ffb347 260px,
+            #ff9226 335px,
+            #ff7a1b 400px,
+            #e8791c 520px
+          );
+          background-size: 520px 100%;
+          background-position: 0 50%;
+          background-repeat: repeat;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-shadow:
+            0 1px 0 rgba(255, 181, 88, 0.36),
+            0 2px 0 rgba(234, 121, 27, 0.38),
+            0 4px 0 rgba(178, 76, 16, 0.3),
+            0 10px 16px rgba(94, 40, 9, 0.22);
+          -webkit-text-stroke: 0.26px rgba(136, 57, 12, 0.26);
+          filter: saturate(1.16) contrast(1.12) brightness(1.06);
+          animation: hero-title-shimmer-soft 5.8s linear infinite;
+          will-change: background-position;
+        }
+
         .bus-bob {
           animation: bus-bob 1.9s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite;
           transform-origin: 56% 74%;
@@ -575,7 +797,70 @@ export default function Home2() {
           }
         }
 
+        @keyframes page-fade-down {
+          0% {
+            opacity: 0;
+            transform: translateY(-18px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes page-fade-up {
+          0% {
+            opacity: 0;
+            transform: translateY(24px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes page-fade-right {
+          0% {
+            opacity: 0;
+            transform: translateX(34px) scale(0.97);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+
+        @keyframes hero-title-reveal {
+          0% {
+            opacity: 0;
+            transform: translateY(14px);
+            filter: blur(3px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0);
+          }
+        }
+
+        @keyframes hero-title-shimmer-soft {
+          0% {
+            background-position: 0 50%;
+          }
+          100% {
+            background-position: -520px 50%;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
+          .page-enter-nav,
+          .page-enter-copy,
+          .page-enter-bus,
+          .page-enter-search,
+          .page-enter-content,
+          .page-enter-nav-item,
+          .hero-title-line,
+          .hero-title-shimmer,
           .bus-bob,
           .bus-cloud,
           .bus-tail-cloud,
@@ -584,6 +869,8 @@ export default function Home2() {
           .bus-driver-fit,
           .bus-driver-fit-img {
             animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
           }
         }
       `}</style>
