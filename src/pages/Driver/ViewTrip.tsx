@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Trip } from '../../model/trip';
 import API_TRIP from '../../services/Driver/trips-api';
+import { useNavigate } from 'react-router-dom';
 
 export function ViewTrip() {
     const [trips, setTrip] = useState<Trip[]>([]);
@@ -25,6 +26,8 @@ export function ViewTrip() {
     const handleSelectTrip = (tripId: string) => {
         setSelectedTrip(selectedTrip === tripId ? null : tripId);
     };
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTrips = async () => {
@@ -54,6 +57,7 @@ export function ViewTrip() {
     }, []);
 
     if (loading) return <p>Đang tải...</p>;
+
     const hanldSumit = async (id: string) => {
         try {
             const token = localStorage.getItem("accessToken");
@@ -158,6 +162,12 @@ export function ViewTrip() {
                                         {new Date(trip.created_at).toLocaleDateString()}
                                     </span>
                                 </div>
+                                <button
+                                    onClick={() => navigate(`/driverBooking/tripdetail/${trip._id}`)}
+                                    className="border border-orange-500 text-orange-500 font-bold px-6 py-2 rounded-lg hover:bg-orange-50"
+                                >
+                                    Chi tiết
+                                </button>
                                 {trip.status === "SCHEDULED" && (
                                     <button
                                         onClick={() => hanldSumit(trip._id)}
@@ -184,8 +194,6 @@ export function ViewTrip() {
                                         Đã kết thúc
                                     </button>
                                 )}
-
-
                             </div>
                         </div>
                     );

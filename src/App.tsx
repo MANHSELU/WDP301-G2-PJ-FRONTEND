@@ -29,7 +29,7 @@ export default function App() {
             <Route path="/registerCamera" element={<FaceRegister />} />
             <Route path="driverBooking" element={<TransportBooking />} >
               <Route path="viewtrip" element={<ViewTrip />} />
-              <Route path="tripdetail" element={<TripDetailsDemo />} />
+              <Route path="tripdetail/:id" element={<TripDetailsDemo />} />
             </Route>
 
           </Route>
