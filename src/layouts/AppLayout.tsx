@@ -7,7 +7,9 @@ export default function AppLayout({
     children: React.ReactNode;
 }) {
     const location = useLocation();
-    const hideBg = location.pathname.startsWith("/home2");
+    const hideBg =
+        location.pathname.startsWith("/home2") ||
+        location.pathname.startsWith("/admin/create-coach");
 
     return (
         <div className="relative min-h-screen overflow-hidden">
