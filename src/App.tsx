@@ -12,12 +12,16 @@ import TransportBooking from "./pages/Driver/Home";
 import { ViewTrip } from "./pages/Driver/ViewTrip";
 import TripDetailsDemo from "./pages/Driver/TripDetail";
 import FaceRegister from "./pages/Driver/RegisterAI";
+import Home2 from "./pages/Home2";
+import CreateCoach from "./pages/CreateCoach";
 
 export default function App() {
   return (
     <>
       <AppLayout>
         <Routes>
+          <Route path="/home2" element={<Home2 />} />
+          <Route path="/admin/create-coach" element={<CreateCoach />} />
           <Route path="/" element={<Header />} >
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<BustripLogin />} />
@@ -31,7 +35,6 @@ export default function App() {
               <Route path="viewtrip" element={<ViewTrip />} />
               <Route path="tripdetail/:id" element={<TripDetailsDemo />} />
             </Route>
-
           </Route>
         </Routes>
       </AppLayout>

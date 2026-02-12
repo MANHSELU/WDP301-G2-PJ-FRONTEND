@@ -6,23 +6,14 @@ export default function AppLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const { pathname } = useLocation();
-
-    // 🔥 CHỈ CÁC ROUTE NÀY MỚI CÓ LOGO
-    const logoRoutes = [
-        "/",
-        "/login",
-        "/register",
-        "/profile",
-    ];
-
-    const showLogo = logoRoutes.some(
-        (route) => pathname === route || pathname.startsWith(route + "/")
-    );
+    const location = useLocation();
+    const hideBg =
+        location.pathname.startsWith("/home2") ||
+        location.pathname.startsWith("/admin/create-coach");
 
     return (
-        <div className="relative min-h-screen">
-            {showLogo && <BustripLogoBg />}
+        <div className="relative min-h-screen overflow-hidden">
+            {!hideBg && <BustripLogoBg />}
 
             {/* CONTENT */}
             <div className="relative z-20">

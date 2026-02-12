@@ -8,7 +8,6 @@ type RegisterStep =
     | "BLINK"
     | "CAPTURE"
     | "DONE";
-
 export default function FaceRegister() {
     const token = localStorage.getItem("accessToken");
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -135,12 +134,15 @@ export default function FaceRegister() {
             }
 
             // EAR (blink)
-            const calcEAR = (eye: faceapi.Point[]) => {
+            type Point = { x: number; y: number };
+
+            const calcEAR = (eye: Point[]) => {
                 const v1 = Math.hypot(eye[1].x - eye[5].x, eye[1].y - eye[5].y);
                 const v2 = Math.hypot(eye[2].x - eye[4].x, eye[2].y - eye[4].y);
                 const h = Math.hypot(eye[0].x - eye[3].x, eye[0].y - eye[3].y);
                 return (v1 + v2) / (2.0 * h);
             };
+
             const avgEAR = (calcEAR(lm.getLeftEye()) + calcEAR(lm.getRightEye())) / 2;
 
             // YAW
