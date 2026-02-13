@@ -1,6 +1,5 @@
 import { Link, Outlet } from "react-router-dom";
 import BustripLogo from "../components/BustripLogo";
-import Footer from "./Footer";
 import { NavLink } from "react-router-dom";
 import type { RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -183,7 +182,6 @@ export default function Header() {
 
 
             <Outlet />
-            <Footer />
         </>
     );
 }

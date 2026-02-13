@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { GiSteeringWheel } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
-import baseAPIAuth from "../api/auth";
+import baseAPIAuth from "../../api/auth";
 import type {
   coach as CoachBase,
   Column,
@@ -22,8 +22,8 @@ import type {
   CreateBusRequest,
   RowOverride,
   SeatLayout,
-} from "../model/coach";
-import type { BusType } from "../model/coachType";
+} from "../../model/coach";
+import type { BusType } from "../../model/coachType";
 
 interface ColumnFormColumn {
   enabled: boolean;
@@ -73,11 +73,11 @@ const COLUMN_LABEL: Record<ColumnName, string> = {
 };
 
 const OVERRIDE_KEY_BY_COLUMN: Record<ColumnName, "left" | "middle" | "right"> =
-  {
-    LEFT: "left",
-    MIDDLE: "middle",
-    RIGHT: "right",
-  };
+{
+  LEFT: "left",
+  MIDDLE: "middle",
+  RIGHT: "right",
+};
 
 // Set giá trị default của số cột ghế
 const INITIAL_COLUMNS: ColumnFormState = {
@@ -197,9 +197,9 @@ export default function CreateCoach() {
         return seats === null
           ? null
           : {
-              column_name: columnName,
-              seats,
-            };
+            column_name: columnName,
+            seats,
+          };
       }).filter((override): override is ColumnOverride => override !== null);
       if (columnOverrides.length === 0) {
         continue;
@@ -317,15 +317,15 @@ export default function CreateCoach() {
       prev.length > 0
         ? []
         : [
-            {
-              id: 1,
-              rowIndex: 1,
-              floor: 1,
-              left: "",
-              middle: "",
-              right: "",
-            },
-          ],
+          {
+            id: 1,
+            rowIndex: 1,
+            floor: 1,
+            left: "",
+            middle: "",
+            right: "",
+          },
+        ],
     );
   };
 
@@ -446,11 +446,10 @@ export default function CreateCoach() {
                     <button
                       key={item.id}
                       type="button"
-                      className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${
-                        isActive
+                      className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${isActive
                           ? "bg-[#f4d5b4] text-[#1f2937]"
                           : "text-[#374151] hover:bg-[#f3f4f6]"
-                      }`}
+                        }`}
                     >
                       <ItemIcon size={14} className="shrink-0 text-[#111827]" />
                       <span>{item.label}</span>
@@ -916,8 +915,8 @@ export default function CreateCoach() {
                                       slotIndex === 0;
                                     const isDoorSlot =
                                       column.name ===
-                                        activeColumns[activeColumns.length - 1]
-                                          ?.name && slotIndex === slotCount - 1;
+                                      activeColumns[activeColumns.length - 1]
+                                        ?.name && slotIndex === slotCount - 1;
 
                                     return (
                                       <span

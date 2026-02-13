@@ -5,7 +5,6 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-// import Footer from "../layouts/Footer";
 
 type RouteCard = {
   id: number;
@@ -105,135 +104,81 @@ export default function Home2() {
   }, []);
 
   return (
-    <div className="overflow-x-hidden bg-[#ece7e2] text-[#2e1f16]">
-      <section className="relative overflow-hidden bg-[#ece7e2]">
-        <img
-          src="/images/bg4.png"
-          alt="Hero background"
-          className="absolute inset-0 h-full w-full object-cover object-center"
-          style={{ imageRendering: "auto" }}
-        />
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-[96px] bg-gradient-to-b from-[#fefcfb]/90 via-[#fefcfb]/58 to-transparent" />
-        <div className="page-enter-nav absolute inset-x-0 top-0 z-40">
-          <div className="mx-auto flex h-[74px] w-full max-w-[1240px] items-center justify-between px-4">
-            <div className="relative -ml-[39px] flex h-14 w-[260px] items-center sm:-ml-[63px] lg:-ml-[111px]">
+    <>
+      <div className="absolute inset-0 bg-[linear-gradient(96deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.93)_34%,rgba(255,255,255,0.64)_56%,rgba(255,255,255,0.16)_78%,rgba(255,255,255,0)_100%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#f3ece5] to-[#ece7e2]" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-[#ece7e2]" />
+      <div className="pointer-events-none absolute top-[18%] right-[0%] z-10 w-[66%] max-w-[860px] md:top-[9%] md:w-[62%]">
+        <div className="bus-aero-overlay absolute inset-[-16%] z-0">
+          <span className="bus-cloud bus-cloud-1 absolute left-[-10%] top-[-10%] h-[28%] w-[68%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.25)_54%,rgba(255,255,255,0)_100%)] blur-[30px]" />
+          <span className="bus-cloud bus-cloud-2 absolute left-[-20%] top-[28%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.66)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
+          <span className="bus-cloud bus-cloud-3 absolute right-[-16%] top-[34%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.18)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
+          <span className="bus-cloud bus-cloud-4 absolute left-[-16%] top-[66%] h-[30%] w-[58%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.24)_54%,rgba(255,255,255,0)_100%)] blur-[28px]" />
+          <span className="bus-cloud bus-cloud-5 absolute right-[-4%] top-[70%] h-[28%] w-[54%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[26px]" />
+          <span className="bus-cloud bus-cloud-6 absolute left-[4%] top-[90%] h-[16%] w-[72%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.56)_0%,rgba(255,255,255,0.14)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
+        </div>
+
+        <div className="bus-aero-trail absolute right-[-14%] top-[30%] z-0 h-[54%] w-[46%]">
+          <span className="bus-tail-cloud bus-tail-cloud-1 absolute right-[10%] top-[14%] h-[42%] w-[34%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.48)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-2 absolute right-[28%] top-[28%] h-[38%] w-[32%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.84)_0%,rgba(255,255,255,0.4)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-3 absolute right-[12%] top-[50%] h-[34%] w-[30%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,rgba(255,255,255,0.36)_54%,rgba(255,255,255,0)_100%)] blur-[10px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-4 absolute right-[38%] top-[20%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.32)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-5 absolute right-[44%] top-[42%] h-[24%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.3)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-6 absolute right-[24%] top-[44%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.38)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-7 absolute right-[18%] top-[64%] h-[22%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.76)_0%,rgba(255,255,255,0.34)_54%,rgba(255,255,255,0)_100%)] blur-[9px]" />
+        </div>
+
+        <div className="bus-bob relative z-10">
+          <img
+            src="/images/bus7.png"
+            alt="Bus overlay"
+            className="w-full object-contain block relative -top-100"
+            style={{
+              imageRendering: "auto",
+              filter:
+                "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))",
+            }}
+          />
+
+
+
+          <div className="pointer-events-none absolute inset-0">
+            <div className="bus-front-left-passenger">
               <img
-                src="/images/logo1.png"
-                alt="CoachTrip logo"
-                className="h-14 w-auto object-contain"
+                src="/images/loxe1.png"
+                alt="Front passenger"
+                className="bus-front-left-passenger-img"
               />
-              <span className="absolute left-[58px] top-1/2 -translate-y-1/2 text-[24px] font-black uppercase leading-none tracking-[-0.01em] text-[#f28320]">
-                COACHTRIP
-              </span>
             </div>
-
-            <nav className="hidden items-center gap-8 md:flex">
-              {["Trang chủ", "Lịch trình", "Tra cứu vé", "Hóa đơn", "Tin tức", "Thêm"].map(
-                (item, idx) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className={`page-enter-nav-item relative py-7 text-[13px] font-semibold ${idx === 0
-                      ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
-                      : "text-[#7c5f4a]"
-                      }`}
-                  >
-                    {item}
-                  </button>
-                )
-              )}
-            </nav>
-
-            <div className="hidden items-center gap-4 md:flex md:translate-x-3 lg:translate-x-14">
-              <button
-                type="button"
-                className="rounded-xl border border-[#e6bc93] bg-[#fff4e8] px-4 py-2 text-sm font-semibold text-[#5f3e28] shadow-[0_8px_18px_-14px_rgba(165,96,35,0.7)] transition duration-200 hover:border-[#df9a5e] hover:bg-[#ffeddc] hover:text-[#b05e1b]"
-              >
-                Đăng kí
-              </button>
-              <button
-                type="button"
-                className="rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-2 text-sm font-bold text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
-              >
-                Đăng nhập
-              </button>
+            <div className="bus-driver-fit">
+              <img
+                src="/images/1me1.png"
+                alt="Driver"
+                className="bus-driver-fit-img"
+              />
             </div>
           </div>
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(96deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.93)_34%,rgba(255,255,255,0.64)_56%,rgba(255,255,255,0.16)_78%,rgba(255,255,255,0)_100%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#f3ece5] to-[#ece7e2]" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-[#ece7e2]" />
-        <div className="page-enter-bus pointer-events-none absolute bottom-[5%] right-[2%] z-10 w-[66%] max-w-[860px] md:bottom-[2%] md:w-[62%]">
-          <div className="bus-aero-overlay absolute inset-[-16%] z-0">
-            <span className="bus-cloud bus-cloud-1 absolute left-[-10%] top-[-10%] h-[28%] w-[68%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.25)_54%,rgba(255,255,255,0)_100%)] blur-[30px]" />
-            <span className="bus-cloud bus-cloud-2 absolute left-[-20%] top-[28%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.66)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
-            <span className="bus-cloud bus-cloud-3 absolute right-[-16%] top-[34%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.18)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
-            <span className="bus-cloud bus-cloud-4 absolute left-[-16%] top-[66%] h-[30%] w-[58%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.24)_54%,rgba(255,255,255,0)_100%)] blur-[28px]" />
-            <span className="bus-cloud bus-cloud-5 absolute right-[-4%] top-[70%] h-[28%] w-[54%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[26px]" />
-            <span className="bus-cloud bus-cloud-6 absolute left-[4%] top-[90%] h-[16%] w-[72%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.56)_0%,rgba(255,255,255,0.14)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
-          </div>
+      </div>
 
-          <div className="bus-aero-trail absolute right-[-14%] top-[30%] z-0 h-[54%] w-[46%]">
-            <span className="bus-tail-cloud bus-tail-cloud-1 absolute right-[10%] top-[14%] h-[42%] w-[34%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.48)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
-            <span className="bus-tail-cloud bus-tail-cloud-2 absolute right-[28%] top-[28%] h-[38%] w-[32%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.84)_0%,rgba(255,255,255,0.4)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
-            <span className="bus-tail-cloud bus-tail-cloud-3 absolute right-[12%] top-[50%] h-[34%] w-[30%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,rgba(255,255,255,0.36)_54%,rgba(255,255,255,0)_100%)] blur-[10px]" />
-            <span className="bus-tail-cloud bus-tail-cloud-4 absolute right-[38%] top-[20%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.32)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
-            <span className="bus-tail-cloud bus-tail-cloud-5 absolute right-[44%] top-[42%] h-[24%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.3)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
-            <span className="bus-tail-cloud bus-tail-cloud-6 absolute right-[24%] top-[44%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.38)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
-            <span className="bus-tail-cloud bus-tail-cloud-7 absolute right-[18%] top-[64%] h-[22%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.76)_0%,rgba(255,255,255,0.34)_54%,rgba(255,255,255,0)_100%)] blur-[9px]" />
-          </div>
-
-          <div className="bus-bob relative z-10">
-            <img
-              src="/images/bus7.png"
-              alt="Bus overlay"
-              className="w-full object-contain"
-              style={{
-                imageRendering: "auto",
-                filter:
-                  "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))",
-              }}
-            />
-
-            <div className="pointer-events-none absolute inset-0">
-              <div className="bus-front-left-passenger">
-                <img
-                  src="/images/loxe1.png"
-                  alt="Front passenger"
-                  className="bus-front-left-passenger-img"
-                />
-              </div>
-              <div className="bus-driver-fit">
-                <img
-                  src="/images/1me1.png"
-                  alt="Driver"
-                  className="bus-driver-fit-img"
-                />
-              </div>
-            </div>
-          </div>
+      <div className="relative z-20 mx-auto flex min-h-[680px] w-full max-w-[1240px] items-center px-4 pb-24 pt-24 lg:min-h-[780px] lg:pt-20">
+        <div className="page-enter-copy relative isolate -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
+          <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[360px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.46)_34%,rgba(255,255,255,0.18)_56%,rgba(255,255,255,0)_78%)] blur-[26px]" />
+          <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[300px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(248,250,252,0.46)_0%,rgba(248,250,252,0.14)_58%,rgba(248,250,252,0)_84%)] blur-[18px]" />
+          <h1 className="hero-title relative z-10 py-1 text-[48px] font-black leading-[1.05] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
+            <span className="hero-title-line block whitespace-nowrap">Tìm và đặt ngay</span>
+            <span className="hero-title-line mt-2 block whitespace-nowrap">những chuyến xe</span>
+            <span className="hero-title-line mt-2 block whitespace-nowrap font-extrabold italic">
+              <span className="text-[#0d142a]">thật</span>{" "}
+              <span className="hero-title-shimmer">Dễ Dàng</span>
+            </span>
+          </h1>
+          <p className="relative z-10 max-w-[510px] text-base leading-relaxed text-[#475569] lg:text-lg">
+            Đặt vé mọi lúc mọi nơi, đi vững ngàn hành trình đa dạng và dịch vụ
+            chắt lượng cao nhất.
+          </p>
         </div>
-
-
-        <div className="relative z-20 mx-auto flex min-h-[680px] w-full max-w-[1240px] items-center px-4 pb-24 pt-24 lg:min-h-[780px] lg:pt-20">
-          <div className="page-enter-copy relative isolate -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
-            <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[360px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.46)_34%,rgba(255,255,255,0.18)_56%,rgba(255,255,255,0)_78%)] blur-[26px]" />
-            <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[300px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(248,250,252,0.46)_0%,rgba(248,250,252,0.14)_58%,rgba(248,250,252,0)_84%)] blur-[18px]" />
-            <h1 className="hero-title relative z-10 py-1 text-[48px] font-black leading-[1.05] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
-              <span className="hero-title-line block whitespace-nowrap">Tìm và đặt ngay</span>
-              <span className="hero-title-line mt-2 block whitespace-nowrap">những chuyến xe</span>
-              <span className="hero-title-line mt-2 block whitespace-nowrap font-extrabold italic">
-                <span className="text-[#0d142a]">thật</span>{" "}
-                <span className="hero-title-shimmer">Dễ Dàng</span>
-              </span>
-            </h1>
-            <p className="relative z-10 max-w-[510px] text-base leading-relaxed text-[#475569] lg:text-lg">
-              Đặt vé mọi lúc mọi nơi, đi vững ngàn hành trình đa dạng và dịch vụ
-              chắt lượng cao nhất.
-            </p>
-          </div>
-        </div>
-      </section>
+      </div>
 
       <section className="page-enter-search relative z-30 -mt-14 bg-gradient-to-b from-transparent via-[#ece7e2]/75 to-[#ece7e2]">
         <div className="mx-auto w-full max-w-[1460px] px-3">
@@ -410,8 +355,6 @@ export default function Home2() {
           </div>
         </div>
       </section>
-
-      {/* <Footer /> */}
 
       <style>{`
         .page-enter-nav,
@@ -871,7 +814,7 @@ export default function Home2() {
           }
         }
       `}</style>
-    </div>
+    </>
   );
 }
 

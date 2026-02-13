@@ -1,13 +1,9 @@
-import BusBookingApp from "../../layouts/Side1"
-import Side2 from "../../layouts/Side2"
-import BusBookingForm from "../../layouts/Side3"
+import Home2 from "../../layouts/Side12"
 
 export const HomePage = () => {
     return (
         <>
-            <BusBookingApp />
-            <Side2 />
-            <BusBookingForm />
+            <Home2 />
         </>
     )
 }

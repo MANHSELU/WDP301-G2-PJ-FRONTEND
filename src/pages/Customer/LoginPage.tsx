@@ -70,7 +70,7 @@ const BustripLogin = () => {
 
             // ✅ Chỉ lưu trạng thái đăng nhập (KHÔNG token)
             dispatch(loginSuccess({
-                id: dataProfile.data.id,
+                _id: dataProfile.data.id,
                 name: dataProfile.data.name,
                 phone: dataProfile.data.phone,
                 avatar: dataProfile.data.avatar,
@@ -95,107 +95,109 @@ const BustripLogin = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-orange-100">
-            <div className="max-w-7xl mx-auto">
-                {/* Main Card */}
-                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-3xl overflow-hidden relative">
-                    {/* Background Decorative Elements */}
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-orange-100 opacity-30 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-100 opacity-30 rounded-full blur-3xl"></div>
+        <div className="relative min-h-screen w-full overflow-hidden text-[#2e1f16]">
 
-                    <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10">
-                        {/* Left Side - Content */}
-                        <div className="flex flex-col justify-center space-y-6 pl-24">
+            {/* ===== Background Image ===== */}
+            <img
+                src="/images/bg4.png"
+                alt="Background"
+                className="absolute inset-0 h-full w-full object-cover object-[80%_center]"
+            />
 
-                            {/* Title */}
-                            <div>
-                                <h1 className="text-4xl font-bold text-gray-800">
-                                    Trở lại với{" "}
-                                    <span className="text-orange-500">Bustrip</span>
-                                </h1>
-                            </div>
 
-                            {/* Email */}
-                            <label className="text-sm font-medium">
-                                Số điện thoại
-                            </label>
 
-                            <div className="flex gap-2 items-center">
-                                <div className="flex-1">
-                                    <PhoneInput
-                                        country={"vn"}
-                                        value={phone}
-                                        onChange={setPhone}
-                                        inputClass="!w-full !h-[42px]"
-                                    />
-                                </div>
-                            </div>
+            {/* ===== Overlay chỉ phủ bên trái, điều chỉnh độ rộng và gradient để cân đối hơn ===== */}
+            <div className="absolute left-0 top-0 h-full w-[50%] bg-gradient-to-r from-white/95 via-white/85 to-transparent" />
 
-                            {/* Password */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Mật khẩu
-                                </label>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Ít nhất 8 ký tự"
-                                    required
-                                    autoComplete="current-password"
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
-                                />
-                            </div>
+            {/* ===== Bus bên phải, điều chỉnh vị trí và kích thước để cân bằng hơn với bên trái ===== */}
+            <div className="pointer-events-none absolute bottom-[8%] right-[5%] w-[50%] max-w-[780px] z-10">
+                <img
+                    src="/images/bus7.png"
+                    alt="Bus"
+                    className="w-full object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.2)]"
+                />
+            </div>
 
-                            {/* Forgot password */}
-                            <div className="text-right">
-                                <Link to={"/forgot"}
-                                    type="button"
-                                    className="text-sm text-blue-600 hover:underline"
-                                >
-                                    Quên mật khẩu?
-                                </Link>
-                            </div>
+            {/* ===== Form Container - Điều chỉnh để gần giữa hơn một chút, giữ left nhưng tăng padding ===== */}
+            <div className="relative z-20 flex min-h-screen w-1/2 items-center justify-end px-12 lg:px-20">
+                <div className="w-full max-w-[560px] rounded-3xl border border-[#f2e5d8] bg-white/95 p-12 shadow-[0_30px_60px_-25px_rgba(181,98,27,0.6)] backdrop-blur">
+                    {/* Title - Giữ nguyên nhưng thêm text-center để đối xứng nội bộ */}
+                    <div className="mb-8 space-y-3 text-center">
+                        <h1 className="text-4xl font-black tracking-tight text-[#2f2118]">
+                            Trở lại với{" "}
+                            <span className="bg-gradient-to-r from-[#f7a53a] to-[#e8791c] bg-clip-text text-transparent">
+                                CoachTrip
+                            </span>
+                        </h1>
+                        <p className="text-sm text-[#7c5f4a]">
+                            Đăng nhập để tiếp tục hành trình của bạn
+                        </p>
+                    </div>
 
-                            {/* Submit */}
-                            <button
-                                type="button"
-                                onClick={handleLogin}
-                                disabled={loading}
-                                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow-md transition"
-                            >
-                                {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-                            </button>
+                    {/* Phone */}
+                    <div className="mb-5 space-y-2">
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-[#b58460]">
+                            Số điện thoại
+                        </label>
 
-                            {/* Register */}
-                            <p className="text-center text-sm text-gray-600">
-                                Bạn chưa có tài khoản?{" "}
-                                <Link to={"/register"}
-                                    type="button"
-                                    className="text-blue-600 hover:underline font-medium"
-                                >
-                                    Đăng ký
-                                </Link>
-                            </p>
-                        </div>
-
-                        {/* RIGHT - IMAGE */}
-                        <div className="flex items-center justify-center relative">
-                            <div className="hidden lg:flex items-center justify-center relative">
-                                <div className="absolute -top-10 -left-10 w-56 h-56 bg-orange-300 rounded-full opacity-30 blur-2xl" />
-                                <div className="absolute -bottom-10 -right-10 w-56 h-56 bg-yellow-300 rounded-full opacity-30 blur-2xl" />
-
-                                <img
-                                    src="/images/otocheck.png"
-                                    alt="Bus illustration"
-                                    className="relative z-10 w-[90%] max-w-none object-contain"
-                                />
-                            </div>
+                        <div className="rounded-lg border border-[#e6d5c3] bg-[#fffdfb] p-1 focus-within:border-[#f39a32] focus-within:ring-2 focus-within:ring-[#f39a32]/20">
+                            <PhoneInput
+                                country={"vn"}
+                                value={phone}
+                                onChange={setPhone}
+                                inputClass="!w-full !h-[44px] !bg-transparent !border-0 !text-[#4a3426] !font-semibold"
+                                buttonClass="!bg-transparent !border-0"
+                                containerClass="!bg-transparent"
+                            />
                         </div>
                     </div>
+
+                    {/* Password */}
+                    <div className="mb-3 space-y-2">
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-[#b58460]">
+                            Mật khẩu
+                        </label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Ít nhất 8 ký tự"
+                            className="w-full rounded-lg border border-[#e6d5c3] bg-[#fffdfb] px-4 py-3 text-sm font-semibold text-[#4a3426] outline-none transition focus:border-[#f39a32] focus:ring-2 focus:ring-[#f39a32]/20"
+                        />
+                    </div>
+
+                    {/* Forgot - Text center để đối xứng */}
+                    <div className="mb-6 text-center">
+                        <Link
+                            to="/forgot"
+                            className="text-sm font-semibold text-[#e8791c] hover:underline"
+                        >
+                            Quên mật khẩu?
+                        </Link>
+                    </div>
+
+                    {/* Button */}
+                    <button
+                        onClick={handleLogin}
+                        disabled={loading}
+                        className="w-full rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-6 py-3.5 text-sm font-bold text-white shadow-[0_18px_30px_-14px_rgba(216,113,28,0.9)] transition hover:opacity-90 disabled:opacity-60"
+                    >
+                        {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                    </button>
+
+                    {/* Register - Text center */}
+                    <p className="mt-6 text-center text-sm text-[#6b4b39]">
+                        Bạn chưa có tài khoản?{" "}
+                        <Link
+                            to="/register"
+                            className="font-bold text-[#e8791c] hover:underline"
+                        >
+                            Đăng ký ngay
+                        </Link>
+                    </p>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 
