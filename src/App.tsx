@@ -16,6 +16,9 @@ import FaceRegister from "./pages/Driver/RegisterAI";
 // import CreateCoach from "./pages/Admin/CreateCoach";
 import Header2 from "./layouts/Header2";
 import CreateCoach from "./pages/Admin/CreateCoach";
+import LichTrinh from "./pages/Customer/LichTrinh";
+import BusTripSearch from "./pages/Customer/ChiTietLichTrinh";
+import BusSeatSelection from "./pages/Customer/DatVe";
 
 export default function App() {
   return (
@@ -25,6 +28,10 @@ export default function App() {
         <Route path="/admin/create-coach" element={<CreateCoach />} />
         <Route path="/" element={<Header2 />} >
           <Route path="/" element={<HomePage />} />
+          <Route path="/lichtrinh" element={<LichTrinh />} />
+          <Route path="/lichtrinhdetail" element={<BusTripSearch />} />
+
+          <Route path="/datve" element={<BusSeatSelection />} />
           <Route path="/login" element={<BustripLogin />} />
           <Route path="/register" element={<BustripRegister />} />
           <Route path="/changePass" element={<BustripChangePassword />} />

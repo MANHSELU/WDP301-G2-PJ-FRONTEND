@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import Footer from "./Footer";
 import type { RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,24 +36,32 @@ export default function Header2() {
     }, [token, dispatch]);
     const navItems = [
         { name: "Trang chủ", path: "/" },
-        { name: "Lịch trình", path: "/lich-trinh" },
+        { name: "Lịch trình", path: "/lichtrinh" },
         { name: "Tra cứu vé", path: "/tra-cuu" },
         { name: "Hóa đơn", path: "/hoa-don" },
         { name: "Tin tức", path: "/tin-tuc" },
         { name: "Thêm", path: "/them" },
     ];
+    const location = useLocation();
+    const noBgExact = ["/loginCamera", "/registerCamera", "/profile"];
+
+    const showBackground =
+        !noBgExact.includes(location.pathname) &&
+        !location.pathname.startsWith("/driverBooking");
 
     return (
         <>
             <div className="overflow-x-hidden bg-[#ece7e2] text-[#2e1f16]">
                 <section className="relative overflow-hidden bg-[#ece7e2]">
                     {/* Background Image - QUAN TRỌNG: Không bỏ phần này */}
-                    <img
-                        src="/images/bg4.png"
-                        alt="Hero background"
-                        className="absolute inset-0 h-full w-full object-cover object-center"
-                        style={{ imageRendering: "auto" }}
-                    />
+                    {showBackground && (
+                        <img
+                            src="/images/bg4.png"
+                            alt="Hero background"
+                            className="absolute inset-0 h-full w-full object-cover object-center"
+                        />
+                    )}
+
 
                     {/* Gradient Overlay */}
                     <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-[96px] bg-gradient-to-b from-[#fefcfb]/90 via-[#fefcfb]/58 to-transparent" />
@@ -80,8 +88,8 @@ export default function Header2() {
                                         key={item.name}
                                         to={item.path}
                                         className={`relative py-7 text-[13px] font-semibold ${idx === 0
-                                                ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
-                                                : "text-[#7c5f4a]"
+                                            ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
+                                            : "text-[#7c5f4a]"
                                             }`}
                                     >
                                         {item.name}

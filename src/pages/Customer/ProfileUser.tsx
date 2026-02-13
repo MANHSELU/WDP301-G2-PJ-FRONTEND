@@ -10,7 +10,6 @@ import {
   Camera,
   Loader2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 
 /* ================= CONFIG ================= */
 
@@ -21,7 +20,7 @@ const API_BASE_URL = "http://localhost:3000";
 type UserProfile = {
   name: string;
   phone: string;
-  avatar: string | null;
+  avatar: { url: string } | null;
   role: string;
   joinDate: string;
 };
@@ -101,11 +100,10 @@ export default function BusTripProfile() {
 
     selectedFileRef.current = file;
 
-    // 👉 Preview ảnh ngay lập tức
     const previewUrl = URL.createObjectURL(file);
     setProfile((prev) => ({
       ...prev,
-      avatar: previewUrl,
+      avatar: { url: previewUrl },
     }));
   };
 
@@ -134,6 +132,30 @@ export default function BusTripProfile() {
           },
         }
       );
+
+      // 👇 Fetch lại profile mới từ server
+      const res = await axios.get(
+        `${API_BASE_URL}/api/customer/check/getuser`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const raw = res.data;
+      const u = raw?.data || raw?.user || raw;
+
+      setProfile({
+        name: u.name ?? "",
+        phone: u.phone ?? "",
+        avatar: u.avatar ?? null,
+        role: u.role?.name ?? "",
+        joinDate: u.createdAt ?? "",
+      });
+
+      // 👇 Clear selected file
+      selectedFileRef.current = null;
 
       alert("Cập nhật thông tin thành công");
     } catch (err) {
@@ -182,15 +204,12 @@ export default function BusTripProfile() {
 
         {/* -------- Profile -------- */}
         <section className="bg-white rounded-3xl border p-10">
-          <h1 className="text-2xl font-extrabold mb-8">
-            Thông tin cá nhân
-          </h1>
+          <h1 className="text-2xl font-extrabold mb-8">Thông tin cá nhân</h1>
 
           {/* Avatar */}
           <div className="flex items-center gap-6 pb-10 border-b mb-10">
             <div className="relative">
               <div className="w-32 h-32 rounded-full ring-4 ring-orange-100 overflow-hidden">
-
                 <img
                   src={profile.avatar?.url || "https://i.pravatar.cc/300"}
                   className="w-full h-full object-cover"
@@ -264,7 +283,7 @@ export default function BusTripProfile() {
           </div>
         </section>
       </main>
-    </div >
+    </div>
   );
 }
 

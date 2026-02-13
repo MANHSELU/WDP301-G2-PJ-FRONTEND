@@ -103,7 +103,7 @@ const BustripLogin = () => {
                 alt="Background"
                 className="absolute inset-0 h-full w-full object-cover object-[80%_center]"
             />
-
+            <div className="absolute inset-0 bg-white/40"></div>
 
 
             {/* ===== Overlay chỉ phủ bên trái, điều chỉnh độ rộng và gradient để cân đối hơn ===== */}

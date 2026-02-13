@@ -125,20 +125,23 @@ export default function FaceVerification() {
 
             const { box } = resized.detection;
             const landmarks = resized.landmarks;
-
+            const lm = resized.landmarks;
             if (box.width < 160) {
                 safeSetStatus("📏 Đưa mặt lại gần camera hơn");
                 return;
             }
 
             // --- TÍNH TOÁN EAR (NHÁY MẮT) ---
-            const calcEAR = (eye: faceapi.Point[]) => {
+            type Point = { x: number; y: number };
+
+            const calcEAR = (eye: Point[]) => {
                 const v1 = Math.hypot(eye[1].x - eye[5].x, eye[1].y - eye[5].y);
                 const v2 = Math.hypot(eye[2].x - eye[4].x, eye[2].y - eye[4].y);
                 const h = Math.hypot(eye[0].x - eye[3].x, eye[0].y - eye[3].y);
                 return (v1 + v2) / (2.0 * h);
             };
-            const avgEAR = (calcEAR(landmarks.getLeftEye()) + calcEAR(landmarks.getRightEye())) / 2;
+
+            const avgEAR = (calcEAR(lm.getLeftEye()) + calcEAR(lm.getRightEye())) / 2;
 
             // --- TÍNH TOÁN YAW (QUAY MẶT) ---
             const leftEyeX = (landmarks.getLeftEye()[0].x + landmarks.getLeftEye()[3].x) / 2;

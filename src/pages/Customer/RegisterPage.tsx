@@ -202,7 +202,7 @@ const BustripRegister = () => {
                 alt="Background"
                 className="absolute inset-0 h-full w-full object-cover object-[72%_center]"
             />
-
+            <div className="absolute inset-0 bg-white/40"></div>
             {/* ===== Overlay bên trái ===== */}
             <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-white/95 via-white/85 to-transparent" />
 
