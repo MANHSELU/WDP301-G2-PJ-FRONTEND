@@ -9,7 +9,9 @@ import BusTripProfile from "./pages/ProfileUser";
 import ForgotPassword from "./pages/ForgotPassword";
 import Home2 from "./pages/Home2";
 import CreateCoach from "./pages/CreateCoach";
-
+import ManageBus from "./pages/ManageBus";
+import ManageRoute from "./pages/ManageRoute";
+import ManageUser from "./pages/ManageUser";
 export default function App() {
   return (
     <>
@@ -17,7 +19,11 @@ export default function App() {
         <Routes>
           <Route path="/home2" element={<Home2 />} />
           <Route path="/admin/create-coach" element={<CreateCoach />} />
-          <Route path="/" element={<Header />} >
+          <Route path="/admin/manage-buses" element={<ManageBus />} />
+          <Route path="/admin/manage-routes" element={<ManageRoute />} />
+          <Route path="/admin/manage-users" element={<ManageUser />} />
+
+          <Route path="/" element={<Header />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<BustripLogin />} />
             <Route path="/register" element={<BustripRegister />} />
@@ -28,5 +34,5 @@ export default function App() {
         </Routes>
       </AppLayout>
     </>
-  )
+  );
 }
