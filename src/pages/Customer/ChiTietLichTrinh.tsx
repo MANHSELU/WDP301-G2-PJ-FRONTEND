@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Clock, Bus, DollarSign } from "lucide-react";
+import { Link } from "react-router-dom";
 
 /* ================= TYPES ================= */
 
@@ -370,10 +371,10 @@ export default function BusTripSearch() {
                                             </div>
 
                                             {/* Book Button */}
-                                            <button className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group">
+                                            <Link to={"/datve"} className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group">
                                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                                                 <span className="relative z-10">Chọn chuyến</span>
-                                            </button>
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>

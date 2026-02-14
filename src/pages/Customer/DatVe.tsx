@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { X, ArrowRight, Armchair } from "lucide-react";
+import { Link } from "react-router-dom";
 
 /* ================= TYPES ================= */
 
@@ -197,7 +198,7 @@ export default function BusSeatSelection() {
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-slate-100 py-8">
                 <div className="max-w-7xl mx-auto px-4">
                     {/* Tab Navigation */}
-                    <div className="flex gap-4 mb-8">
+                    <div className="relative z-30 flex gap-4 mb-8">
                         <button
                             onClick={() => setActiveTab("booking")}
                             className={`flex-1 py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 ${activeTab === "booking"
@@ -214,7 +215,7 @@ export default function BusSeatSelection() {
                                 : "bg-white text-slate-600 hover:shadow-lg"
                                 }`}
                         >
-                            Quá hướng
+                            Gửi hàng
                         </button>
                     </div>
 
@@ -487,10 +488,10 @@ export default function BusSeatSelection() {
                                                     Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục
                                                 </p>
                                             </div>
-                                            <button className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-8 py-4 rounded-xl font-bold shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
+                                            <Link to={"/thongtindatve"} className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-8 py-4 rounded-xl font-bold shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
                                                 Tiếp tục
                                                 <ArrowRight size={20} />
-                                            </button>
+                                            </Link>
                                         </div>
                                     </div>
                                 )}

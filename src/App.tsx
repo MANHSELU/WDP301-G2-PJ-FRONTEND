@@ -19,6 +19,9 @@ import CreateCoach from "./pages/Admin/CreateCoach";
 import LichTrinh from "./pages/Customer/LichTrinh";
 import BusTripSearch from "./pages/Customer/ChiTietLichTrinh";
 import BusSeatSelection from "./pages/Customer/DatVe";
+import BusBookingUI from "./pages/Customer/ThongTinDatVe";
+import ShippingCart from "./pages/Customer/DatHang";
+import CheckoutPage from "./pages/Customer/ChiTietDatHang";
 
 export default function App() {
   return (
@@ -32,6 +35,10 @@ export default function App() {
           <Route path="/lichtrinhdetail" element={<BusTripSearch />} />
 
           <Route path="/datve" element={<BusSeatSelection />} />
+          <Route path="/dathang" element={<ShippingCart />} />
+          <Route path="/chitietdathang" element={<CheckoutPage />} />
+
+          <Route path="/thongtindatve" element={<BusBookingUI />} />
           <Route path="/login" element={<BustripLogin />} />
           <Route path="/register" element={<BustripRegister />} />
           <Route path="/changePass" element={<BustripChangePassword />} />
