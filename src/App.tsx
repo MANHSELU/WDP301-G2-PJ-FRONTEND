@@ -9,6 +9,7 @@ import BusTripProfile from "./pages/ProfileUser";
 import ForgotPassword from "./pages/ForgotPassword";
 import Home2 from "./pages/Home2";
 import CreateCoach from "./pages/CreateCoach";
+import CreateRoute from "./pages/CreateRoute";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Routes>
           <Route path="/home2" element={<Home2 />} />
           <Route path="/admin/create-coach" element={<CreateCoach />} />
+          <Route path="/admin/create-route" element={<CreateRoute />} />
           <Route path="/" element={<Header />} >
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<BustripLogin />} />
