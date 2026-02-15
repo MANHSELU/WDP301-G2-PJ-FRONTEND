@@ -49,7 +49,9 @@ export default function Header2() {
         !noBgExact.includes(location.pathname) &&
         !location.pathname.startsWith("/driverBooking")
         &&
-        !location.pathname.startsWith("/user");
+        !location.pathname.startsWith("/user")
+        &&
+        !location.pathname.startsWith("/assistant");
     return (
         <>
             <div className="overflow-x-hidden bg-[#ece7e2] text-[#2e1f16]">

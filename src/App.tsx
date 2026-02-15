@@ -4,7 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import { HomePage } from "./pages/Customer/HomePage";
 import BustripLogin from "./pages/Customer/LoginPage";
 import BustripRegister from "./pages/Customer/RegisterPage";
-import BustripChangePassword from "./pages/Customer/ChangePass";
+import BustripChangePassword from "./pages/Customer/Profile/ChangePass";
 import BusTripProfile from "./pages/Customer/ProfileUser";
 import ForgotPassword from "./pages/Customer/ForgotPassword";
 import FaceLoginPage from "./pages/Driver/vefication";
@@ -25,6 +25,9 @@ import CheckoutPage from "./pages/Customer/ChiTietDatHang";
 import { InformationUser } from "./pages/Customer/Profile/InformationUser";
 import OrderHistory from "./pages/Customer/Profile/OrderHistory";
 import AddressForm from "./pages/Customer/Profile/AddressUser";
+import TripListPage from "./pages/Phuxe/Home";
+import { DanhSachChuyenDi } from "./pages/Phuxe/DanhSachChuyenDi";
+import TripDetailPage from "./pages/Phuxe/ChiTietChuyenDi";
 
 export default function App() {
   return (
@@ -58,6 +61,10 @@ export default function App() {
           <Route path="driverBooking" element={<TransportBooking />} >
             <Route path="viewtrip" element={<ViewTrip />} />
             <Route path="tripdetail/:id" element={<TripDetailsDemo />} />
+          </Route>
+          <Route path="assistant" element={<TripListPage />} >
+            <Route path="chuyendi" element={<DanhSachChuyenDi />} />
+            <Route path="chitietchuyendi" element={<TripDetailPage />} />
           </Route>
         </Route>
       </Routes>
