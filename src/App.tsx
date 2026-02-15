@@ -28,6 +28,9 @@ import AddressForm from "./pages/Customer/Profile/AddressUser";
 import TripListPage from "./pages/Phuxe/Home";
 import { DanhSachChuyenDi } from "./pages/Phuxe/DanhSachChuyenDi";
 import TripDetailPage from "./pages/Phuxe/ChiTietChuyenDi";
+import ManageBus from "./pages/Admin/ManageBus";
+import ManageRoute from "./pages/Admin/ManageRoute";
+import ManageUser from "./pages/Admin/ManageUser";
 
 export default function App() {
   return (
@@ -35,6 +38,10 @@ export default function App() {
       {/* <AppLayout> */}
       <Routes>
         <Route path="/admin/create-coach" element={<CreateCoach />} />
+        <Route path="/admin/manage-buses" element={<ManageBus />} />
+        <Route path="/admin/manage-routes" element={<ManageRoute />} />
+        <Route path="/admin/manage-users" element={<ManageUser />} />
+
         <Route path="/" element={<Header2 />} >
           <Route path="/" element={<HomePage />} />
           <Route path="/lichtrinh" element={<LichTrinh />} />
