@@ -43,12 +43,13 @@ export default function Header2() {
         { name: "Gửi hàng", path: "/dathang" },
     ];
     const location = useLocation();
-    const noBgExact = ["/loginCamera", "/registerCamera", "/profile"];
+    const noBgExact = ["/loginCamera", "/registerCamera", "/changePass"];
 
     const showBackground =
         !noBgExact.includes(location.pathname) &&
-        !location.pathname.startsWith("/driverBooking");
-
+        !location.pathname.startsWith("/driverBooking")
+        &&
+        !location.pathname.startsWith("/user");
     return (
         <>
             <div className="overflow-x-hidden bg-[#ece7e2] text-[#2e1f16]">
@@ -117,7 +118,7 @@ export default function Header2() {
                                     </>
                                 ) : (
                                     <div className="flex items-center gap-3">
-                                        <Link to="/profile">
+                                        <Link to="/user/profile">
                                             <img
                                                 src={users.avatar?.url || "/avatar-default.png"}
                                                 alt="User avatar"

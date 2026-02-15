@@ -17,7 +17,7 @@ export default function BusBookingUI() {
     const isFormValid = customerInfo.name.trim() && customerInfo.phone.trim();
 
     // Generate all seats (44 per floor, 4 rows x 11 cols)
-    const generateSeats = (floor: number) => {
+    const generateSeats = (floor) => {
         const seats = [];
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 11; j++) {

@@ -22,6 +22,9 @@ import BusSeatSelection from "./pages/Customer/DatVe";
 import BusBookingUI from "./pages/Customer/ThongTinDatVe";
 import ShippingCart from "./pages/Customer/DatHang";
 import CheckoutPage from "./pages/Customer/ChiTietDatHang";
+import { InformationUser } from "./pages/Customer/Profile/InformationUser";
+import OrderHistory from "./pages/Customer/Profile/OrderHistory";
+import AddressForm from "./pages/Customer/Profile/AddressUser";
 
 export default function App() {
   return (
@@ -41,8 +44,13 @@ export default function App() {
           <Route path="/thongtindatve" element={<BusBookingUI />} />
           <Route path="/login" element={<BustripLogin />} />
           <Route path="/register" element={<BustripRegister />} />
-          <Route path="/changePass" element={<BustripChangePassword />} />
-          <Route path="/profile" element={<BusTripProfile />} />
+
+          <Route path="user" element={<BusTripProfile />} >
+            <Route path="profile" element={<InformationUser />} />
+            <Route path="orderhistory" element={<OrderHistory />} />
+            <Route path="address" element={<AddressForm />} />
+            <Route path="changpassword" element={<BustripChangePassword />} />
+          </Route>
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/loginCamera" element={<FaceLoginPage />} />
           <Route path="/registerCamera" element={<FaceRegister />} />

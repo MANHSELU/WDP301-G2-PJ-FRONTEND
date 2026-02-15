@@ -56,8 +56,9 @@ const BustripChangePassword: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-orange-100 flex items-center justify-center">
-            <div className="w-full max-w-2xl bg-white rounded-3xl shadow-lg p-10">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-orange-100 flex items-start justify-center pt-4">
+
+            <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg mt-4">
 
                 <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">
                     Đổi <span className="text-orange-500">Mật Khẩu</span>
