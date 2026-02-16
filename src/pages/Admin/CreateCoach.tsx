@@ -24,8 +24,8 @@ import type {
   CreateBusRequest,
   RowOverride,
   SeatLayout,
-} from "../model/coach";
-import type { BusType } from "../model/coachType";
+} from "../../model/coach";
+import type { BusType } from "../../model/coachType";
 
 interface ColumnFormColumn {
   enabled: boolean;
