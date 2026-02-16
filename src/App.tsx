@@ -1,6 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-// import AppLayout from "./layouts/AppLayout";
-// import Header from "./layouts/Header";
 import { HomePage } from "./pages/Customer/HomePage";
 import BustripLogin from "./pages/Customer/LoginPage";
 import BustripRegister from "./pages/Customer/RegisterPage";
@@ -12,8 +10,6 @@ import TransportBooking from "./pages/Driver/Home";
 import { ViewTrip } from "./pages/Driver/ViewTrip";
 import TripDetailsDemo from "./pages/Driver/TripDetail";
 import FaceRegister from "./pages/Driver/RegisterAI";
-// import Home2 from "./pages/Home2";
-// import CreateCoach from "./pages/Admin/CreateCoach";
 import Header2 from "./layouts/Header2";
 import CreateCoach from "./pages/Admin/CreateCoach";
 import LichTrinh from "./pages/Customer/LichTrinh";
@@ -35,7 +31,6 @@ import ManageUser from "./pages/Admin/ManageUser";
 export default function App() {
   return (
     <>
-      {/* <AppLayout> */}
       <Routes>
         <Route path="/admin/create-coach" element={<CreateCoach />} />
         <Route path="/admin/manage-buses" element={<ManageBus />} />
@@ -75,7 +70,6 @@ export default function App() {
           </Route>
         </Route>
       </Routes>
-      {/* </AppLayout> */}
     </>
   )
 }
