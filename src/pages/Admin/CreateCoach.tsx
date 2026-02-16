@@ -1,14 +1,16 @@
-﻿import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   BadgeDollarSign,
   BusFront,
   CalendarCheck2,
+  CircleCheck,
   ChevronDown,
   ChevronLeft,
   LayoutDashboard,
   LogIn,
   Plus,
   Shield,
+  TriangleAlert,
   Trash2,
 } from "lucide-react";
 import { GiSteeringWheel } from "react-icons/gi";
@@ -62,6 +64,12 @@ interface RowLayout {
 interface FloorLayout {
   floor: number;
   rows: RowLayout[];
+}
+
+interface NoticeState {
+  type: "success" | "error";
+  title: string;
+  message: string;
 }
 
 const COLUMN_ORDER: ColumnName[] = ["LEFT", "MIDDLE", "RIGHT"];
@@ -172,7 +180,7 @@ export default function CreateCoach() {
 
   // Validate, preview, chỉ UI
   const [previewFloor, setPreviewFloor] = useState<RowOverrideForm["floor"]>(1);
-  const [validationMessage, setValidationMessage] = useState("");
+  const [notice, setNotice] = useState<NoticeState | null>(null);
   const [payloadPreview] = useState("");
 
   // Hàm để filter và map sao cho dữ liệu từ UI map format với interface từ BE
@@ -379,13 +387,19 @@ export default function CreateCoach() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!licensePlate.trim() || !busTypeId.trim() || !templateName.trim()) {
-      setValidationMessage(
-        "Vui long nhap du bien so, loai xe va ten template.",
-      );
+      setNotice({
+        type: "error",
+        title: "Thiếu thông tin",
+        message: "Vui lòng nhập đủ biển số, loại xe và tên template.",
+      });
       return;
     }
     if (activeColumns.length === 0) {
-      setValidationMessage("Xe phai co it nhat 1 cot ghe.");
+      setNotice({
+        type: "error",
+        title: "Cấu hình chưa hợp lệ",
+        message: "Xe phải có ít nhất 1 cột ghế.",
+      });
       return;
     }
     const coachBase: CoachBase = {
@@ -399,20 +413,28 @@ export default function CreateCoach() {
       columns: activeColumns,
       row_overrides: rowOverridePayload,
       total_seats: totalSeats,
-    };
+    };  
     const payload: CreateBusRequest = {
       ...coachBase,
       seat_layout: seatLayout,
     };
     console.log(busTypeId);
     try {
-      setValidationMessage("");
+      setNotice(null);
       const res = await baseAPIAuth.post("/api/admin/check/buses", payload);
       console.log(res.data);
-      alert("Tao xe thanh cong!");
+      setNotice({
+        type: "success",
+        title: "Tạo xe thành công",
+        message: "Thông tin xe đã được lưu.",
+      });
     } catch (err: any) {
       console.error(err);
-      setValidationMessage(err.response?.data?.message || "Tao xe that bai");
+      setNotice({
+        type: "error",
+        title: "Tạo xe thất bại",
+        message: err.response?.data?.message || "Đã có lỗi xảy ra, vui lòng thử lại.",
+      });
     }
   };
 
@@ -523,8 +545,8 @@ export default function CreateCoach() {
                     Thông tin xe
                   </h2>
                   <div className="grid gap-3 md:grid-cols-2">
-                    <label className="space-y-1">
-                      <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                    <label className="space-y-1.5">
+                      <span className="block text-[13px] font-medium text-[#9aa2af]">
                         Biển số xe
                       </span>
                       <input
@@ -539,8 +561,8 @@ export default function CreateCoach() {
                       />
                     </label>
 
-                    <label className="space-y-1">
-                      <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                    <label className="space-y-1.5">
+                      <span className="block text-[13px] font-medium text-[#9aa2af]">
                         Loại xe
                       </span>
                       <div className="relative">
@@ -570,8 +592,8 @@ export default function CreateCoach() {
                   <h2 className="text-lg font-black text-[#1f2430]">
                     Sơ đồ ghế ngồi
                   </h2>
-                  <label className="space-y-1">
-                    <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                  <label className="space-y-1.5">
+                    <span className="block text-[13px] font-medium text-[#9aa2af]">
                       Tên mẫu sơ đồ ghế
                     </span>
                     <input
@@ -585,8 +607,8 @@ export default function CreateCoach() {
                   </label>
 
                   <div className="grid gap-3 md:grid-cols-2">
-                    <label className="space-y-1">
-                      <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                    <label className="space-y-1.5">
+                      <span className="block text-[13px] font-medium text-[#9aa2af]">
                         Số tầng
                       </span>
                       <div className="relative">
@@ -622,8 +644,8 @@ export default function CreateCoach() {
                       </div>
                     </label>
 
-                    <label className="space-y-1">
-                      <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                    <label className="space-y-1.5">
+                      <span className="block text-[13px] font-medium text-[#9aa2af]">
                         Số hàng ghế
                       </span>
                       <input
@@ -668,8 +690,8 @@ export default function CreateCoach() {
                             {COLUMN_LABEL[columnName]}
                           </label>
 
-                          <label className="space-y-1">
-                            <span className="block text-[11px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
+                          <label className="space-y-1.5">
+                            <span className="block text-[13px] font-medium text-[#9aa2af]">
                               số ghế / 1 hàng
                             </span>
                             <input
@@ -727,7 +749,7 @@ export default function CreateCoach() {
                         className="space-y-3 rounded-[10px] bg-white p-3"
                       >
                         <div className="grid gap-3 md:grid-cols-2">
-                          <label className="space-y-1">
+                          <label className="space-y-1.5">
                             <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
                               Vị trí hàng ghế
                             </span>
@@ -750,7 +772,7 @@ export default function CreateCoach() {
                             />
                           </label>
 
-                          <label className="space-y-1">
+                          <label className="space-y-1.5">
                             <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
                               Tầng
                             </span>
@@ -786,7 +808,7 @@ export default function CreateCoach() {
                             return (
                               <label
                                 key={`${item.id}-${column.name}`}
-                                className="space-y-1"
+                                className="space-y-1.5"
                               >
                                 <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
                                   {COLUMN_LABEL[column.name]}
@@ -814,12 +836,6 @@ export default function CreateCoach() {
                   </div>
                 </section>
 
-                {validationMessage ? (
-                  <p className="rounded-[8px] border border-[#d1d5db] bg-[#f9fafb] px-3 py-2 text-sm font-semibold text-[#4b5563]">
-                    {validationMessage}
-                  </p>
-                ) : null}
-
                 <button
                   type="submit"
                   className="w-full rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
@@ -841,7 +857,7 @@ export default function CreateCoach() {
                 <div className="rounded-[14px] border border-[#e7eaf0] bg-white p-3">
                   <div className="mb-3 grid grid-cols-2 gap-3 text-sm">
                     <div className="rounded-[10px] border border-[#e3e7ef] bg-white px-3 py-2">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9aa4b2]">
+                      <p className="text-[13px] font-medium text-[#9aa2af]">
                         Tầng 1
                       </p>
                       <p className="text-lg font-black text-[#1f2430]">
@@ -849,7 +865,7 @@ export default function CreateCoach() {
                       </p>
                     </div>
                     <div className="rounded-[10px] border border-[#e3e7ef] bg-white px-3 py-2">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9aa4b2]">
+                      <p className="text-[13px] font-medium text-[#9aa2af]">
                         Tổng ghế
                       </p>
                       <p className="text-lg font-black text-[#1f2430]">
@@ -1226,6 +1242,111 @@ export default function CreateCoach() {
           </div>
         </div>
       </section>
+
+      {notice ? (
+        <>
+        <style>{`
+          @keyframes coachNoticeIn {
+            0% {
+              opacity: 0;
+              transform: translateY(10px) scale(0.95);
+            }
+            70% {
+              transform: translateY(-2px) scale(1.02);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+
+          @keyframes coachNoticeIcon {
+            0% {
+              transform: scale(0.4) rotate(-25deg);
+              opacity: 0;
+            }
+            55% {
+              transform: scale(1.18) rotate(8deg);
+              opacity: 1;
+            }
+            80% {
+              transform: scale(0.95) rotate(-4deg);
+            }
+            100% {
+              transform: scale(1) rotate(0);
+            }
+          }
+
+          @keyframes coachNoticePulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.32);
+            }
+            100% {
+              box-shadow: 0 0 0 16px rgba(16, 185, 129, 0);
+            }
+          }
+        `}</style>
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
+          onClick={() => setNotice(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              animation:
+                notice.type === "success"
+                  ? "coachNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+                  : "coachNoticeIn 0.35s ease",
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${
+                  notice.type === "success"
+                    ? "bg-[#ecfdf3] text-[#16a34a]"
+                    : "bg-[#fff7ed] text-[#ea580c]"
+                }`}
+                style={{
+                  animation:
+                    notice.type === "success"
+                      ? "coachNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                      : undefined,
+                }}
+              >
+                {notice.type === "success" ? (
+                  <CircleCheck
+                    size={20}
+                    style={{
+                      animation:
+                        notice.type === "success"
+                          ? "coachNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
+                          : undefined,
+                    }}
+                  />
+                ) : (
+                  <TriangleAlert size={20} />
+                )}
+              </span>
+              <div className="flex-1">
+                <h3 className="text-base font-black text-[#111827]">{notice.title}</h3>
+                <p className="mt-1 text-sm font-medium text-[#4b5563]">{notice.message}</p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setNotice(null)}
+                className="rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+        </>
+      ) : null}
     </div>
   );
 }
