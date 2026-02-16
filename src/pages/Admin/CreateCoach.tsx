@@ -24,8 +24,8 @@ import type {
   CreateBusRequest,
   RowOverride,
   SeatLayout,
-} from "../../model/coach";
-import type { BusType } from "../../model/coachType";
+} from "../model/coach";
+import type { BusType } from "../model/coachType";
 
 interface ColumnFormColumn {
   enabled: boolean;
@@ -413,7 +413,7 @@ export default function CreateCoach() {
       columns: activeColumns,
       row_overrides: rowOverridePayload,
       total_seats: totalSeats,
-    };  
+    };
     const payload: CreateBusRequest = {
       ...coachBase,
       seat_layout: seatLayout,
@@ -469,8 +469,8 @@ export default function CreateCoach() {
                       key={item.id}
                       type="button"
                       className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${isActive
-                          ? "bg-[#f4d5b4] text-[#1f2937]"
-                          : "text-[#374151] hover:bg-[#f3f4f6]"
+                        ? "bg-[#f4d5b4] text-[#1f2937]"
+                        : "text-[#374151] hover:bg-[#f3f4f6]"
                         }`}
                     >
                       <ItemIcon size={14} className="shrink-0 text-[#111827]" />
@@ -1245,7 +1245,7 @@ export default function CreateCoach() {
 
       {notice ? (
         <>
-        <style>{`
+          <style>{`
           @keyframes coachNoticeIn {
             0% {
               opacity: 0;
@@ -1286,65 +1286,64 @@ export default function CreateCoach() {
             }
           }
         `}</style>
-        <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
-          onClick={() => setNotice(null)}
-        >
           <div
-            className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              animation:
-                notice.type === "success"
-                  ? "coachNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
-                  : "coachNoticeIn 0.35s ease",
-            }}
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
+            onClick={() => setNotice(null)}
           >
-            <div className="flex items-start gap-3">
-              <span
-                className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${
+            <div
+              className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
+              onClick={(event) => event.stopPropagation()}
+              style={{
+                animation:
                   notice.type === "success"
+                    ? "coachNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+                    : "coachNoticeIn 0.35s ease",
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
                     ? "bg-[#ecfdf3] text-[#16a34a]"
                     : "bg-[#fff7ed] text-[#ea580c]"
-                }`}
-                style={{
-                  animation:
-                    notice.type === "success"
-                      ? "coachNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
-                      : undefined,
-                }}
-              >
-                {notice.type === "success" ? (
-                  <CircleCheck
-                    size={20}
-                    style={{
-                      animation:
-                        notice.type === "success"
-                          ? "coachNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
-                          : undefined,
-                    }}
-                  />
-                ) : (
-                  <TriangleAlert size={20} />
-                )}
-              </span>
-              <div className="flex-1">
-                <h3 className="text-base font-black text-[#111827]">{notice.title}</h3>
-                <p className="mt-1 text-sm font-medium text-[#4b5563]">{notice.message}</p>
+                    }`}
+                  style={{
+                    animation:
+                      notice.type === "success"
+                        ? "coachNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                        : undefined,
+                  }}
+                >
+                  {notice.type === "success" ? (
+                    <CircleCheck
+                      size={20}
+                      style={{
+                        animation:
+                          notice.type === "success"
+                            ? "coachNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
+                            : undefined,
+                      }}
+                    />
+                  ) : (
+                    <TriangleAlert size={20} />
+                  )}
+                </span>
+                <div className="flex-1">
+                  <h3 className="text-base font-black text-[#111827]">{notice.title}</h3>
+                  <p className="mt-1 text-sm font-medium text-[#4b5563]">{notice.message}</p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  className="rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
+                >
+                  Đóng
+                </button>
               </div>
             </div>
-
-            <div className="mt-5 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setNotice(null)}
-                className="rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
-              >
-                Đóng
-              </button>
-            </div>
           </div>
-        </div>
         </>
       ) : null}
     </div>

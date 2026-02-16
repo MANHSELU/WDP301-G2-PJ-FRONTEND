@@ -34,6 +34,7 @@ export default function App() {
       <Routes>
         <Route path="/admin/create-coach" element={<CreateCoach />} />
         <Route path="/admin/manage-buses" element={<ManageBus />} />
+        <Route path="/admin/create-coach" element={<CreateCoach />} />
         <Route path="/admin/manage-routes" element={<ManageRoute />} />
         <Route path="/admin/manage-users" element={<ManageUser />} />
 

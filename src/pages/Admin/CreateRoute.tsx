@@ -16,9 +16,9 @@ import {
   Save,
   Shield,
 } from "lucide-react";
-import type { recommendStops } from "../model/recommendStops";
-import baseAPIAuth from "../api/auth";
-import type { searchStops } from "../model/searchStop";
+import type { recommendStops } from "../../model/recommendStops";
+import baseAPIAuth from "../../api/auth";
+import type { searchStops } from "../../model/searchStop";
 
 const ADMIN_SIDEBAR_ITEMS = [
   { id: "overview", label: "Tổng quan", icon: LayoutDashboard },
@@ -105,19 +105,17 @@ function StationCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick?.()}
-      className={`flex w-full cursor-grab items-start justify-between gap-2 rounded-[8px] border px-3 py-2.5 text-left transition active:cursor-grabbing ${
-        selected
-          ? "border-[#e8791c] bg-[#F7E6D6]"
-          : "border-[#d9e0ea] bg-white hover:border-[#cfd6e2]"
-      } ${isDragging ? "opacity-50" : ""}`}
+      className={`flex w-full cursor-grab items-start justify-between gap-2 rounded-[8px] border px-3 py-2.5 text-left transition active:cursor-grabbing ${selected
+        ? "border-[#e8791c] bg-[#F7E6D6]"
+        : "border-[#d9e0ea] bg-white hover:border-[#cfd6e2]"
+        } ${isDragging ? "opacity-50" : ""}`}
     >
       <div className="flex min-w-0 items-start gap-3">
         <span
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[11px] font-black ${
-            selected
-              ? "bg-[#e8791c]/20 text-[#c55a14]"
-              : "bg-[#e8ecf1] text-[#6b7280]"
-          }`}
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[11px] font-black ${selected
+            ? "bg-[#e8791c]/20 text-[#c55a14]"
+            : "bg-[#e8ecf1] text-[#6b7280]"
+            }`}
         >
           {order}
         </span>
@@ -130,20 +128,18 @@ function StationCard({
             {name}
           </h3>
           <p
-            className={`mt-1 truncate text-[9px] font-black uppercase tracking-[0.08em] ${
-              selected ? "text-[#6b7280]" : "text-[#9ca6b7]"
-            }`}
+            className={`mt-1 truncate text-[9px] font-black uppercase tracking-[0.08em] ${selected ? "text-[#6b7280]" : "text-[#9ca6b7]"
+              }`}
           >
             {distance}
           </p>
         </div>
       </div>
       <span
-        className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
-          selected
-            ? "border-2 border-[#e8791c] bg-white"
-            : "border border-[#bcc6d5] bg-white"
-        }`}
+        className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${selected
+          ? "border-2 border-[#e8791c] bg-white"
+          : "border border-[#bcc6d5] bg-white"
+          }`}
       >
         {selected ? (
           <Check size={10} className="text-[#e8791c]" strokeWidth={3} />
@@ -165,41 +161,6 @@ export default function CreateRoute() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [notice, setNotice] = useState<NoticeState | null>(null);
 
-  // Hàm use effect cho điểm xuất phát departure
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      searchDepartureStops(departure);
-    }, 300);
-    return () => clearTimeout(delay);
-  }, [departure]);
-
-  // Hàm use effect cho điểm kết thúc destination
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      searchDestinationStops(destination);
-    }, 300);
-    return () => clearTimeout(delay);
-  }, [destination]);
-
-  // Hàm search các stops cho điểm xuất phát.
-  const searchDepartureStops = async (keyword: string) => {
-    if (!keyword.trim()) {
-      setDepartureSearchInput([]);
-      return;
-    }
-    try {
-      const res = await baseAPIAuth.get("/api/admin/check/searchStop", {
-        params: {
-          keyword,
-        },
-      });
-      setDepartureSearchInput(res.data);
-      console.log("search data", res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   // Hàm search các stops cho điểm kết thúc.
   const searchDestinationStops = async (keyword: string) => {
     if (!keyword.trim()) {
@@ -218,6 +179,43 @@ export default function CreateRoute() {
       console.error(error);
     }
   };
+  const searchDepartureStops = async (keyword: string) => {
+    if (!keyword.trim()) {
+      setDepartureSearchInput([]);
+      return;
+    }
+    try {
+      const res = await baseAPIAuth.get("/api/admin/check/searchStop", {
+        params: {
+          keyword,
+        },
+      });
+      setDepartureSearchInput(res.data);
+      console.log("search data", res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  // Hàm use effect cho điểm xuất phát departure
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      searchDepartureStops(departure);
+    }, 300);
+    return () => clearTimeout(delay);
+  }, [departure]);
+
+  // Hàm use effect cho điểm kết thúc destination
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      searchDestinationStops(destination);
+    }, 300);
+    return () => clearTimeout(delay);
+  }, [destination]);
+
+  // Hàm search các stops cho điểm xuất phát.
+
+
+
 
   // Hàm lấy ra thông tin stops được gợi ý
   const getRecommendStops = async () => {
@@ -377,11 +375,10 @@ export default function CreateRoute() {
                     <button
                       key={item.id}
                       type="button"
-                      className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${
-                        isActive
-                          ? "bg-[#f4d5b4] text-[#1f2937]"
-                          : "text-[#374151] hover:bg-[#f3f4f6]"
-                      }`}
+                      className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${isActive
+                        ? "bg-[#f4d5b4] text-[#1f2937]"
+                        : "text-[#374151] hover:bg-[#f3f4f6]"
+                        }`}
                     >
                       <ItemIcon size={14} className="shrink-0 text-[#111827]" />
                       <span>{item.label}</span>
@@ -506,14 +503,14 @@ export default function CreateRoute() {
                       <span className="flex min-w-[200px] flex-1 items-center gap-2 rounded-[8px] border border-[#dbe2ee] bg-[#f5f7fb] px-4 py-2.5">
                         <MapPin size={14} className="shrink-0 text-[#e8791c]" />
                         <div className="relative">
-                        <input
-                          type="text"
-                          value={destination}
-                          onChange={(e) => setDestination(e.target.value)}
-                          placeholder="Nhập điểm kết thúc"
-                          className="min-w-0 flex-1 bg-transparent text-[13px] font-black text-[#2a3444] outline-none placeholder:text-[#9ca6b7]"
-                        />
-                            {searchDestinationInput.length > 0 && (
+                          <input
+                            type="text"
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            placeholder="Nhập điểm kết thúc"
+                            className="min-w-0 flex-1 bg-transparent text-[13px] font-black text-[#2a3444] outline-none placeholder:text-[#9ca6b7]"
+                          />
+                          {searchDestinationInput.length > 0 && (
                             <ul className="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur-sm">
                               {searchDestinationInput.map((stop) => (
                                 <li
@@ -539,7 +536,7 @@ export default function CreateRoute() {
                               ))}
                             </ul>
                           )}
-                          </div>
+                        </div>
                       </span>
                     </label>
 
@@ -696,11 +693,10 @@ export default function CreateRoute() {
             >
               <div className="flex items-start gap-3">
                 <span
-                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${
-                    notice.type === "success"
-                      ? "bg-[#ecfdf3] text-[#16a34a]"
-                      : "bg-[#fff7ed] text-[#ea580c]"
-                  }`}
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
+                    ? "bg-[#ecfdf3] text-[#16a34a]"
+                    : "bg-[#fff7ed] text-[#ea580c]"
+                    }`}
                   style={{
                     animation:
                       notice.type === "success"
