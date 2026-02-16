@@ -27,14 +27,15 @@ import TripDetailPage from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageBus from "./pages/Admin/ManageBus";
 import ManageRoute from "./pages/Admin/ManageRoute";
 import ManageUser from "./pages/Admin/ManageUser";
+import CreateRoute from "./pages/Admin/CreateRoute";
 
 export default function App() {
   return (
     <>
       <Routes>
         <Route path="/admin/create-coach" element={<CreateCoach />} />
+        <Route path="/admin/create-route" element={<CreateRoute />} />
         <Route path="/admin/manage-buses" element={<ManageBus />} />
-        <Route path="/admin/create-coach" element={<CreateCoach />} />
         <Route path="/admin/manage-routes" element={<ManageRoute />} />
         <Route path="/admin/manage-users" element={<ManageUser />} />
 
