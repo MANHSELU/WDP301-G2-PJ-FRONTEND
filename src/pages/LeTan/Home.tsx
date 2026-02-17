@@ -1,16 +1,19 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { Bus, BarChart3 } from "lucide-react";
+import { Bus, BarChart3, Ticket, Package } from "lucide-react";
 
 
 
-const TripListPage: React.FC = () => {
+const TripListPageLeTan: React.FC = () => {
     const location = useLocation();
     // ===== Pagination Logic =====
-    const menuItems = [
-        { label: "Danh sách chuyến đi", icon: Bus, path: "/assistant/chuyendi" },
-        { label: "Doanh thu", icon: BarChart3, path: "/driver/revenue" },
-    ];
 
+    const menuItems = [
+        { label: "Danh sách chuyến đi", icon: Bus, path: "/letan/chuyendi" },
+        { label: "Đặt vé cho khách hàng", icon: Ticket, path: "/letan/ticketBooking" },
+        { label: "Gửi hàng cho khách", icon: Package, path: "/letan/cargoBooking" },
+        { label: "Danh Sách Duyệt Đơn", icon: Package, path: "/letan/CargoOrderList" },
+        { label: "Doanh thu", icon: BarChart3, path: "/letan/revenue" },
+    ];
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 pt-28 px-6">
             <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8">
@@ -47,10 +50,11 @@ const TripListPage: React.FC = () => {
                 {/* Main Content */}
                 <main className="col-span-9">
                     <Outlet />
+
                 </main>
             </div>
         </div>
     );
 };
 
-export default TripListPage;
+export default TripListPageLeTan;

@@ -28,6 +28,10 @@ import ManageBus from "./pages/Admin/ManageBus";
 import ManageRoute from "./pages/Admin/ManageRoute";
 import ManageUser from "./pages/Admin/ManageUser";
 import CreateRoute from "./pages/Admin/CreateRoute";
+import TicketBooking from "./pages/LeTan/DatVeChoKhach";
+import TripListPageLeTan from "./pages/LeTan/Home";
+import CargoBooking from "./pages/LeTan/GuiHangChoKhach";
+import CargoOrderList from "./pages/LeTan/DanhSachHangHoa";
 
 export default function App() {
   return (
@@ -69,6 +73,14 @@ export default function App() {
           <Route path="assistant" element={<TripListPage />} >
             <Route path="chuyendi" element={<DanhSachChuyenDi />} />
             <Route path="chitietchuyendi" element={<TripDetailPage />} />
+          </Route>
+          <Route path="letan" element={<TripListPageLeTan />} >
+            <Route path="chuyendi" element={<DanhSachChuyenDi />} />
+            <Route path="chitietchuyendi" element={<TripDetailPage />} />
+
+            <Route path="CargoOrderList" element={<CargoOrderList />} />
+            <Route path="ticketBooking" element={<TicketBooking />} />
+            <Route path="cargoBooking" element={<CargoBooking />} />
           </Route>
         </Route>
       </Routes>
