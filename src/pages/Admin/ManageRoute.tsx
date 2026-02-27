@@ -4,8 +4,6 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
-    Save,
-    Loader2,
     Search as SearchIcon,
     Plus,
 } from "lucide-react";
@@ -116,15 +114,12 @@ const ManageRoute: React.FC = () => {
     const [updating, setUpdating] = useState(false);
     const [updateError, setUpdateError] = useState<string | null>(null);
 
-    // profile dropdown
-    const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const onDocClick = (e: MouseEvent) => {
             if (!profileRef.current) return;
             if (!(e.target instanceof Node)) return;
-            if (!profileRef.current.contains(e.target)) setProfileOpen(false);
         };
         document.addEventListener("click", onDocClick);
         return () => document.removeEventListener("click", onDocClick);
@@ -295,317 +290,212 @@ const ManageRoute: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white font-sans">
-            <div className="bg-white border-b shadow-sm">
-                <div className="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="text-2xl font-extrabold text-orange-600 tracking-tight">
-                            BUSTRIP
-                        </div>
-                        <div className="hidden sm:block text-sm text-gray-500">
-                            Quản lý tuyến
-                        </div>
-                    </div>
+        <div className="space-y-6">
 
-                    <div className="flex items-center gap-4 text-sm">
-                        <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-50 transition-colors">
-                            Chế độ tối
-                        </button>
+            {/* HEADER */}
+            <div className="flex items-center justify-between">
+                <h2 className="text-[20px] font-black text-[#111827]">
+                    Quản lý tuyến xe
+                </h2>
 
-                        <div className="relative" ref={profileRef}>
+                <button
+                    onClick={handleAddNew}
+                    className="flex items-center gap-2 rounded-[4px] bg-[#eb8a45] px-4 py-2 text-[13px] font-semibold text-white hover:opacity-90"
+                >
+                    <Plus size={14} />
+                    Thêm tuyến mới
+                </button>
+            </div>
+
+            {/* STATS */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="rounded border border-[#dde2ea] bg-white p-4">
+                    <p className="text-[12px] text-[#6b7280]">Tổng số tuyến</p>
+                    <p className="mt-1 text-[24px] font-black">{routes.length}</p>
+                </div>
+
+                <div className="rounded border border-[#dde2ea] bg-white p-4">
+                    <p className="text-[12px] text-[#6b7280]">Hoạt động</p>
+                    <p className="mt-1 text-[24px] font-black">
+                        {routes.filter((r) => r.status === "Hoạt động").length}
+                    </p>
+                </div>
+
+                <div className="rounded border border-[#dde2ea] bg-white p-4">
+                    <p className="text-[12px] text-[#6b7280]">Tạm ngưng</p>
+                    <p className="mt-1 text-[24px] font-black">
+                        {routes.filter((r) => r.status === "Tạm ngưng").length}
+                    </p>
+                </div>
+            </div>
+
+            {/* TABLE WRAPPER */}
+            <div className="rounded border border-[#dde2ea] bg-white">
+
+                {/* FILTER BAR */}
+                <div className="flex flex-col gap-4 border-b border-[#dde2ea] p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-2">
+                        {(["Tất cả", "Hoạt động", "Tạm ngưng"] as const).map((tab) => (
                             <button
-                                onClick={() => setProfileOpen((s) => !s)}
-                                className="flex items-center gap-3 px-2 py-1 rounded-full hover:bg-gray-100 transition"
-                                aria-haspopup="true"
-                                aria-expanded={profileOpen}
-                                title="Tài khoản"
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`rounded px-3 py-1 text-[12px] font-semibold ${activeTab === tab
+                                    ? "bg-[#f4d5b4] text-[#1f2937]"
+                                    : "text-[#6b7280] hover:bg-[#f3f4f6]"
+                                    }`}
                             >
-                                <div className="h-9 w-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-medium">
-                                    AD
-                                </div>
-                                <div className="hidden sm:flex flex-col text-left">
-                                    <span className="text-sm font-medium text-gray-900">
-                                        Admin
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                        admin@example.com
-                                    </span>
-                                </div>
+                                {tab}
                             </button>
-
-                            {profileOpen && (
-                                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50 py-2">
-                                    <div className="px-4 py-3 border-b">
-                                        <div className="text-sm font-medium text-gray-900">
-                                            Admin
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                            admin@example.com
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => {
-                                            window.location.href = "/admin/profile";
-                                            setProfileOpen(false);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Trang cá nhân
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            localStorage.removeItem("accessToken");
-                                            window.location.reload();
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                                    >
-                                        Đăng xuất
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="max-w-7xl mx-auto px-5 py-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-white p-5 rounded-xl shadow-md border">
-                        <div className="text-sm text-gray-500 mb-1">Tổng số tuyến</div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold">{routes.length}</span>
-                            <span className="text-green-600 text-sm font-medium">+0%</span>
-                        </div>
+                        ))}
                     </div>
 
-                    <div className="bg-white p-5 rounded-xl shadow-md border">
-                        <div className="text-sm text-gray-500 mb-1">Hoạt động</div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold">
-                                {routes.filter((r) => r.status === "Hoạt động").length}
-                            </span>
-                            <span className="text-green-600 text-sm font-medium">+0%</span>
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center rounded border border-[#dde2ea] bg-[#f9fafb] px-2 py-1">
+                            <SearchIcon size={14} className="text-[#9ca3af]" />
+                            <input
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Tìm tên tuyến, điểm đi hoặc điểm đến..."
+                                className="ml-2 bg-transparent text-[12px] outline-none"
+                            />
                         </div>
-                    </div>
 
-                    <div className="bg-white p-5 rounded-xl shadow-md border">
-                        <div className="text-sm text-gray-500 mb-1">Tạm ngưng</div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold">
-                                {routes.filter((r) => r.status === "Tạm ngưng").length}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-end">
                         <button
-                            onClick={handleAddNew}
-                            className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center gap-2"
-                            title="Thêm tuyến xe mới"
+                            onClick={() => setSearchQuery("")}
+                            className="text-[12px] text-[#6b7280]"
                         >
-                            <Plus size={16} />
-                            Thêm tuyến xe mới
+                            Xóa
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-3 bg-white rounded-xl shadow border p-5">
-                        <ul className="space-y-3">
-                            <li className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                📊 Tổng quan
-                            </li>
-                            <li className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                🔑 Quản lý phân quyền
-                            </li>
-                            <li className="flex items-center gap-3 px-4 py-3 bg-orange-50 text-orange-700 font-medium rounded-lg">
-                                🚌 Quản lý tuyến xe
-                            </li>
-                            <li className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                🚍 Quản lý xe
-                            </li>
-                            <li className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                💰 Quản lý thu chi
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="lg:col-span-9 bg-white rounded-xl shadow border overflow-hidden">
-                        <div className="border-b px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div className="flex items-center gap-4">
-                                {(["Tất cả", "Hoạt động", "Tạm ngưng"] as const).map((tab) => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setActiveTab(tab)}
-                                        className={`px-3 py-2 text-sm rounded-lg font-medium transition ${activeTab === tab
-                                                ? "bg-orange-50 text-orange-600 ring-1 ring-orange-100"
-                                                : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                                            }`}
-                                    >
-                                        {tab}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="flex items-center gap-3 w-full sm:w-auto">
-                                <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-full sm:w-80 shadow-sm">
-                                    <SearchIcon size={16} className="text-gray-500" />
-                                    <input
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Tìm tên tuyến, điểm đi hoặc điểm đến"
-                                        className="ml-3 w-full bg-transparent outline-none text-sm text-gray-700"
-                                    />
-                                </div>
-                                <button
-                                    onClick={() => setSearchQuery("")}
-                                    className="text-sm text-gray-600 hover:text-gray-800"
-                                >
-                                    Xóa
-                                </button>
-                            </div>
+                {/* TABLE */}
+                <div className="overflow-x-auto">
+                    {loading ? (
+                        <div className="p-8 text-center text-[#6b7280]">
+                            Đang tải danh sách tuyến...
                         </div>
+                    ) : error ? (
+                        <div className="p-8 text-center text-red-600">
+                            Lỗi: {error}
+                        </div>
+                    ) : (
+                        <table className="w-full text-[13px]">
+                            <thead className="bg-[#f9fafb] text-[#6b7280]">
+                                <tr>
+                                    <th className="px-4 py-2 text-left">Đi → Đến</th>
+                                    <th className="px-4 py-2 text-left">Ngày tạo</th>
+                                    <th className="px-4 py-2 text-left">Khoảng cách (km)</th>
+                                    <th className="px-4 py-2 text-center">Trạng thái</th>
+                                    <th className="px-4 py-2"></th>
+                                </tr>
+                            </thead>
 
-                        <div className="overflow-x-auto">
-                            {loading ? (
-                                <div className="p-8 text-center text-gray-600">
-                                    Đang tải danh sách tuyến...
-                                </div>
-                            ) : error ? (
-                                <div className="p-8 text-center text-red-600">Lỗi: {error}</div>
-                            ) : (
-                                <table className="w-full min-w-full divide-y divide-gray-200 text-sm">
-                                    <thead className="bg-gray-50">
-                                        <tr className="text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                                            <th className="px-6 py-3">Đi - Đến</th>
-                                            <th className="px-6 py-3">Thời gian</th>
-                                            <th className="px-6 py-3">Khoảng cách (km)</th>
-                                            <th className="px-6 py-3">Trạng thái</th>
-                                            <th className="px-6 py-3 w-20" />
+                            <tbody>
+                                {filteredRoutes.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-4 py-10 text-center text-[#9ca3af]">
+                                            Không có tuyến phù hợp
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredRoutes.map((route, idx) => (
+                                        <tr
+                                            key={route.id ?? idx}
+                                            className="border-t border-[#dde2ea] hover:bg-[#f9fafb]"
+                                        >
+                                            <td className="px-4 py-2">
+                                                <div className="font-semibold text-[#111827]">
+                                                    {route.start} → {route.stop}
+                                                </div>
+                                                <div className="text-[11px] text-[#9ca3af]">
+                                                    Mã: {route.code ?? "—"}
+                                                </div>
+                                            </td>
+
+                                            <td className="px-4 py-2">
+                                                {fmtDate(route.created_at)}
+                                            </td>
+
+                                            <td className="px-4 py-2">
+                                                {route.distance_km}
+                                            </td>
+
+                                            <td className="px-4 py-2 text-center">
+                                                <span
+                                                    className={`rounded px-2 py-[2px] text-[11px] font-semibold ${getStatusStyle(
+                                                        route.status
+                                                    )}`}
+                                                >
+                                                    {route.status}
+                                                </span>
+                                            </td>
+
+                                            <td className="px-4 py-2 text-center">
+                                                <button
+                                                    onClick={() => handleEdit(route)}
+                                                    className="rounded p-1 hover:bg-[#f3f4f6]"
+                                                    title="Chỉnh sửa"
+                                                >
+                                                    <Edit size={14} />
+                                                </button>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-100">
-                                        {filteredRoutes.length === 0 ? (
-                                            <tr>
-                                                <td
-                                                    colSpan={5}
-                                                    className="px-6 py-10 text-center text-gray-500"
-                                                >
-                                                    Không có tuyến nào phù hợp
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            filteredRoutes.map((route, idx) => (
-                                                <tr
-                                                    key={route.id ?? idx}
-                                                    className="hover:bg-gray-50 transition-colors"
-                                                >
-                                                    <td className="px-6 py-4 text-gray-700">
-                                                        <div className="font-medium text-gray-900">
-                                                            {route.start} → {route.stop}
-                                                        </div>
-                                                        <div className="text-xs text-gray-500 mt-1">
-                                                            Mã: {route.code ?? "—"}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-gray-700">
-                                                        {fmtDate(route.created_at)}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-gray-700">
-                                                        {route.distance_km}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-center">
-                                                        <span
-                                                            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
-                                                                route.status
-                                                            )}`}
-                                                        >
-                                                            <span
-                                                                className={`h-2 w-2 rounded-full ${route.status === "Hoạt động"
-                                                                        ? "bg-green-500"
-                                                                        : "bg-red-500"
-                                                                    }`}
-                                                            />
-                                                            {route.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-center">
-                                                        <button
-                                                            onClick={() => handleEdit(route)}
-                                                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-white hover:bg-orange-500 transition"
-                                                            title="Chỉnh sửa"
-                                                        >
-                                                            <Edit size={16} />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
 
-                        <div className="px-6 py-4 border-t flex items-center justify-between text-sm text-gray-600">
-                            <div>
-                                Hiển thị 1–{Math.min(10, filteredRoutes.length)} của{" "}
-                                {filteredRoutes.length} tuyến
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
-                                    disabled
-                                >
-                                    <ChevronLeft size={18} />
-                                </button>
-                                <div className="px-3 py-1 bg-orange-500 text-white rounded-md">
-                                    1
-                                </div>
-                                <button
-                                    className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
-                                    disabled
-                                >
-                                    <ChevronRight size={18} />
-                                </button>
-                            </div>
-                        </div>
+                {/* FOOTER */}
+                <div className="border-t border-[#dde2ea] px-4 py-3 text-[12px] text-[#6b7280] flex items-center justify-between">
+                    <div>
+                        Hiển thị 1–{Math.min(10, filteredRoutes.length)} của{" "}
+                        {filteredRoutes.length} tuyến
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button className="rounded p-1 hover:bg-[#f3f4f6]" disabled>
+                            <ChevronLeft size={16} />
+                        </button>
+                        <span className="rounded bg-[#eb8a45] px-2 py-[2px] text-white">1</span>
+                        <button className="rounded p-1 hover:bg-[#f3f4f6]" disabled>
+                            <ChevronRight size={16} />
+                        </button>
                     </div>
                 </div>
             </div>
 
+            {/* MODAL (GIỮ LOGIC CŨ) */}
             {isModalOpen && selectedRoute && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-                        <div className="px-6 py-4 border-b flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-gray-900">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl">
+                        <div className="flex items-center justify-between border-b px-5 py-3">
+                            <h3 className="text-[15px] font-bold text-[#111827]">
                                 Chỉnh sửa tuyến:{" "}
-                                <span className="text-orange-600 font-medium">
+                                <span className="text-[#eb8a45]">
                                     {selectedRoute.start} → {selectedRoute.stop}
                                 </span>
                             </h3>
-                            <button
-                                onClick={closeModal}
-                                className="text-gray-500 hover:text-gray-800"
-                            >
-                                <X size={22} />
+                            <button onClick={closeModal}>
+                                <X size={18} />
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-4">
+                        <div className="space-y-4 p-5">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-[12px] font-medium text-[#374151]">
                                     Đi - Đến
                                 </label>
                                 <input
-                                    type="text"
                                     value={`${selectedRoute.start} → ${selectedRoute.stop}`}
                                     disabled
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700"
+                                    className="mt-1 w-full rounded border border-[#dde2ea] bg-[#f9fafb] px-2 py-1 text-[13px]"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-[12px] font-medium text-[#374151]">
                                     Khoảng cách (km)
                                 </label>
                                 <input
@@ -617,13 +507,12 @@ const ManageRoute: React.FC = () => {
                                             distance_km: Number(e.target.value) || 0,
                                         })
                                     }
-                                    min={0}
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-200"
+                                    className="mt-1 w-full rounded border border-[#dde2ea] px-2 py-1 text-[13px]"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-[12px] font-medium text-[#374151]">
                                     Trạng thái
                                 </label>
                                 <select
@@ -634,7 +523,7 @@ const ManageRoute: React.FC = () => {
                                             status: e.target.value as FormDataType["status"],
                                         })
                                     }
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-200"
+                                    className="mt-1 w-full rounded border border-[#dde2ea] px-2 py-1 text-[13px]"
                                 >
                                     <option value="Hoạt động">Hoạt động</option>
                                     <option value="Tạm ngưng">Tạm ngưng</option>
@@ -642,41 +531,35 @@ const ManageRoute: React.FC = () => {
                             </div>
 
                             {updateError && (
-                                <div className="text-red-600 text-sm bg-red-50 p-3 rounded">
+                                <div className="rounded bg-red-50 p-2 text-[12px] text-red-600">
                                     {updateError}
                                 </div>
                             )}
                         </div>
 
-                        <div className="px-6 py-4 border-t flex justify-end gap-3">
+                        <div className="flex justify-end gap-2 border-t px-5 py-3">
                             <button
                                 onClick={closeModal}
-                                className="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50"
                                 disabled={updating}
+                                className="rounded border border-[#dde2ea] px-3 py-1 text-[12px]"
                             >
                                 Hủy
                             </button>
                             <button
                                 onClick={handleUpdate}
                                 disabled={updating}
-                                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg flex items-center gap-2 hover:shadow-lg disabled:opacity-50"
+                                className="rounded bg-[#eb8a45] px-3 py-1 text-[12px] text-white"
                             >
-                                {updating ? (
-                                    <>
-                                        <Loader2 size={16} className="animate-spin" /> Đang lưu...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save size={16} /> Lưu thay đổi
-                                    </>
-                                )}
+                                {updating ? "Đang lưu..." : "Lưu"}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
+
         </div>
     );
+
 };
 
 export default ManageRoute;

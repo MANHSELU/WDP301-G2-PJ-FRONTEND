@@ -51,7 +51,10 @@ export default function Header2() {
         &&
         !location.pathname.startsWith("/user")
         &&
-        !location.pathname.startsWith("/assistant");
+        !location.pathname.startsWith("/assistant")
+        &&
+        !location.pathname.startsWith("/letan");
+
     return (
         <>
             <div className="overflow-x-hidden bg-[#ece7e2] text-[#2e1f16]">
