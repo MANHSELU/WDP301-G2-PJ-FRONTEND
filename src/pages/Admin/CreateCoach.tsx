@@ -1,452 +1,1231 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+    BadgeDollarSign,
+    BusFront,
+    CalendarCheck2,
+    ChevronDown,
+    ChevronLeft,
+    LayoutDashboard,
+    LogIn,
+    Plus,
+    Shield,
+    Trash2,
+} from "lucide-react";
+import { GiSteeringWheel } from "react-icons/gi";
+import { useNavigate } from "react-router-dom";
+import baseAPIAuth from "../../api/auth";
+import type {
+    coach as CoachBase,
+    Column,
+    ColumnName,
+    ColumnOverride,
+    CreateBusRequest,
+    RowOverride,
+    SeatLayout,
+} from "../../model/coach";
+import type { BusType } from "../../model/coachType";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-type SeatStatus = "sold" | "available" | "selecting";
-
-interface Seat {
-  id: string;
-  label: string;
-  status: SeatStatus;
-  floor: 1 | 2;
-  row: number;
-  col: number;
+interface ColumnFormColumn {
+    enabled: boolean;
+    seatsPerRow: number;
 }
 
-// ─── Generate seat map ─────────────────────────────────────────────────────────
-function generateSeats(): Seat[] {
-  const seats: Seat[] = [];
-  // Floor 1: 5 rows x 3 cols (columns 5,7,9)
-  const f1Layout = [
-    ["A1", "A2", "A3"], ["B1", "B2", "B3"], ["C1", "C2", "C3"],
-    ["D1", "D2", "D3"], ["E1", "E2", "E3"],
-  ];
-  const soldF1 = new Set(["A1", "B2", "C1", "C3", "D2"]);
-  f1Layout.forEach((row, ri) => {
-    row.forEach((label, ci) => {
-      seats.push({
-        id: `f1-${label}`,
-        label,
-        status: soldF1.has(label) ? "sold" : "available",
-        floor: 1,
-        row: ri,
-        col: ci,
-      });
-    });
-  });
-
-  // Floor 2: 5 rows x 3 cols
-  const f2Layout = [
-    ["A1", "A2", "A3"], ["B1", "B2", "B3"], ["C1", "C2", "C3"],
-    ["D1", "D2", "D3"], ["E1", "E2", "E3"],
-  ];
-  const soldF2 = new Set(["A2", "B1", "C2", "D3"]);
-  f2Layout.forEach((row, ri) => {
-    row.forEach((label, ci) => {
-      seats.push({
-        id: `f2-${label}-${ri}`,
-        label: `${label}`,
-        status: soldF2.has(label) && ri < 2 ? "sold" : "available",
-        floor: 2,
-        row: ri,
-        col: ci,
-      });
-    });
-  });
-  return seats;
+interface ColumnFormState {
+    LEFT: ColumnFormColumn;
+    MIDDLE: ColumnFormColumn;
+    RIGHT: ColumnFormColumn;
 }
 
-// ─── Seat visual styles ───────────────────────────────────────────────────────
-const seatVisualMap: Record<SeatStatus, { detail: string; frame: string; label: string; leg: string }> = {
-  sold: {
-    detail: "border-gray-400 bg-gray-300",
-    frame: "border-gray-400 bg-gray-200",
-    label: "text-gray-500",
-    leg: "bg-gray-400",
-  },
-  available: {
-    detail: "border-green-500 bg-green-200",
-    frame: "border-green-500 bg-green-100",
-    label: "text-green-700",
-    leg: "bg-green-500",
-  },
-  selecting: {
-    detail: "border-orange-500 bg-orange-300",
-    frame: "border-orange-500 bg-orange-100",
-    label: "text-orange-700",
-    leg: "bg-orange-500",
-  },
+interface RowOverrideForm {
+    id: number;
+    rowIndex: number;
+    floor: 1 | 2;
+    left: string;
+    middle: string;
+    right: string;
+}
+
+interface SeatCell {
+    id: string;
+    seatNumber: number;
+    seatCode: string;
+    floor: number;
+    rowIndex: number;
+    column: ColumnName;
+}
+
+interface RowLayout {
+    rowIndex: number;
+    seatsByColumn: Partial<Record<ColumnName, SeatCell[]>>;
+}
+
+interface FloorLayout {
+    floor: number;
+    rows: RowLayout[];
+}
+
+const COLUMN_ORDER: ColumnName[] = ["LEFT", "MIDDLE", "RIGHT"];
+
+const COLUMN_LABEL: Record<ColumnName, string> = {
+    LEFT: "Trái",
+    MIDDLE: "Giữa",
+    RIGHT: "Phải",
 };
 
-// ─── Seat Icon (CSS div-based) ────────────────────────────────────────────────
-const SeatIcon = ({ status, label, onClick }: { status: SeatStatus; label: string; onClick: () => void }) => {
-  const seatVisual = seatVisualMap[status];
-  return (
-    <div
-      onClick={status !== "sold" ? onClick : undefined}
-      className={`select-none flex flex-col items-center ${status !== "sold" ? "cursor-pointer" : "cursor-default"}`}
-      title={status === "sold" ? "Đã bán" : label}
-    >
-      <div className="relative h-[36px] w-[62px] overflow-visible">
-        {/* Headrest */}
-        <span className={`pointer-events-none absolute left-[13px] top-[1px] h-[11px] w-[35px] rounded-t-[6px] border-[2px] border-b-0 ${seatVisual.detail}`} />
-        {/* Seat body with label */}
-        <span className={`pointer-events-none absolute left-[7px] top-[10px] flex h-[17px] w-[48px] items-center justify-center rounded-[4px] border-[2px] text-[10px] font-black leading-none ${seatVisual.frame} ${seatVisual.label}`}>
-          {label}
-        </span>
-        {/* Left leg */}
-        <span className={`pointer-events-none absolute left-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`} />
-        {/* Right leg */}
-        <span className={`pointer-events-none absolute right-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`} />
-      </div>
-    </div>
-  );
+const OVERRIDE_KEY_BY_COLUMN: Record<ColumnName, "left" | "middle" | "right"> =
+{
+    LEFT: "left",
+    MIDDLE: "middle",
+    RIGHT: "right",
 };
 
-// ─── Payment method button ─────────────────────────────────────────────────────
-const PayBtn = ({
-  icon, label, selected, onClick,
-}: { icon: React.ReactNode; label: string; selected: boolean; onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 py-3 px-2 transition-all w-full
-      ${selected ? "border-orange-400 bg-orange-50" : "border-gray-200 bg-white hover:border-orange-200"}`}
-  >
-    <span className={`text-xl ${selected ? "text-orange-500" : "text-gray-500"}`}>{icon}</span>
-    <span className={`text-xs font-semibold ${selected ? "text-orange-600" : "text-gray-600"}`}>{label}</span>
-  </button>
-);
+// Set giá trị default của số cột ghế
+const INITIAL_COLUMNS: ColumnFormState = {
+    LEFT: { enabled: true, seatsPerRow: 2 },
+    MIDDLE: { enabled: false, seatsPerRow: 1 },
+    RIGHT: { enabled: true, seatsPerRow: 2 },
+};
+// Set giá trị default cho sidebar trnag admin
+const ADMIN_SIDEBAR_ITEMS = [
+    { id: "overview", label: "Tổng quan", icon: LayoutDashboard },
+    { id: "roles", label: "Quản lý phân quyền", icon: Shield },
+    { id: "routes", label: "Quản lý tuyến xe", icon: CalendarCheck2 },
+    { id: "buses", label: "Quản lý xe", icon: BusFront },
+    { id: "finance", label: "Quản lý thu chi", icon: BadgeDollarSign },
+];
 
-// ─── Main component ───────────────────────────────────────────────────────────
-export default function TicketBooking() {
-  const [seats, setSeats] = useState<Seat[]>(generateSeats);
-  const [form, setForm] = useState({
-    name: "", phone: "", from: "Đà Nẵng", to: "Quảng Trị",
-    date: "10/06/2004", vehicleType: "Limosine",
-  });
-  const [payment, setPayment] = useState<string>("cash");
-  const [promoCode, setPromoCode] = useState("");
-  const [printAfter, setPrintAfter] = useState(true);
+const ADMIN_LAYOUT_TUNE = {
+    sidebarAndContentCols: "lg:grid-cols-[300px_minmax(0,1fr)]",
+    sidebarAndContentGap: "gap-4",
+    rightContentMaxWidth: "max-w-[1380px]",
+    rightContentDesktopPadding: "lg:px-4",
+};
 
-  const cities = ["Đà Nẵng", "Quảng Trị", "Huế", "TP. Hồ Chí Minh", "Hà Nội", "Đà Lạt", "Cần Thơ"];
-  const vehicles = ["Limosine", "Ghế thường", "Giường nằm", "VIP 9 chỗ"];
-
-  const toggleSeat = (id: string) => {
-    setSeats(prev => prev.map(s => {
-      if (s.id !== id) return s;
-      if (s.status === "available") return { ...s, status: "selecting" };
-      if (s.status === "selecting") return { ...s, status: "available" };
-      return s;
-    }));
-  };
-
-  const selectedSeats = seats.filter(s => s.status === "selecting");
-  const seatPrice = 350000;
-  const total = selectedSeats.length * seatPrice;
-
-  const floor1 = seats.filter(s => s.floor === 1);
-  const floor2 = seats.filter(s => s.floor === 2);
-
-  const floorRows = (floorSeats: Seat[]) => {
-    const rows: Seat[][] = [];
-    for (let r = 0; r < 5; r++) {
-      rows.push(floorSeats.filter(s => s.row === r));
+function clampNumber(value: number, min: number, max?: number) {
+    if (Number.isNaN(value)) {
+        return min;
     }
-    return rows;
-  };
 
-  const colLabels = ["5", "7", "9"];
+    if (typeof max === "number") {
+        return Math.min(Math.max(value, min), max);
+    }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 p-4 md:p-8"
-      style={{ fontFamily: "'Nunito', 'Segoe UI', sans-serif" }}>
-      <h1 className="text-2xl font-extrabold text-gray-800 mb-6">Đặt vé cho khách hàng</h1>
+    return Math.max(value, min);
+}
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* ── Left Column ───────────────────────────────────────────────── */}
-        <div className="flex-1 space-y-5 min-w-0">
+function parseOptionalSeatCount(value: string): number | null {
+    if (!value.trim()) {
+        return null;
+    }
 
-          {/* Thông tin đặt vé */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-            <h2 className="text-sm font-bold text-gray-700 mb-4">Thông tin đặt vé</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {/* Họ tên */}
-              <div>
-                <label className="block text-xs text-gray-500 mb-1 font-medium">Họ tên khách hàng</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="Nhập tên khách hàng"
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-gray-50"
-                />
-              </div>
-              {/* SĐT */}
-              <div>
-                <label className="block text-xs text-gray-500 mb-1 font-medium">Số điện thoại</label>
-                <input
-                  type="text"
-                  value={form.phone}
-                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                  placeholder="092304...."
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-gray-50"
-                />
-              </div>
-              {/* Điểm đi */}
-              <div>
-                <label className="block text-xs text-gray-500 mb-1 font-medium">Điểm đi</label>
-                <div className="relative">
-                  <select
-                    value={form.from}
-                    onChange={e => setForm(f => ({ ...f, from: e.target.value }))}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-gray-50 appearance-none pr-8"
-                  >
-                    {cities.map(c => <option key={c}>{c}</option>)}
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▾</span>
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isNaN(parsed)) {
+        return null;
+    }
+
+    return Math.max(0, parsed);
+}
+
+function getSeatVisualStyles(state: "EMPTY" | "SELECTED" | "SOLD"): {
+    frame: string;
+    detail: string;
+    label: string;
+    leg: string;
+} {
+    if (state === "SELECTED") {
+        return {
+            frame: "border-[#ea5b2a] bg-[#fff6f1]",
+            detail: "border-[#ea5b2a] bg-[#fffaf7]",
+            label: "text-[#d84e1f]",
+            leg: "bg-[#ea5b2a]",
+        };
+    }
+
+    if (state === "SOLD") {
+        return {
+            frame: "border-[#a5acb8] bg-[#f4f5f7]",
+            detail: "border-[#a5acb8] bg-[#f8f9fb]",
+            label: "text-[#868e9b]",
+            leg: "bg-[#a5acb8]",
+        };
+    }
+
+    return {
+        frame: "border-[#1e8f2a] bg-white",
+        detail: "border-[#1e8f2a] bg-white",
+        label: "text-[#1e8f2a]",
+        leg: "bg-[#1e8f2a]",
+    };
+}
+
+export default function CreateCoach() {
+    const navigate = useNavigate();
+    // Thông tin xe, cầu hình ghế ngồi xe
+    const [licensePlate, setLicensePlate] = useState("");
+    const [busTypes, setBusTypes] = useState<BusType[]>([]);
+    const [busTypeId, setBusTypeId] = useState("");
+    const [templateName, setTemplateName] = useState("");
+    const [floors, setFloors] = useState<RowOverrideForm["floor"]>(2);
+    const [rows, setRows] = useState(9);
+    const [columns, setColumns] = useState<ColumnFormState>(INITIAL_COLUMNS);
+    const [rowOverrides, setRowOverrides] = useState<RowOverrideForm[]>([]);
+
+    // Validate, preview, chỉ UI
+    const [previewFloor, setPreviewFloor] = useState<RowOverrideForm["floor"]>(1);
+    const [validationMessage, setValidationMessage] = useState("");
+    const [payloadPreview] = useState("");
+
+    // Hàm để filter và map sao cho dữ liệu từ UI map format với interface từ BE
+    const activeColumns = useMemo<Column[]>(
+        () =>
+            COLUMN_ORDER.filter((name) => columns[name].enabled).map((name) => ({
+                name: name,
+                seats_per_row: clampNumber(columns[name].seatsPerRow, 1),
+            })),
+        [columns],
+    );
+    // Xử lí format data hàng đặc biệt để map format với interface từ BE
+    const rowOverridePayload = useMemo<RowOverride[]>(() => {
+        const deduped = new Map<string, RowOverride>();
+        for (const item of rowOverrides) {
+            const floorValue = floors === 1 ? 1 : item.floor;
+            const rowValue = clampNumber(item.rowIndex, 1, rows);
+
+            const columnOverrides = COLUMN_ORDER.map((columnName) => {
+                const key = OVERRIDE_KEY_BY_COLUMN[columnName];
+                const seats = parseOptionalSeatCount(item[key]);
+                return seats === null
+                    ? null
+                    : {
+                        column_name: columnName,
+                        seats,
+                    };
+            }).filter((override): override is ColumnOverride => override !== null);
+            if (columnOverrides.length === 0) {
+                continue;
+            }
+            const payloadItem: RowOverride = {
+                row_index: rowValue,
+                floor: floorValue,
+                column_overrides: columnOverrides,
+            };
+            deduped.set(`${floorValue}-${rowValue}`, payloadItem);
+        }
+        return Array.from(deduped.values()).sort(
+            (a, b) => a.floor - b.floor || a.row_index - b.row_index,
+        );
+    }, [floors, rowOverrides, rows]);
+
+    // Hàm
+    const { floorLayouts, totalSeats } = useMemo(() => {
+        const overrideMap = new Map<string, RowOverride>();
+        for (const item of rowOverridePayload) {
+            overrideMap.set(`${item.floor}-${item.row_index}`, item);
+        }
+
+        const layouts: FloorLayout[] = [];
+        let seatNumber = 1;
+
+        for (let floor = 1; floor <= floors; floor += 1) {
+            const floorRows: RowLayout[] = [];
+            let floorSeatNumber = 1;
+
+            for (let rowIndex = 1; rowIndex <= rows; rowIndex += 1) {
+                const columnSeatCounts: Partial<Record<ColumnName, number>> = {};
+
+                for (const column of activeColumns) {
+                    columnSeatCounts[column.name] = column.seats_per_row;
+                }
+
+                const override = overrideMap.get(`${floor}-${rowIndex}`);
+                if (override) {
+                    for (const columnOverride of override.column_overrides) {
+                        if (columnSeatCounts[columnOverride.column_name] !== undefined) {
+                            columnSeatCounts[columnOverride.column_name] =
+                                columnOverride.seats;
+                        }
+                    }
+                }
+
+                const seatsByColumn: Partial<Record<ColumnName, SeatCell[]>> = {};
+                for (const columnName of COLUMN_ORDER) {
+                    const seatCount = columnSeatCounts[columnName];
+                    if (seatCount === undefined || seatCount <= 0) {
+                        continue;
+                    }
+                    const columnSeats: SeatCell[] = [];
+                    for (let seatOrder = 1; seatOrder <= seatCount; seatOrder += 1) {
+                        const id = `F${floor}-R${rowIndex}-${columnName}-${seatOrder}`;
+                        const seat: SeatCell = {
+                            id,
+                            seatNumber,
+                            seatCode: `${floor === 1 ? "A" : "B"}${floorSeatNumber}`,
+                            floor,
+                            rowIndex,
+                            column: columnName,
+                        };
+                        columnSeats.push(seat);
+                        seatNumber += 1;
+                        floorSeatNumber += 1;
+                    }
+                    seatsByColumn[columnName] = columnSeats;
+                }
+                floorRows.push({ rowIndex, seatsByColumn });
+            }
+            layouts.push({ floor, rows: floorRows });
+        }
+        return {
+            floorLayouts: layouts,
+            totalSeats: seatNumber - 1,
+        };
+    }, [activeColumns, floors, rowOverridePayload, rows]);
+
+    const seatGridTemplate = useMemo(
+        () => `repeat(${Math.max(activeColumns.length, 1)}, minmax(78px, 1fr))`,
+        [activeColumns.length],
+    );
+
+    const previewFloorLayout = useMemo(
+        () =>
+            floorLayouts.find((item) => item.floor === previewFloor) ??
+            floorLayouts[0],
+        [floorLayouts, previewFloor],
+    );
+
+    const normalSeatsPerRow = useMemo(
+        () =>
+            activeColumns.reduce((total, column) => total + column.seats_per_row, 0),
+        [activeColumns],
+    );
+    const overrideColumnsGridClass =
+        activeColumns.length >= 3
+            ? "md:grid-cols-3"
+            : activeColumns.length === 2
+                ? "md:grid-cols-2"
+                : "md:grid-cols-1";
+
+    const overrideByFloorRow = useMemo(() => {
+        const map = new Map<string, RowOverride>();
+        for (const item of rowOverridePayload) {
+            map.set(`${item.floor}-${item.row_index}`, item);
+        }
+        return map;
+    }, [rowOverridePayload]);
+
+    const handleToggleOverride = () => {
+        setRowOverrides((prev) =>
+            prev.length > 0
+                ? []
+                : [
+                    {
+                        id: 1,
+                        rowIndex: 1,
+                        floor: 1,
+                        left: "",
+                        middle: "",
+                        right: "",
+                    },
+                ],
+        );
+    };
+
+    const handleUpdateOverride = <K extends keyof RowOverrideForm>(
+        id: number,
+        key: K,
+        value: RowOverrideForm[K],
+    ) => {
+        setRowOverrides((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, [key]: value } : item)),
+        );
+    };
+
+    const handleToggleColumn = (columnName: ColumnName, enabled: boolean) => {
+        setColumns((prev) => ({
+            ...prev,
+            [columnName]: {
+                ...prev[columnName],
+                enabled,
+            },
+        }));
+    };
+
+    const handleColumnSeatsChange = (
+        columnName: ColumnName,
+        rawValue: string,
+    ) => {
+        const parsed = Number.parseInt(rawValue, 10);
+
+        setColumns((prev) => ({
+            ...prev,
+            [columnName]: {
+                ...prev[columnName],
+                seatsPerRow: clampNumber(parsed, 1),
+            },
+        }));
+    };
+
+    // Lấy BusType
+    useEffect(() => {
+        const fetchBusType = async () => {
+            const res = await baseAPIAuth.get("/api/admin/notcheck/BusType");
+
+            setBusTypes(res.data);
+            console.log("data", res.data);
+        };
+        fetchBusType();
+    }, []);
+
+    // Tạo xe
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!licensePlate.trim() || !busTypeId.trim() || !templateName.trim()) {
+            setValidationMessage(
+                "Vui long nhap du bien so, loai xe va ten template.",
+            );
+            return;
+        }
+        if (activeColumns.length === 0) {
+            setValidationMessage("Xe phai co it nhat 1 cot ghe.");
+            return;
+        }
+        const coachBase: CoachBase = {
+            license_plate: licensePlate.trim().toUpperCase(),
+            bus_type_id: busTypeId.trim(),
+        };
+        const seatLayout: SeatLayout = {
+            template_name: templateName.trim(),
+            floors,
+            rows,
+            columns: activeColumns,
+            row_overrides: rowOverridePayload,
+            total_seats: totalSeats,
+        };
+        const payload: CreateBusRequest = {
+            ...coachBase,
+            seat_layout: seatLayout,
+        };
+        console.log(busTypeId);
+        try {
+            setValidationMessage("");
+            const res = await baseAPIAuth.post("/api/admin/check/buses", payload);
+            console.log(res.data);
+            alert("Tao xe thanh cong!");
+        } catch (err: any) {
+            console.error(err);
+            setValidationMessage(err.response?.data?.message || "Tao xe that bai");
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-[#f6f7f9] text-[#1f2937]">
+            <section className="w-full">
+                <div
+                    className={`grid min-h-screen ${ADMIN_LAYOUT_TUNE.sidebarAndContentGap} ${ADMIN_LAYOUT_TUNE.sidebarAndContentCols}`}
+                >
+                    <aside className="flex h-screen flex-col overflow-hidden border-r border-[#dde2ea] bg-white lg:sticky lg:top-0">
+                        <div className="border-b border-[#dde2ea] bg-white px-5 py-7">
+                            <div className="flex items-center gap-2.5">
+                                <img
+                                    src="/images/logo1.png"
+                                    alt="Bustrip logo"
+                                    className="h-9 w-9 object-contain opacity-85"
+                                />
+                                <span className="text-[22px] font-black uppercase tracking-[-0.01em] text-[#eb8a45]">
+                                    CoachTrip
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="px-4 py-4">
+                            <div className="overflow-hidden rounded-[2px] border border-[#d8dde6] bg-white">
+                                {ADMIN_SIDEBAR_ITEMS.map((item) => {
+                                    const ItemIcon = item.icon;
+                                    const isActive = item.id === "routes";
+
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            type="button"
+                                            className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${isActive
+                                                ? "bg-[#f4d5b4] text-[#1f2937]"
+                                                : "text-[#374151] hover:bg-[#f3f4f6]"
+                                                }`}
+                                        >
+                                            <ItemIcon size={14} className="shrink-0 text-[#111827]" />
+                                            <span>{item.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="mt-auto border-t border-[#dde2ea] bg-white px-4 py-4">
+                            <div className="flex items-center gap-2">
+                                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-black text-[#6b7280] ring-1 ring-[#d7dbe2]">
+                                    AH
+                                </span>
+                                <div>
+                                    <p className="text-[14px] font-black leading-none text-[#111827]">
+                                        Admin_Hung
+                                    </p>
+                                    <p className="mt-1 text-[11px] text-[#9ca3af]">
+                                        hung123@gmail.com
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-3 grid grid-cols-2 gap-2">
+                                <button
+                                    type="button"
+                                    className="h-7 rounded-[3px] border border-[#d9dde5] bg-[#f1f2f4] text-[11px] font-semibold text-[#6b7280]"
+                                >
+                                    Che do toi
+                                </button>
+                                <button
+                                    type="button"
+                                    className="h-7 rounded-[3px] border border-[#d9dde5] bg-[#e5e7eb] text-[11px] font-semibold text-[#b3b8c1]"
+                                >
+                                    Đăng xuất
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div
+                        className={`mx-auto w-full ${ADMIN_LAYOUT_TUNE.rightContentMaxWidth} space-y-6 px-4 pb-16 pt-10 ${ADMIN_LAYOUT_TUNE.rightContentDesktopPadding}`}
+                    >
+                        <div className="mb-6 flex items-center gap-4">
+                            <button
+                                type="button"
+                                onClick={() => navigate(-1)}
+                                className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] !bg-white text-[#c2c8d2] transition duration-200 hover:!bg-white active:!bg-white hover:text-[#9aa3b1]"
+                                aria-label="Quay lai"
+                            >
+                                <ChevronLeft size={25} strokeWidth={2.3} />
+                            </button>
+                            <div>
+                                <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
+                                    Thêm thông tin xe mới
+                                </h1>
+                                <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
+                                    Định danh và tạo trạng thái vận hành của xe
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="pt-4 grid gap-6 xl:grid-cols-[1.1fr_0.9fr] xl:items-stretch">
+                            <form
+                                onSubmit={handleSubmit}
+                                className="h-full space-y-5 rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]"
+                            >
+                                <section className="space-y-3">
+                                    <h2 className="text-lg font-black text-[#1f2430]">
+                                        Thông tin xe
+                                    </h2>
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                        <label className="space-y-1">
+                                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                                Biển số xe
+                                            </span>
+                                            <input
+                                                type="text"
+                                                value={licensePlate}
+                                                onChange={(event) =>
+                                                    setLicensePlate(event.target.value)
+                                                }
+                                                placeholder="51B-123.45"
+                                                className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                                required
+                                            />
+                                        </label>
+
+                                        <label className="space-y-1">
+                                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                                Loại xe
+                                            </span>
+                                            <div className="relative">
+                                                <select
+                                                    value={busTypeId}
+                                                    onChange={(event) => setBusTypeId(event.target.value)}
+                                                    className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                                    required
+                                                >
+                                                    <option value="">Chọn loại xe</option>
+                                                    {busTypes.map((option) => (
+                                                        <option key={option._id} value={option._id}>
+                                                            {option.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown
+                                                    size={16}
+                                                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
+                                                />
+                                            </div>
+                                        </label>
+                                    </div>
+                                </section>
+
+                                <section className="space-y-3 border-t border-[#e5e7eb] pt-4">
+                                    <h2 className="text-lg font-black text-[#1f2430]">
+                                        Sơ đồ ghế ngồi
+                                    </h2>
+                                    <label className="space-y-1">
+                                        <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                            Tên mẫu sơ đồ ghế
+                                        </span>
+                                        <input
+                                            type="text"
+                                            value={templateName}
+                                            onChange={(event) => setTemplateName(event.target.value)}
+                                            placeholder="Giường nằm 40 chỗ"
+                                            className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                            required
+                                        />
+                                    </label>
+
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                        <label className="space-y-1">
+                                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                                Số tầng
+                                            </span>
+                                            <div className="relative">
+                                                <select
+                                                    value={floors}
+                                                    onChange={(event) => {
+                                                        const nextFloors =
+                                                            Number(event.target.value) === 1 ? 1 : 2;
+                                                        setFloors(nextFloors);
+
+                                                        if (nextFloors === 1) {
+                                                            setPreviewFloor(1);
+                                                            setRowOverrides((prev) =>
+                                                                prev.map((item) =>
+                                                                    item.floor === 1
+                                                                        ? item
+                                                                        : { ...item, floor: 1 as const },
+                                                                ),
+                                                            );
+                                                        } else {
+                                                            setPreviewFloor((prev) => (prev === 2 ? 2 : 1));
+                                                        }
+                                                    }}
+                                                    className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                                >
+                                                    <option value={1}>1</option>
+                                                    <option value={2}>2</option>
+                                                </select>
+                                                <ChevronDown
+                                                    size={16}
+                                                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
+                                                />
+                                            </div>
+                                        </label>
+
+                                        <label className="space-y-1">
+                                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                                Số hàng ghế
+                                            </span>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                value={rows}
+                                                onChange={(event) =>
+                                                    setRows(
+                                                        clampNumber(
+                                                            Number.parseInt(event.target.value, 10),
+                                                            1,
+                                                        ),
+                                                    )
+                                                }
+                                                className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                            />
+                                        </label>
+                                    </div>
+
+                                    <div className="space-y-2 border-t border-[#e5e7eb] pt-4">
+                                        <p className="text-lg font-black text-[#1f2430]">
+                                            Số cột ghế
+                                        </p>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {COLUMN_ORDER.map((columnName) => (
+                                                <article key={columnName} className="space-y-2">
+                                                    <label className="flex items-center gap-2 text-sm font-semibold text-[#374151]">
+                                                        <span className="relative inline-flex h-4 w-4 items-center justify-center">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={columns[columnName].enabled}
+                                                                onChange={(event) =>
+                                                                    handleToggleColumn(
+                                                                        columnName,
+                                                                        event.target.checked,
+                                                                    )
+                                                                }
+                                                                className="peer absolute inset-0 m-0 h-4 w-4 cursor-pointer appearance-none rounded-[4px] border border-[#d1d5db] bg-white"
+                                                            />
+                                                            <span className="pointer-events-none absolute h-[8px] w-[5px] -translate-y-[1px] rotate-45 border-b-2 border-r-2 border-[#e8791c] opacity-0 peer-checked:opacity-100" />
+                                                        </span>
+                                                        {COLUMN_LABEL[columnName]}
+                                                    </label>
+
+                                                    <label className="space-y-1">
+                                                        <span className="block text-[11px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
+                                                            số ghế / 1 hàng
+                                                        </span>
+                                                        <input
+                                                            type="number"
+                                                            min={1}
+                                                            value={columns[columnName].seatsPerRow}
+                                                            onChange={(event) =>
+                                                                handleColumnSeatsChange(
+                                                                    columnName,
+                                                                    event.target.value,
+                                                                )
+                                                            }
+                                                            disabled={!columns[columnName].enabled}
+                                                            className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-[#374151] disabled:opacity-100"
+                                                        />
+                                                    </label>
+                                                </article>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section className="space-y-3 border-t border-[#e5e7eb] pt-4">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <h2 className="text-lg font-black text-[#1f2430]">
+                                            Hàng ghế đặc biệt
+                                        </h2>
+                                        <button
+                                            type="button"
+                                            onClick={handleToggleOverride}
+                                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+                                        >
+                                            {rowOverrides.length === 0 ? (
+                                                <Plus size={14} />
+                                            ) : (
+                                                <Trash2 size={13} />
+                                            )}
+                                            {rowOverrides.length === 0
+                                                ? "Thêm hàng đặc biệt"
+                                                : "Xóa hàng đặc biệt"}
+                                        </button>
+                                    </div>
+
+                                    {rowOverrides.length === 0 ? (
+                                        <p className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-3 py-3 text-sm text-[#6b7280]">
+                                            Chưa có hàng ghế đặc biệt. Có thể thêm để chỉnh riêng từng
+                                            hàng/tầng.
+                                        </p>
+                                    ) : null}
+
+                                    <div className="space-y-3">
+                                        {rowOverrides.map((item) => (
+                                            <article
+                                                key={item.id}
+                                                className="space-y-3 rounded-[10px] bg-white p-3"
+                                            >
+                                                <div className="grid gap-3 md:grid-cols-2">
+                                                    <label className="space-y-1">
+                                                        <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
+                                                            Vị trí hàng ghế
+                                                        </span>
+                                                        <input
+                                                            type="number"
+                                                            min={1}
+                                                            value={item.rowIndex}
+                                                            onChange={(event) =>
+                                                                handleUpdateOverride(
+                                                                    item.id,
+                                                                    "rowIndex",
+                                                                    clampNumber(
+                                                                        Number.parseInt(event.target.value, 10),
+                                                                        1,
+                                                                        rows,
+                                                                    ),
+                                                                )
+                                                            }
+                                                            className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none"
+                                                        />
+                                                    </label>
+
+                                                    <label className="space-y-1">
+                                                        <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
+                                                            Tầng
+                                                        </span>
+                                                        <div className="relative">
+                                                            <select
+                                                                value={item.floor}
+                                                                onChange={(event) =>
+                                                                    handleUpdateOverride(
+                                                                        item.id,
+                                                                        "floor",
+                                                                        Number(event.target.value) === 1 ? 1 : 2,
+                                                                    )
+                                                                }
+                                                                disabled={floors === 1}
+                                                                className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none disabled:cursor-not-allowed disabled:bg-[#e5e7eb]"
+                                                            >
+                                                                <option value={1}>Tầng 1</option>
+                                                                <option value={2}>Tầng 2</option>
+                                                            </select>
+                                                            <ChevronDown
+                                                                size={16}
+                                                                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
+                                                            />
+                                                        </div>
+                                                    </label>
+                                                </div>
+
+                                                <div
+                                                    className={`grid gap-3 ${overrideColumnsGridClass}`}
+                                                >
+                                                    {activeColumns.map((column) => {
+                                                        const field = OVERRIDE_KEY_BY_COLUMN[column.name];
+                                                        return (
+                                                            <label
+                                                                key={`${item.id}-${column.name}`}
+                                                                className="space-y-1"
+                                                            >
+                                                                <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
+                                                                    {COLUMN_LABEL[column.name]}
+                                                                </span>
+                                                                <input
+                                                                    type="number"
+                                                                    min={0}
+                                                                    placeholder=""
+                                                                    value={item[field]}
+                                                                    onChange={(event) =>
+                                                                        handleUpdateOverride(
+                                                                            item.id,
+                                                                            field,
+                                                                            event.target.value,
+                                                                        )
+                                                                    }
+                                                                    className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none"
+                                                                />
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </article>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {validationMessage ? (
+                                    <p className="rounded-[8px] border border-[#d1d5db] bg-[#f9fafb] px-3 py-2 text-sm font-semibold text-[#4b5563]">
+                                        {validationMessage}
+                                    </p>
+                                ) : null}
+
+                                <button
+                                    type="submit"
+                                    className="w-full rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+                                >
+                                    Thêm mới thông tin xe
+                                </button>
+                            </form>
+
+                            <aside className="h-full space-y-4 rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
+                                <div>
+                                    <h2 className="text-lg font-black text-[#1f2430]">
+                                        Sơ đồ ghế tự sinh
+                                    </h2>
+                                    <p className="mt-1 text-sm text-[#7c8493]">
+                                        Sơ đồ ghế này chỉ để minh họa cấu hình chỗ ngồi.
+                                    </p>
+                                </div>
+
+                                <div className="rounded-[14px] border border-[#e7eaf0] bg-white p-3">
+                                    <div className="mb-3 grid grid-cols-2 gap-3 text-sm">
+                                        <div className="rounded-[10px] border border-[#e3e7ef] bg-white px-3 py-2">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9aa4b2]">
+                                                Tầng 1
+                                            </p>
+                                            <p className="text-lg font-black text-[#1f2430]">
+                                                {floors}
+                                            </p>
+                                        </div>
+                                        <div className="rounded-[10px] border border-[#e3e7ef] bg-white px-3 py-2">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9aa4b2]">
+                                                Tổng ghế
+                                            </p>
+                                            <p className="text-lg font-black text-[#1f2430]">
+                                                {totalSeats}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {previewFloorLayout ? (
+                                        <div className="relative overflow-hidden rounded-[16px] border border-[#d7dde8] bg-white px-2 pb-3 pt-3">
+                                            <div className="relative mb-3 flex items-center justify-between border-b border-[#e6e9ef] px-1 pb-2">
+                                                <div className="inline-flex items-center gap-2 text-[#6f7785]">
+                                                    <h3 className="text-base font-black leading-none text-[#2b2f36]">
+                                                        Tầng {previewFloorLayout.floor}
+                                                    </h3>
+                                                </div>
+                                                {floors === 2 ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setPreviewFloor(previewFloor === 1 ? 2 : 1)
+                                                        }
+                                                        className="rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+                                                    >
+                                                        Xem tầng {previewFloor === 1 ? 2 : 1}
+                                                    </button>
+                                                ) : null}
+                                            </div>
+
+                                            {activeColumns.length === 0 ? (
+                                                <p className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2 text-center text-xs text-[#6b7280]">
+                                                    Chọn ít nhất một cột để tạo sơ đồ.
+                                                </p>
+                                            ) : (
+                                                <div className="relative rounded-[12px] bg-white px-2 pb-3 pt-2">
+                                                    <div
+                                                        className="mb-3 grid items-center gap-2"
+                                                        style={{ gridTemplateColumns: seatGridTemplate }}
+                                                    >
+                                                        {activeColumns.map((column) => (
+                                                            <div
+                                                                key={`coach-head-${previewFloorLayout.floor}-${column.name}`}
+                                                                className="flex min-h-[36px] items-center justify-center gap-1"
+                                                            >
+                                                                {Array.from(
+                                                                    {
+                                                                        length: Math.max(
+                                                                            previewFloorLayout.rows[0]?.seatsByColumn[
+                                                                                column.name
+                                                                            ]?.length ?? 0,
+                                                                            1,
+                                                                        ),
+                                                                    },
+                                                                    (_, slotIndex) => {
+                                                                        const slotCount = Math.max(
+                                                                            previewFloorLayout.rows[0]?.seatsByColumn[
+                                                                                column.name
+                                                                            ]?.length ?? 0,
+                                                                            1,
+                                                                        );
+                                                                        const isDriverSlot =
+                                                                            column.name === activeColumns[0]?.name &&
+                                                                            slotIndex === 0;
+                                                                        const isDoorSlot =
+                                                                            column.name ===
+                                                                            activeColumns[activeColumns.length - 1]
+                                                                                ?.name && slotIndex === slotCount - 1;
+
+                                                                        return (
+                                                                            <span
+                                                                                key={`${column.name}-head-slot-${slotIndex}`}
+                                                                                className="inline-flex h-[36px] w-[62px] items-center justify-center text-[#6e7787]"
+                                                                            >
+                                                                                {isDriverSlot ? (
+                                                                                    <GiSteeringWheel size={28} />
+                                                                                ) : isDoorSlot ? (
+                                                                                    <LogIn
+                                                                                        size={28}
+                                                                                        strokeWidth={1.9}
+                                                                                        style={{ transform: "scaleX(-1)" }}
+                                                                                    />
+                                                                                ) : null}
+                                                                            </span>
+                                                                        );
+                                                                    },
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <span className="pointer-events-none absolute bottom-3 right-3 top-[58px] border-r border-dashed border-[#d5dce8]" />
+
+                                                    <div className="space-y-2">
+                                                        {previewFloorLayout.rows.map((rowLayout) =>
+                                                            (() => {
+                                                                const rowKey = `${previewFloorLayout.floor}-${rowLayout.rowIndex}`;
+                                                                const rowOverride =
+                                                                    overrideByFloorRow.get(rowKey);
+                                                                const rowSeatCount = activeColumns.reduce(
+                                                                    (total, column) =>
+                                                                        total +
+                                                                        (rowLayout.seatsByColumn[column.name]
+                                                                            ?.length ?? 0),
+                                                                    0,
+                                                                );
+
+                                                                const isSpecialMergedRow =
+                                                                    !!rowOverride &&
+                                                                    rowSeatCount > normalSeatsPerRow;
+
+                                                                if (isSpecialMergedRow) {
+                                                                    const splitByColumn: Partial<
+                                                                        Record<
+                                                                            ColumnName,
+                                                                            { base: SeatCell[]; extras: SeatCell[] }
+                                                                        >
+                                                                    > = {};
+
+                                                                    for (const column of activeColumns) {
+                                                                        const seats =
+                                                                            rowLayout.seatsByColumn[column.name] ??
+                                                                            [];
+                                                                        const defaultCount = column.seats_per_row;
+                                                                        const extraCount = Math.max(
+                                                                            seats.length - defaultCount,
+                                                                            0,
+                                                                        );
+
+                                                                        if (extraCount === 0) {
+                                                                            splitByColumn[column.name] = {
+                                                                                base: seats,
+                                                                                extras: [],
+                                                                            };
+                                                                            continue;
+                                                                        }
+
+                                                                        if (column.name === "RIGHT") {
+                                                                            splitByColumn[column.name] = {
+                                                                                base: seats.slice(extraCount),
+                                                                                extras: seats.slice(0, extraCount),
+                                                                            };
+                                                                            continue;
+                                                                        }
+
+                                                                        splitByColumn[column.name] = {
+                                                                            base: seats.slice(0, defaultCount),
+                                                                            extras: seats.slice(defaultCount),
+                                                                        };
+                                                                    }
+
+                                                                    const centeredExtraSeats =
+                                                                        activeColumns.flatMap(
+                                                                            (column) =>
+                                                                                splitByColumn[column.name]?.extras ??
+                                                                                [],
+                                                                        );
+
+                                                                    const renderSpecialSeat = (
+                                                                        seat: SeatCell,
+                                                                    ) => {
+                                                                        const seatVisual =
+                                                                            getSeatVisualStyles("EMPTY");
+
+                                                                        return (
+                                                                            <div
+                                                                                key={seat.id}
+                                                                                title={`Tang ${seat.floor} - Hang ${seat.rowIndex} - ${seat.column}`}
+                                                                                className="relative h-[36px] w-[62px] overflow-visible"
+                                                                            >
+                                                                                <span
+                                                                                    className={`pointer-events-none absolute left-[13px] top-[1px] h-[11px] w-[35px] rounded-t-[6px] border-[2px] border-b-0 ${seatVisual.detail}`}
+                                                                                />
+                                                                                <span
+                                                                                    className={`pointer-events-none absolute left-[7px] top-[10px] flex h-[17px] w-[48px] items-center justify-center rounded-[4px] border-[2px] text-[10px] font-black leading-none ${seatVisual.frame} ${seatVisual.label}`}
+                                                                                >
+                                                                                    {seat.seatCode}
+                                                                                </span>
+                                                                                <span
+                                                                                    className={`pointer-events-none absolute left-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
+                                                                                />
+                                                                                <span
+                                                                                    className={`pointer-events-none absolute right-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
+                                                                                />
+                                                                            </div>
+                                                                        );
+                                                                    };
+
+                                                                    const hasLeftAndRightOnly =
+                                                                        activeColumns.length === 2 &&
+                                                                        activeColumns.some(
+                                                                            (column) => column.name === "LEFT",
+                                                                        ) &&
+                                                                        activeColumns.some(
+                                                                            (column) => column.name === "RIGHT",
+                                                                        );
+
+                                                                    if (hasLeftAndRightOnly) {
+                                                                        const leftBaseSeats =
+                                                                            splitByColumn.LEFT?.base ?? [];
+                                                                        const rightBaseSeats =
+                                                                            splitByColumn.RIGHT?.base ?? [];
+
+                                                                        return (
+                                                                            <div
+                                                                                key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}`}
+                                                                                className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2"
+                                                                            >
+                                                                                <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
+                                                                                    Hang dac biet
+                                                                                </p>
+                                                                                <div className="flex min-h-8 items-center justify-center gap-3">
+                                                                                    <div className="flex min-h-8 min-w-[124px] items-center justify-end gap-1">
+                                                                                        {leftBaseSeats.length > 0 ? (
+                                                                                            leftBaseSeats.map((seat) =>
+                                                                                                renderSpecialSeat(seat),
+                                                                                            )
+                                                                                        ) : (
+                                                                                            <span className="text-[11px] font-semibold text-[#c1c8d4]">
+                                                                                                -
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+
+                                                                                    {centeredExtraSeats.length > 0 ? (
+                                                                                        <div className="flex min-h-8 items-center justify-center gap-1">
+                                                                                            {centeredExtraSeats.map((seat) =>
+                                                                                                renderSpecialSeat(seat),
+                                                                                            )}
+                                                                                        </div>
+                                                                                    ) : null}
+
+                                                                                    <div className="flex min-h-8 min-w-[124px] items-center justify-start gap-1">
+                                                                                        {rightBaseSeats.length > 0 ? (
+                                                                                            rightBaseSeats.map((seat) =>
+                                                                                                renderSpecialSeat(seat),
+                                                                                            )
+                                                                                        ) : (
+                                                                                            <span className="text-[11px] font-semibold text-[#c1c8d4]">
+                                                                                                -
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    }
+
+                                                                    return (
+                                                                        <div
+                                                                            key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}`}
+                                                                            className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2"
+                                                                        >
+                                                                            <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
+                                                                                Hang dac biet
+                                                                            </p>
+                                                                            <div
+                                                                                className="grid items-center gap-2"
+                                                                                style={{
+                                                                                    gridTemplateColumns: seatGridTemplate,
+                                                                                }}
+                                                                            >
+                                                                                {activeColumns.map((column) => {
+                                                                                    const seats =
+                                                                                        splitByColumn[column.name]?.base ??
+                                                                                        [];
+
+                                                                                    return (
+                                                                                        <div
+                                                                                            key={`special-group-${previewFloorLayout.floor}-${rowLayout.rowIndex}-${column.name}`}
+                                                                                            className="flex min-h-8 items-center justify-center"
+                                                                                        >
+                                                                                            {seats.length > 0 ? (
+                                                                                                seats.map((seat) =>
+                                                                                                    renderSpecialSeat(seat),
+                                                                                                )
+                                                                                            ) : (
+                                                                                                <span className="text-[11px] font-semibold text-[#c1c8d4]">
+                                                                                                    -
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    );
+                                                                                })}
+                                                                            </div>
+
+                                                                            {centeredExtraSeats.length > 0 ? (
+                                                                                <div className="mt-1 flex min-h-8 items-center justify-center gap-1">
+                                                                                    {centeredExtraSeats.map((seat) =>
+                                                                                        renderSpecialSeat(seat),
+                                                                                    )}
+                                                                                </div>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    );
+                                                                }
+
+                                                                return (
+                                                                    <div
+                                                                        key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}`}
+                                                                        className="grid items-center gap-2"
+                                                                        style={{
+                                                                            gridTemplateColumns: seatGridTemplate,
+                                                                        }}
+                                                                    >
+                                                                        {activeColumns.map((column) => {
+                                                                            const seats =
+                                                                                rowLayout.seatsByColumn[column.name] ??
+                                                                                [];
+
+                                                                            return (
+                                                                                <div
+                                                                                    key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}-${column.name}`}
+                                                                                    className="flex min-h-8 items-center justify-center gap-1"
+                                                                                >
+                                                                                    {seats.length > 0 ? (
+                                                                                        seats.map((seat) => {
+                                                                                            const seatVisual =
+                                                                                                getSeatVisualStyles("EMPTY");
+
+                                                                                            return (
+                                                                                                <div
+                                                                                                    key={seat.id}
+                                                                                                    title={`Tang ${seat.floor} - Hang ${seat.rowIndex} - ${seat.column}`}
+                                                                                                    className="relative h-[36px] w-[62px] overflow-visible"
+                                                                                                >
+                                                                                                    <span
+                                                                                                        className={`pointer-events-none absolute left-[13px] top-[1px] h-[11px] w-[35px] rounded-t-[6px] border-[2px] border-b-0 ${seatVisual.detail}`}
+                                                                                                    />
+                                                                                                    <span
+                                                                                                        className={`pointer-events-none absolute left-[7px] top-[10px] flex h-[17px] w-[48px] items-center justify-center rounded-[4px] border-[2px] text-[10px] font-black leading-none ${seatVisual.frame} ${seatVisual.label}`}
+                                                                                                    >
+                                                                                                        {seat.seatCode}
+                                                                                                    </span>
+                                                                                                    <span
+                                                                                                        className={`pointer-events-none absolute left-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
+                                                                                                    />
+                                                                                                    <span
+                                                                                                        className={`pointer-events-none absolute right-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
+                                                                                                    />
+                                                                                                </div>
+                                                                                            );
+                                                                                        })
+                                                                                    ) : (
+                                                                                        <span className="text-[11px] font-semibold text-[#c1c8d4]">
+                                                                                            -
+                                                                                        </span>
+                                                                                    )}
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                );
+                                                            })(),
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            </aside>
+                        </div>
+
+                        {payloadPreview ? (
+                            <section className="rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
+                                <h2 className="mb-2 text-lg font-black text-[#1f2430]">
+                                    Payload preview
+                                </h2>
+                                <pre className="overflow-x-auto rounded-[12px] bg-[#f8fafc] p-3 text-xs leading-relaxed text-[#374151]">
+                                    {payloadPreview}
+                                </pre>
+                            </section>
+                        ) : null}
+                    </div>
                 </div>
-              </div>
-              {/* Điểm đến */}
-              <div>
-                <label className="block text-xs text-gray-500 mb-1 font-medium">Điểm đến</label>
-                <div className="relative">
-                  <select
-                    value={form.to}
-                    onChange={e => setForm(f => ({ ...f, to: e.target.value }))}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-gray-50 appearance-none pr-8"
-                  >
-                    {cities.map(c => <option key={c}>{c}</option>)}
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">▾</span>
-                </div>
-              </div>
-              {/* Ngày đi */}
-              <div>
-                <label className="block text-xs text-gray-500 mb-1 font-medium">Ngày đi</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={form.date}
-                    onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-gray-50 pr-9"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">📅</span>
-                </div>
-              </div>
-              {/* Loại xe */}
-              <div>
-                <label className="block text-xs text-gray-500 mb-1 font-medium">Loại xe</label>
-                <div className="relative">
-                  <select
-                    value={form.vehicleType}
-                    onChange={e => setForm(f => ({ ...f, vehicleType: e.target.value }))}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-gray-50 appearance-none pr-9"
-                  >
-                    {vehicles.map(v => <option key={v}>{v}</option>)}
-                  </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">🚌</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Sơ đồ ghế */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-            <div className="flex gap-6 justify-center">
-
-              {/* Tầng 1 */}
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="3" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v2m0 14v2M3 12h2m14 0h2M5.22 5.22l1.42 1.42m10.72 10.72 1.42 1.42M5.22 18.78l1.42-1.42m10.72-10.72 1.42-1.42" />
-                  </svg>
-                  <span className="text-sm font-bold text-gray-700">Tầng 1</span>
-                  <svg className="w-4 h-4 text-gray-400 ml-1 cursor-pointer hover:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4" />
-                  </svg>
-                </div>
-
-                {/* Col labels */}
-                <div className="grid grid-cols-3 gap-2 mb-1 px-1">
-                  {colLabels.map(l => (
-                    <div key={l} className="text-center text-[10px] text-gray-400 font-semibold">{l}</div>
-                  ))}
-                </div>
-                {floorRows(floor1).map((row, ri) => (
-                  <div key={ri} className="grid grid-cols-3 gap-2 mb-1">
-                    {row.map(seat => (
-                      <SeatIcon
-                        key={seat.id}
-                        status={seat.status}
-                        label={seat.label}
-                        onClick={() => toggleSeat(seat.id)}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
-
-              {/* Divider */}
-              <div className="w-px bg-gray-100 mx-2"></div>
-
-              {/* Tầng 2 */}
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm font-bold text-gray-700">Tầng 2</span>
-                </div>
-
-                {/* Col labels */}
-                <div className="grid grid-cols-3 gap-2 mb-1 px-1">
-                  {colLabels.map(l => (
-                    <div key={l} className="text-center text-[10px] text-gray-400 font-semibold">{l}</div>
-                  ))}
-                </div>
-                {floorRows(floor2).map((row, ri) => (
-                  <div key={ri} className="grid grid-cols-3 gap-2 mb-1">
-                    {row.map(seat => (
-                      <SeatIcon
-                        key={seat.id}
-                        status={seat.status}
-                        label={seat.label}
-                        onClick={() => toggleSeat(seat.id)}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Legend */}
-            <div className="flex items-center gap-5 mt-4 pt-3 border-t border-gray-100 justify-center">
-              {[
-                { detail: "border-gray-400 bg-gray-300", frame: "border-gray-400 bg-gray-200", leg: "bg-gray-400", label: "Đã bán" },
-                { detail: "border-green-500 bg-green-200", frame: "border-green-500 bg-green-100", leg: "bg-green-500", label: "Trống" },
-                { detail: "border-orange-500 bg-orange-300", frame: "border-orange-500 bg-orange-100", leg: "bg-orange-500", label: "Đang chọn" },
-              ].map(({ detail, frame, leg, label }) => (
-                <div key={label} className="flex items-center gap-2">
-                  <div className="relative h-[22px] w-[36px] overflow-visible flex-shrink-0">
-                    <span className={`pointer-events-none absolute left-[7px] top-[1px] h-[7px] w-[20px] rounded-t-[4px] border-[2px] border-b-0 ${detail}`} />
-                    <span className={`pointer-events-none absolute left-[3px] top-[6px] h-[10px] w-[29px] rounded-[3px] border-[2px] ${frame}`} />
-                    <span className={`pointer-events-none absolute left-[10px] top-[16px] h-[4px] w-[1.5px] rounded-b-[1px] ${leg}`} />
-                    <span className={`pointer-events-none absolute right-[10px] top-[16px] h-[4px] w-[1.5px] rounded-b-[1px] ${leg}`} />
-                  </div>
-                  <span className="text-xs text-gray-600 font-medium">{label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Selected seats info */}
-            {selectedSeats.length > 0 && (
-              <div className="mt-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-2 flex items-center justify-between">
-                <span className="text-sm text-orange-700 font-semibold">
-                  Đã chọn: {selectedSeats.map(s => s.label).join(", ")}
-                </span>
-                <span className="text-xs text-orange-500">{selectedSeats.length} ghế</span>
-              </div>
-            )}
-          </div>
+            </section>
         </div>
-
-        {/* ── Right Column — Thanh toán ─────────────────────────────────── */}
-        <div className="w-full lg:w-72 flex-shrink-0">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4 sticky top-6">
-            <h2 className="text-sm font-bold text-gray-700">Thanh toán & xuất vé</h2>
-
-            {/* Payment methods */}
-            <div className="grid grid-cols-2 gap-2">
-              <PayBtn
-                icon={<span>💵</span>}
-                label="Tiền mặt"
-                selected={payment === "cash"}
-                onClick={() => setPayment("cash")}
-              />
-              <PayBtn
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="1" y="4" width="22" height="16" rx="2" strokeWidth={2} />
-                    <path strokeLinecap="round" strokeWidth={2} d="M1 10h22" />
-                  </svg>
-                }
-                label="Thẻ/Pos"
-                selected={payment === "card"}
-                onClick={() => setPayment("card")}
-              />
-              <PayBtn
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="3" y="3" width="7" height="7" strokeWidth={2} /><rect x="14" y="3" width="7" height="7" strokeWidth={2} />
-                    <rect x="3" y="14" width="7" height="7" strokeWidth={2} /><rect x="14" y="14" width="3" height="3" strokeWidth={2} />
-                    <rect x="18" y="18" width="3" height="3" strokeWidth={2} /><rect x="14" y="18" width="3" height="1" strokeWidth={2} />
-                  </svg>
-                }
-                label="Mã QR"
-                selected={payment === "qr"}
-                onClick={() => setPayment("qr")}
-              />
-              <PayBtn
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="1" y="4" width="22" height="16" rx="2" strokeWidth={2} />
-                    <text x="4" y="16" fontSize="7" fill="#1a56db" fontWeight="bold" stroke="none">VISA</text>
-                  </svg>
-                }
-                label="Visa"
-                selected={payment === "visa"}
-                onClick={() => setPayment("visa")}
-              />
-            </div>
-
-            {/* Promo code */}
-            <div className="relative">
-              <input
-                type="text"
-                value={promoCode}
-                onChange={e => setPromoCode(e.target.value)}
-                placeholder="Mã giảm giá"
-                className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-gray-50 pr-10"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">🏷️</span>
-            </div>
-
-            {/* Print after confirm toggle */}
-            <div className="flex items-center justify-between py-2 border-t border-gray-100">
-              <span className="text-sm text-gray-600 font-medium">In vé sau khi xác nhận</span>
-              <button
-                onClick={() => setPrintAfter(p => !p)}
-                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${printAfter ? "bg-orange-400" : "bg-gray-200"}`}
-              >
-                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${printAfter ? "left-5" : "left-0.5"}`}></span>
-              </button>
-            </div>
-
-            {/* Divider */}
-            <div className="border-t border-gray-100"></div>
-
-            {/* Total */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-gray-700">Tổng cộng :</span>
-              <span className="text-lg font-extrabold text-orange-500">
-                {total > 0 ? `${total.toLocaleString("vi-VN")} VND` : "0 VND"}
-              </span>
-            </div>
-
-            {/* Confirm button */}
-            <button
-              className={`w-full py-3 rounded-xl font-bold text-sm transition-all duration-200
-                ${selectedSeats.length > 0
-                  ? "bg-gradient-to-r from-orange-400 to-orange-500 text-white hover:shadow-lg hover:scale-[1.02]"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                }`}
-              disabled={selectedSeats.length === 0}
-            >
-              Xác nhận đặt vé
-            </button>
-
-            {selectedSeats.length === 0 && (
-              <p className="text-xs text-gray-400 text-center">Vui lòng chọn ít nhất 1 ghế</p>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

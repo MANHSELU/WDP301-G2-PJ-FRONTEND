@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Edit,
-    ChevronLeft,
-    ChevronRight,
     X,
     Save,
     Loader2,
@@ -177,13 +175,11 @@ const ManageUser: React.FC = () => {
     const [updateError, setUpdateError] = useState<string | null>(null);
 
     // profile dropdown
-    const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
         const onDocClick = (e: MouseEvent) => {
             if (!profileRef.current) return;
             if (!(e.target instanceof Node)) return;
-            if (!profileRef.current.contains(e.target)) setProfileOpen(false);
         };
         document.addEventListener("click", onDocClick);
         return () => document.removeEventListener("click", onDocClick);

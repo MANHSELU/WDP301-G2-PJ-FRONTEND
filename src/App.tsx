@@ -40,19 +40,19 @@ export default function App() {
     <>
       <Routes>
         <Route path="admin" element={<HomeAdmin />} >
-          <Route path="create-coach" element={<CreateCoach />} />
+          {/* <Route path="create-coach" element={<CreateCoach />} /> */}
           <Route path="create-route" element={<CreateRoute />} />
           <Route path="manage-buses" element={<ManageBus />} />
           <Route path="manage-routes" element={<ManageRoute />} />
           <Route path="manage-users" element={<ManageUser />} />
           <Route path="manage-revenue" element={<RevenueDashboard />} />
         </Route>
-        {/* <Route path="/admin/create-coach" element={<CreateCoach />} />
-        <Route path="/admin/create-route" element={<CreateRoute />} />
+        <Route path="/admin/create-coach" element={<CreateCoach />} />
+        {/* <Route path="/admin/create-route" element={<CreateRoute />} />
         <Route path="/admin/manage-buses" element={<ManageBus />} />
         <Route path="/admin/manage-routes" element={<ManageRoute />} />
         <Route path="/admin/manage-users" element={<ManageUser />} />
-        <Route path="/admin/manage-revenue" element={<RevenueDashboard />} /> */}
+        <Route path="/admin/manage-revenue" element={<RevenueDashboard />} />  */}
 
         <Route path="/" element={<Header2 />} >
           <Route path="/" element={<HomePage />} />
