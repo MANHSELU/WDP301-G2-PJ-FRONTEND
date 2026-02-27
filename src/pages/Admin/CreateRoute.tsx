@@ -156,8 +156,12 @@ export default function CreateRoute() {
   const [destination, setDestination] = useState("");
   const [destinationId, setDestinationId] = useState("");
   const [recommendStops, setRecommendStops] = useState<recommendStops[]>([]);
-  const [searchDepartureInput, setDepartureSearchInput] = useState<searchStops[]>([]);
-  const [searchDestinationInput, setDestinationSearchInput] = useState<searchStops[]>([]);
+  const [searchDepartureInput, setDepartureSearchInput] = useState<
+    searchStops[]
+  >([]);
+  const [searchDestinationInput, setDestinationSearchInput] = useState<
+    searchStops[]
+  >([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [notice, setNotice] = useState<NoticeState | null>(null);
 
@@ -179,6 +183,8 @@ export default function CreateRoute() {
       console.error(error);
     }
   };
+
+    // Hàm search các stops cho điểm xuất phát.
   const searchDepartureStops = async (keyword: string) => {
     if (!keyword.trim()) {
       setDepartureSearchInput([]);
@@ -196,7 +202,8 @@ export default function CreateRoute() {
       console.error(error);
     }
   };
-  // Hàm use effect cho điểm xuất phát departure
+
+  // Hàm use effect cho search điểm xuất phát departure
   useEffect(() => {
     const delay = setTimeout(() => {
       searchDepartureStops(departure);
@@ -204,18 +211,13 @@ export default function CreateRoute() {
     return () => clearTimeout(delay);
   }, [departure]);
 
-  // Hàm use effect cho điểm kết thúc destination
+  // Hàm use effect cho search điểm kết thúc destination
   useEffect(() => {
     const delay = setTimeout(() => {
       searchDestinationStops(destination);
     }, 300);
     return () => clearTimeout(delay);
   }, [destination]);
-
-  // Hàm search các stops cho điểm xuất phát.
-
-
-
 
   // Hàm lấy ra thông tin stops được gợi ý
   const getRecommendStops = async () => {
@@ -253,24 +255,18 @@ export default function CreateRoute() {
       return;
     }
     try {
-      const selectedStops = recommendStops
+      const middleStops = recommendStops
         .filter((s) => s.selected)
-        .map((s, index) => ({
-          stop_id: s._id,
-          stop_order: index + 1,
-        }));
-      if (selectedStops.length === 0) {
-        setNotice({
-          type: "error",
-          title: "Thiếu trạm dừng",
-          message: "Vui lòng chọn ít nhất một trạm dừng cho tuyến.",
-        });
-        return;
-      }
+        .map((s) => s._id);
+      const fullStops = [departureId, ...middleStops, destinationId];
+      const payloadStops = fullStops.map((id, index) => ({
+        stop_id: id,
+        stop_order: index + 1, 
+      }));
       const res = await baseAPIAuth.post("/api/admin/check/routes", {
         start_id: departureId,
         stop_id: destinationId,
-        stops: selectedStops,
+        stops: payloadStops,
       });
       console.log("Create route success:", res.data);
       setNotice({
@@ -375,10 +371,11 @@ export default function CreateRoute() {
                     <button
                       key={item.id}
                       type="button"
-                      className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${isActive
-                        ? "bg-[#f4d5b4] text-[#1f2937]"
-                        : "text-[#374151] hover:bg-[#f3f4f6]"
-                        }`}
+                      className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${
+                        isActive
+                          ? "bg-[#f4d5b4] text-[#1f2937]"
+                          : "text-[#374151] hover:bg-[#f3f4f6]"
+                      }`}
                     >
                       <ItemIcon size={14} className="shrink-0 text-[#111827]" />
                       <span>{item.label}</span>
@@ -517,7 +514,7 @@ export default function CreateRoute() {
                                   key={stop._id}
                                   onClick={() => {
                                     setDestination(stop.name);
-                                    setDestinationId(stop._id)
+                                    setDestinationId(stop._id);
                                     setDestinationSearchInput([]);
                                   }}
                                   className="group flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
@@ -567,7 +564,7 @@ export default function CreateRoute() {
                     {recommendStops.map((recommendStop, index) => (
                       <StationCard
                         key={recommendStop._id}
-                        order={index + 1}
+                        order={index + 2}
                         name={recommendStop.name}
                         distance={recommendStop.distance}
                         selected={recommendStop.selected}
@@ -693,10 +690,11 @@ export default function CreateRoute() {
             >
               <div className="flex items-start gap-3">
                 <span
-                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
-                    ? "bg-[#ecfdf3] text-[#16a34a]"
-                    : "bg-[#fff7ed] text-[#ea580c]"
-                    }`}
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${
+                    notice.type === "success"
+                      ? "bg-[#ecfdf3] text-[#16a34a]"
+                      : "bg-[#fff7ed] text-[#ea580c]"
+                  }`}
                   style={{
                     animation:
                       notice.type === "success"
