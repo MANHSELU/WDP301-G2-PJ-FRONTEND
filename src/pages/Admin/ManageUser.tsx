@@ -340,279 +340,140 @@ const ManageUser: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white font-sans">
-            <div className="bg-white border-b shadow-sm">
-                <div className="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="text-2xl font-extrabold text-orange-600 tracking-tight">
-                            BUSTRIP
-                        </div>
-                        <div className="hidden sm:block text-sm text-gray-500">
-                            Quản lý người dùng
-                        </div>
+        <div className="space-y-6">
+            {/* STATS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white p-5 rounded-xl shadow border">
+                    <div className="text-sm text-gray-500 mb-1">Tổng số nhân sự</div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-bold">{users.length}</span>
+                        <span className="text-green-600 text-sm font-medium">+0%</span>
                     </div>
+                </div>
 
-                    <div className="flex items-center gap-4 text-sm">
-                        <button className="px-3 py-1 rounded-md text-gray-600 hover:bg-gray-50 transition-colors">
-                            Chế độ tối
-                        </button>
-
-                        <div className="relative" ref={profileRef}>
-                            <button
-                                onClick={() => setProfileOpen((s) => !s)}
-                                className="flex items-center gap-3 px-2 py-1 rounded-full hover:bg-gray-100 transition"
-                                aria-haspopup="true"
-                                aria-expanded={profileOpen}
-                                title="Tài khoản"
-                            >
-                                <div className="h-9 w-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-medium">
-                                    AD
-                                </div>
-                                <div className="hidden sm:flex flex-col text-left">
-                                    <span className="text-sm font-medium text-gray-900">
-                                        Admin
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                        admin@example.com
-                                    </span>
-                                </div>
-                            </button>
-
-                            {profileOpen && (
-                                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50 py-2">
-                                    <div className="px-4 py-3 border-b">
-                                        <div className="text-sm font-medium text-gray-900">
-                                            Admin
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                            admin@example.com
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => {
-                                            window.location.href = "/admin/profile";
-                                            setProfileOpen(false);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Trang cá nhân
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            localStorage.removeItem("accessToken");
-                                            window.location.reload();
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                                    >
-                                        Đăng xuất
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                <div className="bg-white p-5 rounded-xl shadow border">
+                    <div className="text-sm text-gray-500 mb-1">Admin</div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-bold">
+                            {users.filter((u) => u.role.toLowerCase() === "admin").length}
+                        </span>
+                        <span className="text-purple-600 text-sm font-medium">+0%</span>
                     </div>
+                </div>
+
+                <div className="bg-white p-5 rounded-xl shadow border">
+                    <div className="text-sm text-gray-500 mb-1">Quản lý</div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-bold">
+                            {
+                                users.filter(
+                                    (u) =>
+                                        u.role.toLowerCase().includes("tân") ||
+                                        u.role.toLowerCase() === "quản lý"
+                                ).length
+                            }
+                        </span>
+                        <span className="text-green-600 text-sm font-medium">+0%</span>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-end">
+                    <button
+                        onClick={() => (window.location.href = "/admin/accounts/new")}
+                        className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center gap-2"
+                    >
+                        <Plus size={16} />
+                        Thêm nhân sự
+                    </button>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-5 py-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-white p-5 rounded-xl shadow-md border">
-                        <div className="text-sm text-gray-500 mb-1">Tổng số nhân sự</div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold">{users.length}</span>
-                            <span className="text-green-600 text-sm font-medium">+0%</span>
-                        </div>
+            {/* TABLE */}
+            <div className="bg-white rounded-xl shadow border overflow-hidden">
+                <div className="border-b px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                            Danh sách nhân sự
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                            Quản lý tài khoản và phân quyền
+                        </p>
                     </div>
 
-                    <div className="bg-white p-5 rounded-xl shadow-md border">
-                        <div className="text-sm text-gray-500 mb-1">Admin</div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold">
-                                {users.filter((u) => u.role.toLowerCase() === "admin").length}
-                            </span>
-                            <span className="text-purple-600 text-sm font-medium">+0%</span>
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-full sm:w-80 shadow-sm">
+                            <SearchIcon size={16} className="text-gray-500" />
+                            <input
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Tìm tên, số điện thoại hoặc vai trò"
+                                className="ml-3 w-full bg-transparent outline-none text-sm text-gray-700"
+                            />
                         </div>
-                    </div>
-
-                    <div className="bg-white p-5 rounded-xl shadow-md border">
-                        <div className="text-sm text-gray-500 mb-1">Quản lý</div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold">
-                                {
-                                    users.filter(
-                                        (u) =>
-                                            u.role.toLowerCase().includes("tân") ||
-                                            u.role.toLowerCase() === "quản lý"
-                                    ).length
-                                }
-                            </span>
-                            <span className="text-green-600 text-sm font-medium">+0%</span>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-end">
                         <button
-                            onClick={() => (window.location.href = "/admin/accounts/new")}
-                            className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center gap-2"
-                            title="Thêm nhân sự mới"
+                            onClick={() => setSearchTerm("")}
+                            className="text-sm text-gray-600 hover:text-gray-800"
                         >
-                            <Plus size={16} />
-                            Thêm nhân sự
+                            Xóa
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-3 bg-white rounded-xl shadow border p-5">
-                        <ul className="space-y-3">
-                            <li className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                📊 Tổng quan
-                            </li>
-                            <li className="flex items-center gap-3 px-4 py-3 bg-orange-50 text-orange-700 font-medium rounded-lg">
-                                🔒 Quản lý phân quyền
-                            </li>
-                            <li className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                🚌 Quản lý tuyến xe
-                            </li>
-                            <li className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                🚍 Quản lý xe
-                            </li>
-                            <li className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                💰 Quản lý thu chi
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="lg:col-span-9 bg-white rounded-xl shadow border overflow-hidden">
-                        <div className="border-b px-6 pt-5 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-800">
-                                    Danh sách nhân sự
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                    Quản lý tài khoản và phân quyền
-                                </p>
-                            </div>
-
-                            <div className="flex items-center gap-3 w-full sm:w-auto">
-                                <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-full sm:w-80 shadow-sm">
-                                    <SearchIcon size={16} className="text-gray-500" />
-                                    <input
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        placeholder="Tìm tên, số điện thoại hoặc vai trò"
-                                        className="ml-3 w-full bg-transparent outline-none text-sm text-gray-700"
-                                    />
-                                </div>
-                                <button
-                                    onClick={() => setSearchTerm("")}
-                                    className="text-sm text-gray-600 hover:text-gray-800"
-                                >
-                                    Xóa
-                                </button>
-                            </div>
+                <div className="overflow-x-auto">
+                    {loading ? (
+                        <div className="p-8 text-center text-gray-600">
+                            Đang tải danh sách nhân sự...
                         </div>
-
-                        <div className="overflow-x-auto">
-                            {loading ? (
-                                <div className="p-8 text-center text-gray-600">
-                                    Đang tải danh sách nhân sự...
-                                </div>
-                            ) : error ? (
-                                <div className="p-8 text-center text-red-600">Lỗi: {error}</div>
-                            ) : (
-                                <table className="w-full min-w-full divide-y divide-gray-200 text-sm">
-                                    <thead className="bg-gray-50">
-                                        <tr className="text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                                            <th className="px-6 py-3">Họ tên</th>
-                                            <th className="px-6 py-3">Liên hệ</th>
-                                            <th className="px-6 py-3">Vai Trò</th>
-                                            <th className="px-6 py-3 text-right w-24"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-100">
-                                        {filteredUsers.length === 0 ? (
-                                            <tr>
-                                                <td
-                                                    colSpan={4}
-                                                    className="px-6 py-10 text-center text-gray-500"
-                                                >
-                                                    Không tìm thấy nhân sự phù hợp
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            filteredUsers.map((u, idx) => (
-                                                <tr
-                                                    key={u.id ?? idx}
-                                                    className="hover:bg-gray-50 transition-colors"
-                                                >
-                                                    <td className="px-6 py-4 font-medium text-gray-900">
-                                                        {u.name}
-                                                        <div className="text-xs text-gray-500 mt-1">
-                                                            {fmtDate(u.created_at)}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-gray-700">
-                                                        {u.contact}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span
-                                                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getRoleStyle(
-                                                                u.role
-                                                            )}`}
-                                                        >
-                                                            {u.role}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <button
-                                                            onClick={() => handleEdit(u)}
-                                                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-white hover:bg-orange-500 transition"
-                                                            title="Chỉnh sửa"
-                                                        >
-                                                            <Edit size={16} />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            )}
+                    ) : error ? (
+                        <div className="p-8 text-center text-red-600">
+                            Lỗi: {error}
                         </div>
-
-                        <div className="px-6 py-4 border-t flex items-center justify-between text-sm text-gray-600">
-                            <div>
-                                Hiển thị 1–{Math.min(10, filteredUsers.length)} của{" "}
-                                {filteredUsers.length} người
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <button
-                                    className="p-2 rounded hover:bg-gray-100 disabled:opacity-50"
-                                    disabled
-                                >
-                                    <ChevronLeft size={18} />
-                                </button>
-                                <button className="px-3 py-1 bg-orange-500 text-white rounded font-medium">
-                                    1
-                                </button>
-                                <button
-                                    className="px-3 py-1 rounded hover:bg-gray-100 disabled:opacity-50"
-                                    disabled
-                                >
-                                    2
-                                </button>
-                                <button
-                                    className="p-2 rounded hover:bg-gray-100 disabled:opacity-50"
-                                    disabled
-                                >
-                                    <ChevronRight size={18} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    ) : (
+                        <table className="w-full divide-y divide-gray-200 text-sm">
+                            <thead className="bg-gray-50">
+                                <tr className="text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                                    <th className="px-6 py-3">Họ tên</th>
+                                    <th className="px-6 py-3">Liên hệ</th>
+                                    <th className="px-6 py-3">Vai Trò</th>
+                                    <th className="px-6 py-3 text-right w-24"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-100">
+                                {filteredUsers.map((u, idx) => (
+                                    <tr key={u.id ?? idx} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 font-medium text-gray-900">
+                                            {u.name}
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                {fmtDate(u.created_at)}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-700">
+                                            {u.contact}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getRoleStyle(
+                                                    u.role
+                                                )}`}
+                                            >
+                                                {u.role}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button
+                                                onClick={() => handleEdit(u)}
+                                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-white hover:bg-orange-500 transition"
+                                            >
+                                                <Edit size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
-
             {isModalOpen && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">

@@ -5,6 +5,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 type RouteCard = {
   id: number;
@@ -214,12 +215,15 @@ export default function Home2() {
                 min={1}
                 max={6}
               />
-              <button
-                type="button"
-                className="m-1.5 justify-self-start min-h-[52px] rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-8 text-sm font-bold text-white shadow-[0_18px_30px_-14px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
-              >
-                Tim kiếm
-              </button>
+              <Link to={"/lichtrinhdetail"}>
+                <button
+                  type="button"
+                  className="m-1.5 justify-self-start min-h-[52px] rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-8 text-sm font-bold text-white shadow-[0_18px_30px_-14px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
+                >
+                  Tim kiếm
+                </button>
+              </Link>
+
             </div>
           </div>
         </div>

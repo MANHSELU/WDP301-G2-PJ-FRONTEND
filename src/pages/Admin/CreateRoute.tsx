@@ -2,39 +2,27 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
-  BadgeDollarSign,
-  BusFront,
-  CalendarCheck2,
   CircleCheck,
   Check,
   ChevronLeft,
   GripVertical,
-  LayoutDashboard,
   TriangleAlert,
   MapPin,
   Plus,
   Save,
-  Shield,
 } from "lucide-react";
 import type { recommendStops } from "../../model/recommendStops";
 import baseAPIAuth from "../../api/auth";
 import type { searchStops } from "../../model/searchStop";
 
-const ADMIN_SIDEBAR_ITEMS = [
-  { id: "overview", label: "Tổng quan", icon: LayoutDashboard },
-  { id: "roles", label: "Quản lý phân quyền", icon: Shield },
-  { id: "routes", label: "Quản lý tuyến xe", icon: CalendarCheck2 },
-  { id: "buses", label: "Quản lý xe", icon: BusFront },
-  { id: "finance", label: "Quản lý thu chi", icon: BadgeDollarSign },
-];
 
-const STATION_NOTES: Record<string, string> = {
-  "bien-hoa": "TRẠM ĐÓN DỌC ĐƯỜNG",
-  "long-khanh": "TRẠM TRẢ/ĐÓN KHÁCH",
-  madagui: "NGHỈ NGƠI 30 PHÚT",
-  "bao-loc": "TRẠM TRẢ/ĐÓN KHÁCH",
-  "di-linh": "TRẠM TRẢ/ĐÓN KHÁCH",
-};
+// const STATION_NOTES: Record<string, string> = {
+//   "bien-hoa": "TRẠM ĐÓN DỌC ĐƯỜNG",
+//   "long-khanh": "TRẠM TRẢ/ĐÓN KHÁCH",
+//   madagui: "NGHỈ NGƠI 30 PHÚT",
+//   "bao-loc": "TRẠM TRẢ/ĐÓN KHÁCH",
+//   "di-linh": "TRẠM TRẢ/ĐÓN KHÁCH",
+// };
 
 type DotType = "start" | "middle" | "end";
 
@@ -156,12 +144,8 @@ export default function CreateRoute() {
   const [destination, setDestination] = useState("");
   const [destinationId, setDestinationId] = useState("");
   const [recommendStops, setRecommendStops] = useState<recommendStops[]>([]);
-  const [searchDepartureInput, setDepartureSearchInput] = useState<
-    searchStops[]
-  >([]);
-  const [searchDestinationInput, setDestinationSearchInput] = useState<
-    searchStops[]
-  >([]);
+  const [searchDepartureInput, setDepartureSearchInput] = useState<searchStops[]>([]);
+  const [searchDestinationInput, setDestinationSearchInput] = useState<searchStops[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [notice, setNotice] = useState<NoticeState | null>(null);
 
@@ -183,8 +167,6 @@ export default function CreateRoute() {
       console.error(error);
     }
   };
-
-    // Hàm search các stops cho điểm xuất phát.
   const searchDepartureStops = async (keyword: string) => {
     if (!keyword.trim()) {
       setDepartureSearchInput([]);
@@ -202,8 +184,7 @@ export default function CreateRoute() {
       console.error(error);
     }
   };
-
-  // Hàm use effect cho search điểm xuất phát departure
+  // Hàm use effect cho điểm xuất phát departure
   useEffect(() => {
     const delay = setTimeout(() => {
       searchDepartureStops(departure);
@@ -211,13 +192,18 @@ export default function CreateRoute() {
     return () => clearTimeout(delay);
   }, [departure]);
 
-  // Hàm use effect cho search điểm kết thúc destination
+  // Hàm use effect cho điểm kết thúc destination
   useEffect(() => {
     const delay = setTimeout(() => {
       searchDestinationStops(destination);
     }, 300);
     return () => clearTimeout(delay);
   }, [destination]);
+
+  // Hàm search các stops cho điểm xuất phát.
+
+
+
 
   // Hàm lấy ra thông tin stops được gợi ý
   const getRecommendStops = async () => {
@@ -255,18 +241,24 @@ export default function CreateRoute() {
       return;
     }
     try {
-      const middleStops = recommendStops
+      const selectedStops = recommendStops
         .filter((s) => s.selected)
-        .map((s) => s._id);
-      const fullStops = [departureId, ...middleStops, destinationId];
-      const payloadStops = fullStops.map((id, index) => ({
-        stop_id: id,
-        stop_order: index + 1, 
-      }));
+        .map((s, index) => ({
+          stop_id: s._id,
+          stop_order: index + 1,
+        }));
+      if (selectedStops.length === 0) {
+        setNotice({
+          type: "error",
+          title: "Thiếu trạm dừng",
+          message: "Vui lòng chọn ít nhất một trạm dừng cho tuyến.",
+        });
+        return;
+      }
       const res = await baseAPIAuth.post("/api/admin/check/routes", {
         start_id: departureId,
         stop_id: destinationId,
-        stops: payloadStops,
+        stops: selectedStops,
       });
       console.log("Create route success:", res.data);
       setNotice({
@@ -344,292 +336,219 @@ export default function CreateRoute() {
   }, [recommendStops, departure, destination]);
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9] text-[#1f2937]">
-      <section className="w-full">
-        <div className="grid min-h-screen gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
-          <aside className="flex h-screen flex-col overflow-hidden border-r border-[#dde2ea] bg-white lg:sticky lg:top-0">
-            <div className="border-b border-[#dde2ea] bg-white px-5 py-7">
-              <div className="flex items-center gap-2.5">
-                <img
-                  src="/images/logo1.png"
-                  alt="Bustrip logo"
-                  className="h-9 w-9 object-contain opacity-85"
-                />
-                <span className="text-[22px] font-black uppercase tracking-[-0.01em] text-[#eb8a45]">
-                  CoachTrip
-                </span>
-              </div>
-            </div>
-
-            <div className="px-4 py-4">
-              <div className="overflow-hidden rounded-[2px] border border-[#d8dde6] bg-white">
-                {ADMIN_SIDEBAR_ITEMS.map((item) => {
-                  const ItemIcon = item.icon;
-                  const isActive = item.id === "routes";
-
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${
-                        isActive
-                          ? "bg-[#f4d5b4] text-[#1f2937]"
-                          : "text-[#374151] hover:bg-[#f3f4f6]"
-                      }`}
-                    >
-                      <ItemIcon size={14} className="shrink-0 text-[#111827]" />
-                      <span>{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="mt-auto border-t border-[#dde2ea] bg-white px-4 py-4">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-black text-[#6b7280] ring-1 ring-[#d7dbe2]">
-                  AH
-                </span>
-                <div>
-                  <p className="text-[14px] font-black leading-none text-[#111827]">
-                    Admin_Hung
-                  </p>
-                  <p className="mt-1 text-[11px] text-[#9ca3af]">
-                    hung123@gmail.com
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  className="h-7 rounded-[3px] border border-[#d9dde5] bg-[#f1f2f4] text-[11px] font-semibold text-[#6b7280]"
-                >
-                  Chế độ tối
-                </button>
-                <button
-                  type="button"
-                  className="h-7 rounded-[3px] border border-[#d9dde5] bg-[#e5e7eb] text-[11px] font-semibold text-[#b3b8c1]"
-                >
-                  Đăng xuất
-                </button>
-              </div>
-            </div>
-          </aside>
-
-          <div className="mx-auto w-full max-w-[1380px] space-y-6 overflow-auto px-4 pb-16 pt-10 lg:px-4">
-            <header className="flex items-start gap-4">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2] transition hover:text-[#9aa3b1]"
-                aria-label="Quay lại"
-              >
-                <ChevronLeft size={25} strokeWidth={2.3} />
-              </button>
-              <div>
-                <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
-                  Tạo tuyến đường mới
-                </h1>
-                <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
-                  Thiết lập điểm xuất phát, điểm đến và các trạm dừng trên tuyến
-                </p>
-              </div>
-            </header>
-
-            <div className="mt-14 grid min-h-0 gap-6 pt-4 xl:grid-cols-[1.1fr_0.9fr] xl:items-stretch">
-              <div className="min-h-0 space-y-6">
-                <section className="rounded-[20px] border border-[#e7eaf0] bg-white p-6 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
-                  <SectionTitle title="Thông tin hành trình" />
-
-                  <div className="flex flex-wrap items-end gap-3">
-                    <label className="min-w-0 flex-1 space-y-1.5">
-                      <span className="block text-[9px] font-black uppercase tracking-[0.1em] text-[#8d96a7]">
-                        ĐIỂM XUẤT PHÁT
-                      </span>
-                      <span className="flex min-w-[200px] flex-1 items-center gap-2 rounded-[8px] border border-[#dbe2ee] bg-[#f5f7fb] px-4 py-2.5">
-                        <MapPin size={14} className="shrink-0 text-[#e8791c]" />
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={departure}
-                            onChange={(e) => {
-                              setDeparture(e.target.value);
-                            }}
-                            placeholder="Nhập điểm xuất phát"
-                            className="min-w-0 flex-1 bg-transparent text-[13px] font-black text-[#2a3444] outline-none placeholder:text-[#9ca6b7]"
-                          />
-                          {searchDepartureInput.length > 0 && (
-                            <ul className="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur-sm">
-                              {searchDepartureInput.map((stop) => (
-                                <li
-                                  key={stop._id}
-                                  onClick={() => {
-                                    setDeparture(stop.name);
-                                    setDepartureId(stop._id);
-                                    setDepartureSearchInput([]);
-                                  }}
-                                  className="group flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
-                                >
-                                  <div className="flex flex-col">
-                                    <span className="group-hover:text-[#e8791c] transition">
-                                      {stop.name}
-                                    </span>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">
-                                      {stop.province}
-                                    </span>
-                                  </div>
-
-                                  <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover:bg-[#e8791c] transition" />
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      </span>
-                    </label>
-
-                    <span className="flex h-10 shrink-0 items-center pb-1 text-[#e8791c]">
-                      <ArrowRight size={20} />
-                    </span>
-
-                    <label className="min-w-0 flex-1 space-y-1.5">
-                      <span className="block text-[9px] font-black uppercase tracking-[0.1em] text-[#8d96a7]">
-                        ĐIỂM KẾT THÚC
-                      </span>
-                      <span className="flex min-w-[200px] flex-1 items-center gap-2 rounded-[8px] border border-[#dbe2ee] bg-[#f5f7fb] px-4 py-2.5">
-                        <MapPin size={14} className="shrink-0 text-[#e8791c]" />
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={destination}
-                            onChange={(e) => setDestination(e.target.value)}
-                            placeholder="Nhập điểm kết thúc"
-                            className="min-w-0 flex-1 bg-transparent text-[13px] font-black text-[#2a3444] outline-none placeholder:text-[#9ca6b7]"
-                          />
-                          {searchDestinationInput.length > 0 && (
-                            <ul className="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur-sm">
-                              {searchDestinationInput.map((stop) => (
-                                <li
-                                  key={stop._id}
-                                  onClick={() => {
-                                    setDestination(stop.name);
-                                    setDestinationId(stop._id);
-                                    setDestinationSearchInput([]);
-                                  }}
-                                  className="group flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
-                                >
-                                  <div className="flex flex-col">
-                                    <span className="group-hover:text-[#e8791c] transition">
-                                      {stop.name}
-                                    </span>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">
-                                      {stop.province}
-                                    </span>
-                                  </div>
-
-                                  <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover:bg-[#e8791c] transition" />
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      </span>
-                    </label>
-
-                    <button
-                      type="button"
-                      onClick={getRecommendStops}
-                      className="ml-auto inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 text-[13px] font-black text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
-                    >
-                      Xác nhận
-                    </button>
-                  </div>
-                </section>
-
-                <section className="rounded-[20px] border border-[#e7eaf0] bg-white p-6 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="h-4 w-[3px] rounded-full bg-[#e8791c]" />
-                      <h2 className="text-[16px] font-black leading-tight text-[#1f2736]">
-                        Các trạm dừng
-                      </h2>
-                    </div>
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#e8791c]">
-                      Hệ thống gợi ý
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {recommendStops.map((recommendStop, index) => (
-                      <StationCard
-                        key={recommendStop._id}
-                        order={index + 2}
-                        name={recommendStop.name}
-                        distance={recommendStop.distance}
-                        selected={recommendStop.selected}
-                        onClick={() => toggleStation(recommendStop._id)}
-                        onDragStart={handleDragStart(index)}
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop(index)}
-                        onDragEnd={handleDragEnd}
-                        isDragging={draggedIndex === index}
-                      />
-                    ))}
-
-                    <button
-                      type="button"
-                      className="flex h-[74px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#9ca6b7] transition hover:border-[#cfd6e2] hover:bg-[#fafbfc]"
-                    >
-                      <Plus size={16} />
-                      Thêm trạm thủ công
-                    </button>
-                  </div>
-                </section>
-              </div>
-
-              <aside className="flex min-h-0 flex-col self-stretch rounded-[20px] border border-[#e7eaf0] bg-white p-6 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
-                <SectionTitle title="Lộ trình chi tiết" />
-
-                <div className="relative flex min-h-0 flex-1 flex-col pb-3 pl-7">
-                  <span className="pointer-events-none absolute bottom-6 left-[9px] top-[10px] w-px bg-[#e2e8f2]" />
-                  <div className="relative z-10 flex min-h-full flex-1 flex-col justify-between">
-                    {timelineStops.map((stop) => (
-                      <article
-                        key={stop.id}
-                        className="relative flex shrink-0 flex-col"
-                      >
-                        <span className="absolute -left-[22px] top-[4px]">
-                          <Dot type={stop.dot as DotType} />
-                        </span>
-                        <h3 className="text-[13px] font-black leading-tight text-[#273041]">
-                          {stop.name}
-                        </h3>
-                      </article>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={createRoutes}
-                  className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] text-[12px] font-black uppercase tracking-wider text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
-                >
-                  <Save size={16} className="text-white" />
-                  LƯU TUYẾN ĐƯỜNG
-                </button>
-
-                <button
-                  type="button"
-                  className="mt-3 h-11 w-full rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#657085] transition hover:border-[#cfd6e2] hover:bg-[#f7f9fc]"
-                >
-                  Hủy
-                </button>
-              </aside>
-            </div>
+    <>
+      <div className="mx-auto w-full max-w-[1380px] space-y-6 overflow-auto px-4 pb-16 pt-10 lg:px-4">
+        <header className="flex items-start gap-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2] transition hover:text-[#9aa3b1]"
+            aria-label="Quay lại"
+          >
+            <ChevronLeft size={25} strokeWidth={2.3} />
+          </button>
+          <div>
+            <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
+              Tạo tuyến đường mới
+            </h1>
+            <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
+              Thiết lập điểm xuất phát, điểm đến và các trạm dừng trên tuyến
+            </p>
           </div>
+        </header>
+
+        <div className="mt-14 grid min-h-0 gap-6 pt-4 xl:grid-cols-[1.1fr_0.9fr] xl:items-stretch">
+          <div className="min-h-0 space-y-6">
+            <section className="rounded-[20px] border border-[#e7eaf0] bg-white p-6 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
+              <SectionTitle title="Thông tin hành trình" />
+
+              <div className="flex flex-wrap items-end gap-3">
+                <label className="min-w-0 flex-1 space-y-1.5">
+                  <span className="block text-[9px] font-black uppercase tracking-[0.1em] text-[#8d96a7]">
+                    ĐIỂM XUẤT PHÁT
+                  </span>
+                  <span className="flex min-w-[200px] flex-1 items-center gap-2 rounded-[8px] border border-[#dbe2ee] bg-[#f5f7fb] px-4 py-2.5">
+                    <MapPin size={14} className="shrink-0 text-[#e8791c]" />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={departure}
+                        onChange={(e) => {
+                          setDeparture(e.target.value);
+                        }}
+                        placeholder="Nhập điểm xuất phát"
+                        className="min-w-0 flex-1 bg-transparent text-[13px] font-black text-[#2a3444] outline-none placeholder:text-[#9ca6b7]"
+                      />
+                      {searchDepartureInput.length > 0 && (
+                        <ul className="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur-sm">
+                          {searchDepartureInput.map((stop) => (
+                            <li
+                              key={stop._id}
+                              onClick={() => {
+                                setDeparture(stop.name);
+                                setDepartureId(stop._id);
+                                setDepartureSearchInput([]);
+                              }}
+                              className="group flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
+                            >
+                              <div className="flex flex-col">
+                                <span className="group-hover:text-[#e8791c] transition">
+                                  {stop.name}
+                                </span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">
+                                  {stop.province}
+                                </span>
+                              </div>
+
+                              <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover:bg-[#e8791c] transition" />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </span>
+                </label>
+
+                <span className="flex h-10 shrink-0 items-center pb-1 text-[#e8791c]">
+                  <ArrowRight size={20} />
+                </span>
+
+                <label className="min-w-0 flex-1 space-y-1.5">
+                  <span className="block text-[9px] font-black uppercase tracking-[0.1em] text-[#8d96a7]">
+                    ĐIỂM KẾT THÚC
+                  </span>
+                  <span className="flex min-w-[200px] flex-1 items-center gap-2 rounded-[8px] border border-[#dbe2ee] bg-[#f5f7fb] px-4 py-2.5">
+                    <MapPin size={14} className="shrink-0 text-[#e8791c]" />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={destination}
+                        onChange={(e) => setDestination(e.target.value)}
+                        placeholder="Nhập điểm kết thúc"
+                        className="min-w-0 flex-1 bg-transparent text-[13px] font-black text-[#2a3444] outline-none placeholder:text-[#9ca6b7]"
+                      />
+                      {searchDestinationInput.length > 0 && (
+                        <ul className="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur-sm">
+                          {searchDestinationInput.map((stop) => (
+                            <li
+                              key={stop._id}
+                              onClick={() => {
+                                setDestination(stop.name);
+                                setDestinationId(stop._id)
+                                setDestinationSearchInput([]);
+                              }}
+                              className="group flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
+                            >
+                              <div className="flex flex-col">
+                                <span className="group-hover:text-[#e8791c] transition">
+                                  {stop.name}
+                                </span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">
+                                  {stop.province}
+                                </span>
+                              </div>
+
+                              <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover:bg-[#e8791c] transition" />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={getRecommendStops}
+                  className="ml-auto inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 text-[13px] font-black text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+                >
+                  Xác nhận
+                </button>
+              </div>
+            </section>
+
+            <section className="rounded-[20px] border border-[#e7eaf0] bg-white p-6 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-4 w-[3px] rounded-full bg-[#e8791c]" />
+                  <h2 className="text-[16px] font-black leading-tight text-[#1f2736]">
+                    Các trạm dừng
+                  </h2>
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#e8791c]">
+                  Hệ thống gợi ý
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {recommendStops.map((recommendStop, index) => (
+                  <StationCard
+                    key={recommendStop._id}
+                    order={index + 1}
+                    name={recommendStop.name}
+                    distance={recommendStop.distance}
+                    selected={recommendStop.selected}
+                    onClick={() => toggleStation(recommendStop._id)}
+                    onDragStart={handleDragStart(index)}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop(index)}
+                    onDragEnd={handleDragEnd}
+                    isDragging={draggedIndex === index}
+                  />
+                ))}
+
+                <button
+                  type="button"
+                  className="flex h-[74px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#9ca6b7] transition hover:border-[#cfd6e2] hover:bg-[#fafbfc]"
+                >
+                  <Plus size={16} />
+                  Thêm trạm thủ công
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <aside className="flex min-h-0 flex-col self-stretch rounded-[20px] border border-[#e7eaf0] bg-white p-6 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
+            <SectionTitle title="Lộ trình chi tiết" />
+
+            <div className="relative flex min-h-0 flex-1 flex-col pb-3 pl-7">
+              <span className="pointer-events-none absolute bottom-6 left-[9px] top-[10px] w-px bg-[#e2e8f2]" />
+              <div className="relative z-10 flex min-h-full flex-1 flex-col justify-between">
+                {timelineStops.map((stop) => (
+                  <article
+                    key={stop.id}
+                    className="relative flex shrink-0 flex-col"
+                  >
+                    <span className="absolute -left-[22px] top-[4px]">
+                      <Dot type={stop.dot as DotType} />
+                    </span>
+                    <h3 className="text-[13px] font-black leading-tight text-[#273041]">
+                      {stop.name}
+                    </h3>
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={createRoutes}
+              className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] text-[12px] font-black uppercase tracking-wider text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+            >
+              <Save size={16} className="text-white" />
+              LƯU TUYẾN ĐƯỜNG
+            </button>
+
+            <button
+              type="button"
+              className="mt-3 h-11 w-full rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#657085] transition hover:border-[#cfd6e2] hover:bg-[#f7f9fc]"
+            >
+              Hủy
+            </button>
+          </aside>
         </div>
-      </section>
+      </div>
+
 
       {notice ? (
         <>
@@ -690,11 +609,10 @@ export default function CreateRoute() {
             >
               <div className="flex items-start gap-3">
                 <span
-                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${
-                    notice.type === "success"
-                      ? "bg-[#ecfdf3] text-[#16a34a]"
-                      : "bg-[#fff7ed] text-[#ea580c]"
-                  }`}
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
+                    ? "bg-[#ecfdf3] text-[#16a34a]"
+                    : "bg-[#fff7ed] text-[#ea580c]"
+                    }`}
                   style={{
                     animation:
                       notice.type === "success"
@@ -738,6 +656,6 @@ export default function CreateRoute() {
           </div>
         </>
       ) : null}
-    </div>
+    </>
   );
 }

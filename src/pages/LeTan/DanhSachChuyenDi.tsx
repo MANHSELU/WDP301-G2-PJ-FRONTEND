@@ -137,9 +137,9 @@ export function DanhSachChuyenDi() {
                                 </span>
                             </div>
 
-                            <Link to={"/letan/chitietchuyendi"} >
+                            <Link to={"/assistant/chitietchuyendi"} >
                                 <button className="px-6 py-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-semibold rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300">
-                                    ChiTiet
+                                    Xác nhận
                                 </button>
                             </Link>
 
