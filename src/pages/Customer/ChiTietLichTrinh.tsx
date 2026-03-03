@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, Bus, DollarSign } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -30,44 +30,44 @@ export default function BusTripSearch() {
     });
 
     // Mock data
-    const trips: BusTrip[] = [
-        {
-            id: "1",
-            departureTime: "15:00",
-            arrivalTime: "17:00",
-            departureLocation: "An Hữu (Tiền Giang)",
-            arrivalLocation: "TP. Hồ Chí Minh",
-            duration: "2 giờ",
-            distance: "64.0km",
-            busType: "Limousine",
-            price: "20 CHỈ TRỐNG",
-            seatsAvailable: 20,
-        },
-        {
-            id: "2",
-            departureTime: "15:00",
-            arrivalTime: "17:00",
-            departureLocation: "An Hữu (Tiền Giang)",
-            arrivalLocation: "TP. Hồ Chí Minh",
-            duration: "2 giờ",
-            distance: "64.0km",
-            busType: "Limousine",
-            price: "20 CHỈ TRỐNG",
-            seatsAvailable: 20,
-        },
-        {
-            id: "3",
-            departureTime: "15:00",
-            arrivalTime: "17:00",
-            departureLocation: "An Hữu (Tiền Giang)",
-            arrivalLocation: "TP. Hồ Chí Minh",
-            duration: "2 giờ",
-            distance: "64.0km",
-            busType: "Limousine",
-            price: "28 CHỈ TRỐNG",
-            seatsAvailable: 28,
-        },
-    ];
+    // const trips: BusTrip[] = [
+    //     {
+    //         id: "1",
+    //         departureTime: "15:00",
+    //         arrivalTime: "17:00",
+    //         departureLocation: "An Hữu (Tiền Giang)",
+    //         arrivalLocation: "TP. Hồ Chí Minh",
+    //         duration: "2 giờ",
+    //         distance: "64.0km",
+    //         busType: "Limousine",
+    //         price: "20 CHỈ TRỐNG",
+    //         seatsAvailable: 20,
+    //     },
+    //     {
+    //         id: "2",
+    //         departureTime: "15:00",
+    //         arrivalTime: "17:00",
+    //         departureLocation: "An Hữu (Tiền Giang)",
+    //         arrivalLocation: "TP. Hồ Chí Minh",
+    //         duration: "2 giờ",
+    //         distance: "64.0km",
+    //         busType: "Limousine",
+    //         price: "20 CHỈ TRỐNG",
+    //         seatsAvailable: 20,
+    //     },
+    //     {
+    //         id: "3",
+    //         departureTime: "15:00",
+    //         arrivalTime: "17:00",
+    //         departureLocation: "An Hữu (Tiền Giang)",
+    //         arrivalLocation: "TP. Hồ Chí Minh",
+    //         duration: "2 giờ",
+    //         distance: "64.0km",
+    //         busType: "Limousine",
+    //         price: "28 CHỈ TRỐNG",
+    //         seatsAvailable: 28,
+    //     },
+    // ];
 
     const timeSlots = [
         "Sáng sớm: 0h - 6h",
@@ -89,7 +89,83 @@ export default function BusTripSearch() {
         }));
     };
 
-    // const [trips, setTrip] = useState([])
+    const [trips, setTrip] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTrips = async () => {
+            try {
+                const response = await fetch(
+                    "http://localhost:3000/api/customer/notcheck/viewTrip",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            route_id: id
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch trips");
+                }
+
+                const data = await response.json();
+
+                setTrip(data.data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTrips();
+    }, []);
+    // tính thời gian 
+    const calculateDuration = (
+        departure: string | Date | null | undefined,
+        arrival: string | Date | null | undefined
+    ): string => {
+        if (!departure || !arrival) return "N/A";
+
+        const start = new Date(departure);
+        const end = new Date(arrival);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime()))
+            return "Invalid time";
+
+        const diffMs = end.getTime() - start.getTime();
+
+        if (diffMs <= 0) return "Invalid range";
+
+        const totalMinutes = Math.floor(diffMs / (1000 * 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return `${hours}h ${minutes}m`;
+    };
+    //validate time
+    const formatDateTime = (
+        value: string | Date | null | undefined
+    ): string => {
+        if (!value) return "N/A";
+
+        const date = new Date(value);
+
+        if (isNaN(date.getTime())) return "Invalid date";
+
+        return date.toLocaleString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    };
+    if (loading) return <p>Loading...</p>;
     return (
         <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
             {/* Background Layers */}
@@ -284,7 +360,7 @@ export default function BusTripSearch() {
                         <main className="space-y-5">
                             {trips.map((trip, index) => (
                                 <div
-                                    key={trip.id}
+                                    key={trip._id}
                                     className="relative group"
                                     style={{
                                         animation: "fadeInUp 0.5s ease-out forwards",
@@ -305,10 +381,10 @@ export default function BusTripSearch() {
                                                 {/* Departure */}
                                                 <div className="text-center">
                                                     <div className="text-3xl font-black text-slate-800 mb-1">
-                                                        {trip.departureTime}
+                                                        {formatDateTime(trip.departure_time)}
                                                     </div>
                                                     <div className="text-sm text-slate-500 font-medium">
-                                                        {trip.departureLocation}
+                                                        {trip?.route_id?.start_id.province} ({trip.route_id.start_id.name})
                                                     </div>
                                                 </div>
 
@@ -324,19 +400,24 @@ export default function BusTripSearch() {
                                                         <div className="w-3 h-3 rounded-full bg-orange-600 ring-4 ring-orange-100" />
                                                     </div>
                                                     <div className="flex items-center gap-2 text-xs text-slate-600 font-semibold bg-orange-50 px-3 py-1 rounded-full">
-                                                        <span>{trip.duration}</span>
+                                                        <span>   {calculateDuration(
+                                                            trip.departure_time,
+                                                            trip.arrival_time
+                                                        )}</span>
                                                         <span>•</span>
-                                                        <span>{trip.distance}</span>
+                                                        <span>{trip.route_id.distance_km} km</span>
                                                     </div>
                                                 </div>
 
                                                 {/* Arrival */}
                                                 <div className="text-center">
                                                     <div className="text-3xl font-black text-slate-800 mb-1">
-                                                        {trip.arrivalTime}
+                                                        <span>
+                                                            {formatDateTime(trip.arrival_time)}
+                                                        </span>
                                                     </div>
                                                     <div className="text-sm text-slate-500 font-medium">
-                                                        {trip.arrivalLocation}
+                                                        {trip.route_id.stop_id.province} ({trip.route_id.stop_id.name})
                                                     </div>
                                                 </div>
                                             </div>
@@ -362,14 +443,15 @@ export default function BusTripSearch() {
                                                 {/* Limousine Badge */}
                                                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 px-4 py-2 rounded-xl border border-purple-200">
                                                     <span className="text-xs font-bold text-purple-700">
-                                                        {trip.busType}
+                                                        {trip.bus_id.bus_type_id.name}
                                                     </span>
                                                 </div>
 
                                                 {/* Seats Available */}
                                                 <div className="bg-gradient-to-br from-green-50 to-green-100 px-4 py-2 rounded-xl border border-green-200">
                                                     <span className="text-xs font-bold text-green-700">
-                                                        {trip.price}
+                                                        {/* {trip.price} */}
+                                                        200.000 VND
                                                     </span>
                                                 </div>
                                             </div>
