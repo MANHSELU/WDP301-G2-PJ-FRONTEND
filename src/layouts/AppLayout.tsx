@@ -9,7 +9,8 @@ export default function AppLayout({
     const location = useLocation();
     const hideBg =
         location.pathname.startsWith("/home2") ||
-        location.pathname.startsWith("/admin/create-coach");
+        location.pathname.startsWith("/admin/create-coach") ||
+        location.pathname.startsWith("/admin/create-route");
 
     return (
         <div className="relative min-h-screen overflow-hidden">

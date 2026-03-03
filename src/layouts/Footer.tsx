@@ -32,9 +32,11 @@ function Footer() {
         <div className="grid gap-10 text-center sm:text-left md:grid-cols-2 lg:grid-cols-[1.45fr_1fr_1fr_1fr_0.95fr]">
           <div className="space-y-5">
             <div className="flex items-center justify-center gap-3 sm:justify-start">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-white text-lg font-black text-[#eb7d1f] shadow-[0_8px_24px_-16px_rgba(37,20,8,0.8)]">
-                C
-              </span>
+              <img
+                src="/images/logo1.png"
+                alt="CoachTrip logo"
+                className="h-14 w-auto object-contain"
+              />
               <span className="text-2xl font-black tracking-wide">COACHTRIP</span>
             </div>
 

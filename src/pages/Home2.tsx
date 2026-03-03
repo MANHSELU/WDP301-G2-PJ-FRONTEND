@@ -5,7 +5,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import Footer from "../layouts/Footer";
+// import Footer from "../layouts/Footer";
 
 type RouteCard = {
   id: number;
@@ -106,7 +106,6 @@ export default function Home2() {
 
   return (
     <div className="overflow-x-hidden bg-[#ece7e2] text-[#2e1f16]">
-
       <section className="relative overflow-hidden bg-[#ece7e2]">
         <img
           src="/images/bg4.png"
@@ -129,16 +128,15 @@ export default function Home2() {
             </div>
 
             <nav className="hidden items-center gap-8 md:flex">
-              {["Trang chủ", "Lịch trình", "Tra cứu vé", "Hóa đơn","Tin tức", "Thêm"].map(
+              {["Trang chủ", "Lịch trình", "Tra cứu vé", "Hóa đơn", "Tin tức", "Thêm"].map(
                 (item, idx) => (
                   <button
                     key={item}
                     type="button"
-                    className={`page-enter-nav-item relative py-7 text-[13px] font-semibold ${
-                      idx === 0
-                        ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
-                        : "text-[#7c5f4a]"
-                    }`}
+                    className={`page-enter-nav-item relative py-7 text-[13px] font-semibold ${idx === 0
+                      ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
+                      : "text-[#7c5f4a]"
+                      }`}
                   >
                     {item}
                   </button>
@@ -215,8 +213,8 @@ export default function Home2() {
             </div>
           </div>
         </div>
- 
- 
+
+
         <div className="relative z-20 mx-auto flex min-h-[680px] w-full max-w-[1240px] items-center px-4 pb-24 pt-24 lg:min-h-[780px] lg:pt-20">
           <div className="page-enter-copy relative isolate -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
             <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[360px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.46)_34%,rgba(255,255,255,0.18)_56%,rgba(255,255,255,0)_78%)] blur-[26px]" />
@@ -334,11 +332,10 @@ export default function Home2() {
                     type="button"
                     onClick={() => setPromoPage(dotIndex)}
                     aria-label={`Xem khuyến mãi ${dotIndex + 1}`}
-                    className={`h-2.5 rounded-full transition-all duration-300 ${
-                      promoPage === dotIndex
-                        ? "w-6 bg-[#f08d2c]"
-                        : "w-2.5 bg-[#d8c5b5] hover:bg-[#e7b98f]"
-                    }`}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${promoPage === dotIndex
+                      ? "w-6 bg-[#f08d2c]"
+                      : "w-2.5 bg-[#d8c5b5] hover:bg-[#e7b98f]"
+                      }`}
                   />
                 ))}
               </div>
@@ -408,13 +405,13 @@ export default function Home2() {
               className="inline-flex items-center gap-2 rounded-full border border-[#e4bb94] bg-[#fff4e7] px-7 py-3 text-sm font-bold text-[#6a4932] shadow-[0_10px_22px_-16px_rgba(180,95,21,0.78)] transition duration-200 hover:border-[#d99861] hover:bg-[#ffe9d4] hover:text-[#a45b1f]"
             >
               Xem tất cả các chuyến
-                            <ArrowRight size={15} />
+              <ArrowRight size={15} />
             </button>
           </div>
         </div>
       </section>
 
-      <Footer />
+      {/* <Footer /> */}
 
       <style>{`
         .page-enter-nav,
@@ -901,11 +898,10 @@ function FieldInput({
 }) {
   return (
     <div
-      className={`relative min-h-[62px] px-4 py-1.5 ${
-        divider
-          ? "md:after:absolute md:after:right-0 md:after:top-1/2 md:after:h-[70%] md:after:w-px md:after:-translate-y-1/2 md:after:bg-[#d9b38f]"
-          : ""
-      }`}
+      className={`relative min-h-[62px] px-4 py-1.5 ${divider
+        ? "md:after:absolute md:after:right-0 md:after:top-1/2 md:after:h-[70%] md:after:w-px md:after:-translate-y-1/2 md:after:bg-[#d9b38f]"
+        : ""
+        }`}
     >
       <label
         htmlFor={name}

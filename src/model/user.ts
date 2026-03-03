@@ -1,5 +1,5 @@
 export interface user {
-    id: number,
+    _id: number,
     name: string,
     phone: string,
     avatar: {
