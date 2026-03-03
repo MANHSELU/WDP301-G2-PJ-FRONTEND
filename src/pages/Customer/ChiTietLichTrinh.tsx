@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Clock, Bus, DollarSign } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 /* ================= TYPES ================= */
 
@@ -20,6 +20,9 @@ type BusTrip = {
 /* ================= COMPONENT ================= */
 
 export default function BusTripSearch() {
+    const location = useLocation();
+    const id = location.state?.id;
+    console.log("id được gửi đến là : ", id)
     const [selectedFilters, setSelectedFilters] = useState({
         timeSlots: [] as string[],
         busTypes: [] as string[],
@@ -86,6 +89,7 @@ export default function BusTripSearch() {
         }));
     };
 
+    // const [trips, setTrip] = useState([])
     return (
         <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
             {/* Background Layers */}
