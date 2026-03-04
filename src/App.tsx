@@ -34,12 +34,14 @@ import CargoBooking from "./pages/LeTan/GuiHangChoKhach";
 import CargoOrderList from "./pages/LeTan/DanhSachHangHoa";
 import RevenueDashboard from "./pages/Admin/Revenue";
 import HomeAdmin from "./pages/Admin/HomeAdmin";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 export default function App() {
   return (
     <>
       <Routes>
         <Route path="admin" element={<HomeAdmin />} >
+          <Route index element={<AdminDashboard />} />
           {/* <Route path="create-coach" element={<CreateCoach />} /> */}
           <Route path="create-route" element={<CreateRoute />} />
           <Route path="manage-buses" element={<ManageBus />} />
