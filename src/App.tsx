@@ -12,6 +12,7 @@ import TripDetailsDemo from "./pages/Driver/TripDetail";
 import FaceRegister from "./pages/Driver/RegisterAI";
 import Header2 from "./layouts/Header2";
 import CreateCoach from "./pages/Admin/CreateCoach";
+import CreateStopLocation from "./pages/Admin/CreateStopLocation";
 import LichTrinh from "./pages/Customer/LichTrinh";
 import BusTripSearch from "./pages/Customer/ChiTietLichTrinh";
 import BusSeatSelection from "./pages/Customer/DatVe";
@@ -34,7 +35,7 @@ import CargoBooking from "./pages/LeTan/GuiHangChoKhach";
 import CargoOrderList from "./pages/LeTan/DanhSachHangHoa";
 import RevenueDashboard from "./pages/Admin/Revenue";
 import HomeAdmin from "./pages/Admin/HomeAdmin";
-
+import CreateTrip  from "./pages/Admin/CreateTrips";
 export default function App() {
   return (
     <>
@@ -46,8 +47,11 @@ export default function App() {
           <Route path="manage-routes" element={<ManageRoute />} />
           <Route path="manage-users" element={<ManageUser />} />
           <Route path="manage-revenue" element={<RevenueDashboard />} />
+          <Route path="create-coach" element={<CreateCoach />} />
+          <Route path="create-stop-location" element={<CreateStopLocation />} />
+          <Route path="create-trips" element={<CreateTrip />} />
         </Route>
-        <Route path="/admin/create-coach" element={<CreateCoach />} />
+        <Route path="/admin/create-stop-location" element={<CreateStopLocation />} />
         {/* <Route path="/admin/create-route" element={<CreateRoute />} />
         <Route path="/admin/manage-buses" element={<ManageBus />} />
         <Route path="/admin/manage-routes" element={<ManageRoute />} />
