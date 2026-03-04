@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Clock, Bus, DollarSign } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 /* ================= TYPES ================= */
 
@@ -29,45 +29,7 @@ export default function BusTripSearch() {
         tiers: [] as string[],
     });
 
-    // Mock data
-    // const trips: BusTrip[] = [
-    //     {
-    //         id: "1",
-    //         departureTime: "15:00",
-    //         arrivalTime: "17:00",
-    //         departureLocation: "An Hữu (Tiền Giang)",
-    //         arrivalLocation: "TP. Hồ Chí Minh",
-    //         duration: "2 giờ",
-    //         distance: "64.0km",
-    //         busType: "Limousine",
-    //         price: "20 CHỈ TRỐNG",
-    //         seatsAvailable: 20,
-    //     },
-    //     {
-    //         id: "2",
-    //         departureTime: "15:00",
-    //         arrivalTime: "17:00",
-    //         departureLocation: "An Hữu (Tiền Giang)",
-    //         arrivalLocation: "TP. Hồ Chí Minh",
-    //         duration: "2 giờ",
-    //         distance: "64.0km",
-    //         busType: "Limousine",
-    //         price: "20 CHỈ TRỐNG",
-    //         seatsAvailable: 20,
-    //     },
-    //     {
-    //         id: "3",
-    //         departureTime: "15:00",
-    //         arrivalTime: "17:00",
-    //         departureLocation: "An Hữu (Tiền Giang)",
-    //         arrivalLocation: "TP. Hồ Chí Minh",
-    //         duration: "2 giờ",
-    //         distance: "64.0km",
-    //         busType: "Limousine",
-    //         price: "28 CHỈ TRỐNG",
-    //         seatsAvailable: 28,
-    //     },
-    // ];
+
 
     const timeSlots = [
         "Sáng sớm: 0h - 6h",
@@ -163,8 +125,15 @@ export default function BusTripSearch() {
             day: "2-digit",
             month: "2-digit",
             year: "numeric"
+
         });
     };
+    const navigate = useNavigate()
+    const DatVe = async () => {
+        navigate("/datve", {
+            state: { tripId: id }
+        });
+    }
     if (loading) return <p>Loading...</p>;
     return (
         <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
@@ -384,7 +353,7 @@ export default function BusTripSearch() {
                                                         {formatDateTime(trip.departure_time)}
                                                     </div>
                                                     <div className="text-sm text-slate-500 font-medium">
-                                                        {trip?.route_id?.start_id.province} ({trip.route_id.start_id.name})
+                                                        {trip?.route_id?.start_id.province} ({trip?.route_id?.start_id.name})
                                                     </div>
                                                 </div>
 
@@ -443,7 +412,7 @@ export default function BusTripSearch() {
                                                 {/* Limousine Badge */}
                                                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 px-4 py-2 rounded-xl border border-purple-200">
                                                     <span className="text-xs font-bold text-purple-700">
-                                                        {trip.bus_id.bus_type_id.name}
+                                                        {trip?.bus_id.bus_type_id.name}
                                                     </span>
                                                 </div>
 
@@ -457,10 +426,14 @@ export default function BusTripSearch() {
                                             </div>
 
                                             {/* Book Button */}
-                                            <Link to={"/datve"} className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group">
+                                            {/* <Link to={"/datve"}  */}
+                                            <button
+                                                onClick={() => DatVe()}
+                                                className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group">
                                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                                                 <span className="relative z-10">Chọn chuyến</span>
-                                            </Link>
+                                            </button>
+                                            {/* </Link> */}
                                         </div>
                                     </div>
                                 </div>

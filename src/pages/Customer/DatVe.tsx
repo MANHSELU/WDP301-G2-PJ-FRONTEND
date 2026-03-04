@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { X, ArrowRight, Armchair } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 /* ================= TYPES ================= */
 
@@ -27,34 +27,92 @@ export default function BusSeatSelection() {
         busTypes: [] as string[],
         tiers: [] as string[],
     });
+    //lấy id của tríp chuyến đi 
+    const location = useLocation();
+    const route_id = location.state?.tripId;
+    const [trip, setTrip] = useState<any>(null);
+    useEffect(() => {
+        if (!route_id) return;
 
-    // Mock seat data - Generate once and memoize
-    const generateSeats = (floor: 1 | 2): Seat[] => {
-        const seats: Seat[] = [];
-        const rows = 11;
-        const cols = 4;
+        const fetchDiagramBus = async () => {
+            try {
+                const response = await fetch(
+                    "http://localhost:3000/api/customer/notcheck/diagram-bus",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            route_id: route_id,
+                        }),
+                    }
+                );
 
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-                const seatNumber = row * cols + col + 1 + (floor - 1) * 44;
-                const randomStatus: SeatStatus =
-                    Math.random() > 0.7 ? "booked" : "available";
+                if (!response.ok) {
+                    throw new Error("Fetch failed");
+                }
 
-                seats.push({
-                    id: `${floor}-${row}-${col}`,
-                    floor,
-                    row,
-                    col,
-                    status: randomStatus,
-                    label: `A${seatNumber}`,
-                });
+                const result = await response.json();
+
+                setTrip(result.data); // 👈 LƯU TRIP
+
+            } catch (error) {
+                console.error("Error:", error);
             }
+        };
+
+        fetchDiagramBus();
+    }, [route_id]);
+    // Mock seat data - Generate once and memoize
+    const generateSeatsFromLayout = (floor: number): Seat[] => {
+        if (!trip?.bus_id?.seat_layout) return [];
+
+        const { rows, columns, row_overrides } =
+            trip.bus_id.seat_layout;
+
+        const seats: Seat[] = [];
+        let seatCounter = 1;
+
+        for (let row = 1; row <= rows; row++) {
+            // tìm override nếu có
+            const override = row_overrides?.find(
+                (r: any) => r.row_index === row && r.floor === floor
+            );
+
+            columns.forEach((col: any, colIndex: number) => {
+                let seatsInColumn = col.seats_per_row;
+
+                // nếu có override cho column này
+                if (override) {
+                    const colOverride = override.column_overrides.find(
+                        (c: any) => c.column_name === col.name
+                    );
+
+                    if (colOverride) {
+                        seatsInColumn = colOverride.seats;
+                    }
+                }
+
+                for (let i = 0; i < seatsInColumn; i++) {
+                    seats.push({
+                        id: `${floor}-${row}-${colIndex}-${i}`,
+                        floor,
+                        row,
+                        col: colIndex,
+                        status: "available",
+                        label: `A${seatCounter++}`,
+                    });
+                }
+            });
         }
+
         return seats;
     };
 
-    const floor1Seats = useMemo(() => generateSeats(1), []);
-    const floor2Seats = useMemo(() => generateSeats(2), []);
+    const floor1Seats = useMemo(() => generateSeatsFromLayout(1), [trip]);
+    const floor2Seats = useMemo(() => generateSeatsFromLayout(2), [trip]);
+
     const currentSeats = selectedFloor === 1 ? floor1Seats : floor2Seats;
 
     // Calculate available and booked seats
@@ -112,7 +170,93 @@ export default function BusSeatSelection() {
             tiers: [],
         });
     };
+    const groupedSeats = useMemo(() => {
+        const grouped: Record<number, { LEFT: Seat[]; RIGHT: Seat[] }> = {};
 
+        currentSeats.forEach((seat) => {
+            if (!grouped[seat.row]) {
+                grouped[seat.row] = { LEFT: [], RIGHT: [] };
+            }
+
+            // col = 0 là LEFT, col = 1 là RIGHT
+            if (seat.col === 0) {
+                grouped[seat.row].LEFT.push(seat);
+            } else {
+                grouped[seat.row].RIGHT.push(seat);
+            }
+        });
+
+        return grouped;
+    }, [currentSeats]);
+    const renderSeat = (seat: Seat) => {
+        const status = getSeatStatus(seat);
+
+        const seatVisual = {
+            available: {
+                detail: "border-green-400 bg-green-50",
+                frame: "border-green-400 bg-white text-green-700",
+                leg: "bg-green-400",
+                label: "text-green-700",
+            },
+            selected: {
+                detail: "border-orange-500 bg-orange-100",
+                frame: "border-orange-500 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg",
+                leg: "bg-orange-500",
+                label: "text-white",
+            },
+            booked: {
+                detail: "border-slate-300 bg-slate-100",
+                frame: "border-slate-300 bg-slate-200 text-slate-400",
+                leg: "bg-slate-300",
+                label: "text-slate-400",
+            },
+        }[status];
+
+        return (
+            <button
+                key={seat.id}
+                onClick={() => toggleSeat(seat.id, seat.status)}
+                disabled={status === "booked"}
+                className={`relative h-[32px] w-[62px] transition-all duration-300 ${status === "available"
+                    ? "hover:scale-110 cursor-pointer"
+                    : status === "selected"
+                        ? "scale-110"
+                        : "cursor-not-allowed opacity-60"
+                    }`}
+            >
+                <span
+                    className={`absolute left-[13px] top-0.5 h-1.5 w-[35px] rounded-t-[4px] border-[1.5px] border-b-0 ${seatVisual.detail}`}
+                />
+                <span
+                    className={`absolute left-[7px] top-2 flex h-[14px] w-[48px] items-center justify-center rounded-[4px] border-[1.5px] text-[9px] font-black ${seatVisual.frame}`}
+                >
+                    {seat.label}
+                </span>
+                <span
+                    className={`absolute left-[20px] top-[18px] h-[4px] w-[2px] ${seatVisual.leg}`}
+                />
+                <span
+                    className={`absolute right-[20px] top-[18px] h-[4px] w-[2px] ${seatVisual.leg}`}
+                />
+            </button>
+        );
+    };
+    const formatTime = (dateString?: string) => {
+        if (!dateString) return "--:--";
+        const date = new Date(dateString);
+        return date.toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
+
+    const calculateDuration = (start?: string, end?: string) => {
+        if (!start || !end) return "";
+        const diff =
+            new Date(end).getTime() - new Date(start).getTime();
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        return `${hours} giờ`;
+    };
     return (
         <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
             {/* Background Layers */}
@@ -325,138 +469,158 @@ export default function BusSeatSelection() {
                             <div className="relative bg-white rounded-3xl shadow-2xl border-2 border-orange-100/50 p-8">
                                 {/* Trip Info Header */}
                                 <div className="mb-8 pb-6 border-b-2 border-orange-100">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-4">
+                                    <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+
+                                        {/* Thời gian */}
+                                        <div className="flex items-center gap-6 flex-wrap">
+
+                                            {/* Giờ đi */}
                                             <div className="text-center">
-                                                <div className="text-2xl font-black text-slate-800">15:00</div>
-                                                <div className="text-xs text-slate-500">An Hữu (Tiền Giang)</div>
+                                                <div className="text-2xl font-black text-slate-800">
+                                                    {formatTime(trip?.departure_time)}
+                                                </div>
+                                                <div className="text-xs text-slate-500">
+                                                    {`${trip?.route_id?.start_id.province} (${trip?.route_id?.start_id.name})` || "Điểm đi"}
+                                                </div>
                                             </div>
+
+                                            {/* Timeline */}
                                             <div className="flex items-center gap-2 px-4">
                                                 <div className="w-2 h-2 rounded-full bg-orange-400" />
-                                                <div className="h-0.5 w-16 bg-gradient-to-r from-orange-400 to-orange-600" />
+                                                <div className="h-0.5 w-20 bg-gradient-to-r from-orange-400 to-orange-600" />
                                                 <div className="w-2 h-2 rounded-full bg-orange-600" />
                                             </div>
+
+                                            {/* Giờ đến */}
                                             <div className="text-center">
-                                                <div className="text-2xl font-black text-slate-800">17:00</div>
-                                                <div className="text-xs text-slate-500">TP. Hồ Chí Minh</div>
+                                                <div className="text-2xl font-black text-slate-800">
+                                                    {formatTime(trip?.arrival_time)}
+                                                </div>
+                                                <div className="text-xs text-slate-500">
+                                                    {`${trip?.route_id?.stop_id.province} (${trip?.route_id?.stop_id.name})` || "Điểm đến"}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="bg-orange-50 px-4 py-2 rounded-xl">
-                                                <span className="text-xs font-bold text-orange-600">2 giờ • 64.0km</span>
-                                            </div>
+
+                                        {/* Thời lượng */}
+                                        <div className="bg-orange-50 px-4 py-2 rounded-xl">
+                                            <span className="text-xs font-bold text-orange-600">
+                                                {calculateDuration(
+                                                    trip?.departure_time,
+                                                    trip?.arrival_time
+                                                )}
+                                            </span>
                                         </div>
                                     </div>
 
+                                    {/* Meta info */}
                                     <div className="flex items-center gap-3 flex-wrap">
+
                                         <span className="bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600">
                                             Chọn Ghế
                                         </span>
+
                                         <span className="bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600">
                                             Lịch Trình
                                         </span>
+
+                                        {/* Loại xe */}
                                         <span className="bg-purple-50 px-3 py-1.5 rounded-lg text-xs font-bold text-purple-700 border border-purple-200">
-                                            Limousine
+                                            {trip?.bus_id?.bus_type_id?.name}
                                         </span>
+
+                                        {/* Ghế trống */}
                                         <span className="bg-green-50 px-3 py-1.5 rounded-lg text-xs font-bold text-green-700 border border-green-200">
                                             {availableSeats} CHỈ TRỐNG
                                         </span>
+
                                         <button className="ml-auto bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                                             Chọn Chuyến
                                         </button>
+
                                     </div>
                                 </div>
 
                                 {/* Floor Tabs */}
-                                <div className="flex gap-3 mb-6">
-                                    <button
-                                        onClick={() => setSelectedFloor(1)}
-                                        className={`flex-1 py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ${selectedFloor === 1
-                                            ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg"
-                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                            }`}
-                                    >
-                                        <Armchair size={18} />
-                                        Tầng 1
-                                    </button>
-                                    <button
-                                        onClick={() => setSelectedFloor(2)}
-                                        className={`flex-1 py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ${selectedFloor === 2
-                                            ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg"
-                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                            }`}
-                                    >
-                                        <Armchair size={18} />
-                                        Tầng 2
-                                    </button>
-                                </div>
+                                {trip?.bus_id?.seat_layout?.floors > 0 && (
+                                    <div className="flex gap-3 mb-6">
+                                        {Array.from(
+                                            { length: trip.bus_id.seat_layout.floors },
+                                            (_, index) => {
+                                                const floorNumber = index + 1;
+
+                                                return (
+                                                    <button
+                                                        key={floorNumber}
+                                                        onClick={() => setSelectedFloor(floorNumber)}
+                                                        className={`flex-1 py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ${selectedFloor === floorNumber
+                                                            ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg"
+                                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                                            }`}
+                                                    >
+                                                        <Armchair size={18} />
+                                                        Tầng {floorNumber}
+                                                    </button>
+                                                );
+                                            }
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Seat Map */}
-                                <div className="bg-gradient-to-br from-slate-50 to-orange-50/30 rounded-2xl p-8 mb-6">
-                                    {/* Seats Grid */}
-                                    <div className="grid grid-cols-4 gap-y-4 w-full max-w-4xl mx-auto px-16">
-                                        {currentSeats.map((seat) => {
-                                            const status = getSeatStatus(seat);
+                                {/* Seat Map */}
+                                <div className="bg-gradient-to-br from-slate-50 to-orange-50/30 rounded-2xl p-10 mb-8 border-2 border-orange-100">
 
-                                            // Define visual styles based on seat status
-                                            const seatVisual = {
-                                                available: {
-                                                    detail: "border-green-400 bg-green-50",
-                                                    frame: "border-green-400 bg-white text-green-700",
-                                                    leg: "bg-green-400",
-                                                    label: "text-green-700",
-                                                },
-                                                selected: {
-                                                    detail: "border-orange-500 bg-orange-100",
-                                                    frame: "border-orange-500 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg",
-                                                    leg: "bg-orange-500",
-                                                    label: "text-white",
-                                                },
-                                                booked: {
-                                                    detail: "border-slate-300 bg-slate-100",
-                                                    frame: "border-slate-300 bg-slate-200 text-slate-400",
-                                                    leg: "bg-slate-300",
-                                                    label: "text-slate-400",
-                                                },
-                                            }[status];
+                                    {/* Body xe */}
+                                    <div className="w-full max-w-6xl mx-auto border-2 border-slate-300 rounded-[40px] p-12 bg-white shadow-inner">
 
-                                            return (
-                                                <button
-                                                    key={seat.id}
-                                                    onClick={() => toggleSeat(seat.id, seat.status)}
-                                                    disabled={status === "booked"}
-                                                    className={`relative h-[32px] w-[62px] transition-all duration-300 ${status === "available"
-                                                        ? "hover:scale-110 cursor-pointer"
-                                                        : status === "selected"
-                                                            ? "scale-110"
-                                                            : "cursor-not-allowed opacity-60"
-                                                        }`}
-                                                    title={`Tầng ${seat.floor} - ${seat.label}`}
-                                                >
-                                                    {/* Backrest (Tựa lưng) */}
-                                                    <span
-                                                        className={`pointer-events-none absolute left-[13px] top-0.5 h-1.5 w-[35px] rounded-t-[4px] border-[1.5px] border-b-0 transition-all duration-300 ${seatVisual.detail}`}
-                                                    />
+                                        {/* Đầu xe */}
+                                        <div className="text-center text-slate-400 font-bold mb-10 tracking-widest">
+                                            🚍 ĐẦU XE
+                                        </div>
 
-                                                    {/* Seat Frame (Thân ghế) */}
-                                                    <span
-                                                        className={`pointer-events-none absolute left-[7px] top-2 flex h-[14px] w-[48px] items-center justify-center rounded-[4px] border-[1.5px] text-[9px] font-black leading-none transition-all duration-300 ${seatVisual.frame} ${seatVisual.label}`}
+                                        {/* Layout ghế */}
+                                        <div className="flex flex-col gap-10 items-center w-full">
+
+                                            {Object.keys(groupedSeats).map((rowKey) => {
+                                                const row = groupedSeats[Number(rowKey)];
+
+                                                const totalSeats = row.LEFT.length + row.RIGHT.length;
+
+                                                // 🔥 Nếu là hàng đặc biệt (5 ghế)
+                                                if (totalSeats % 2 !== 0) {
+                                                    return (
+                                                        <div
+                                                            key={rowKey}
+                                                            className="flex justify-center gap-6 mb-10"
+                                                        >
+                                                            {[...row.LEFT, ...row.RIGHT].map(renderSeat)}
+                                                        </div>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <div
+                                                        key={rowKey}
+                                                        className="grid grid-cols-[1fr_120px_1fr] items-center mb-10 w-full max-w-3xl mx-auto"
                                                     >
-                                                        {seat.label}
-                                                    </span>
+                                                        {/* LEFT */}
+                                                        <div className="flex justify-end gap-6">
+                                                            {row.LEFT.map(renderSeat)}
+                                                        </div>
 
-                                                    {/* Left Leg (Chân trái) */}
-                                                    <span
-                                                        className={`pointer-events-none absolute left-[20px] top-[18px] h-[4px] w-[2px] rounded-b-[1px] transition-all duration-300 ${seatVisual.leg}`}
-                                                    />
+                                                        {/* AISLE */}
+                                                        <div />
 
-                                                    {/* Right Leg (Chân phải) */}
-                                                    <span
-                                                        className={`pointer-events-none absolute right-[20px] top-[18px] h-[4px] w-[2px] rounded-b-[1px] transition-all duration-300 ${seatVisual.leg}`}
-                                                    />
-                                                </button>
-                                            );
-                                        })}
+                                                        {/* RIGHT */}
+                                                        <div className="flex justify-start gap-6">
+                                                            {row.RIGHT.map(renderSeat)}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+
+                                        </div>
                                     </div>
                                 </div>
 
@@ -488,7 +652,25 @@ export default function BusSeatSelection() {
                                                     Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục
                                                 </p>
                                             </div>
-                                            <Link to={"/thongtindatve"} className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-8 py-4 rounded-xl font-bold shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
+                                            <Link
+                                                to="/thongtindatve"
+                                                state={{
+                                                    // Mảng id ghế đã chọn (dùng để check trạng thái)
+                                                    selectedSeats: selectedSeats,
+
+                                                    // Mảng label ghế ["A1","B2",...] để hiển thị badge
+                                                    selectedSeatLabels: (() => {
+                                                        const allSeats = selectedFloor === 1 ? floor1Seats : floor2Seats;
+                                                        return allSeats
+                                                            .filter((s) => selectedSeats.includes(s.id))
+                                                            .map((s) => s.label);
+                                                    })(),
+
+                                                    // Toàn bộ object trip từ API (chứa route, bus, giá...)
+                                                    trip: trip,
+                                                }}
+                                                className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-8 py-4 rounded-xl font-bold shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+                                            >
                                                 Tiếp tục
                                                 <ArrowRight size={20} />
                                             </Link>
