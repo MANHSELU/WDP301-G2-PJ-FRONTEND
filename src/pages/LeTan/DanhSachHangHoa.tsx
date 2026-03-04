@@ -319,7 +319,6 @@ export default function CargoOrderList() {
     const totalOrders = orders.length;
     const pendingCount = orders.filter(o => o.status === "pending").length;
     const approvedCount = orders.filter(o => o.status === "approved").length;
-    const cancelledCount = orders.filter(o => o.status === "cancelled").length;
     const totalRevenue = orders.filter(o => o.status === "approved").reduce((s, o) => {
         const disc = Math.round(o.fee * o.discount / 100);
         return s + o.fee - disc;
