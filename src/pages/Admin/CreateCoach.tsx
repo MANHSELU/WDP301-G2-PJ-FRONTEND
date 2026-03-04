@@ -417,815 +417,740 @@ export default function CreateCoach() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f6f7f9] text-[#1f2937]">
-            <section className="w-full">
-                <div
-                    className={`grid min-h-screen ${ADMIN_LAYOUT_TUNE.sidebarAndContentGap} ${ADMIN_LAYOUT_TUNE.sidebarAndContentCols}`}
+
+        <div
+            className={`mx-auto w-full ${ADMIN_LAYOUT_TUNE.rightContentMaxWidth} space-y-6 px-4 pb-16 pt-10 ${ADMIN_LAYOUT_TUNE.rightContentDesktopPadding}`}
+        >
+            <div className="mb-6 flex items-center gap-4">
+                <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] !bg-white text-[#c2c8d2] transition duration-200 hover:!bg-white active:!bg-white hover:text-[#9aa3b1]"
+                    aria-label="Quay lai"
                 >
-                    <aside className="flex h-screen flex-col overflow-hidden border-r border-[#dde2ea] bg-white lg:sticky lg:top-0">
-                        <div className="border-b border-[#dde2ea] bg-white px-5 py-7">
-                            <div className="flex items-center gap-2.5">
-                                <img
-                                    src="/images/logo1.png"
-                                    alt="Bustrip logo"
-                                    className="h-9 w-9 object-contain opacity-85"
+                    <ChevronLeft size={25} strokeWidth={2.3} />
+                </button>
+                <div>
+                    <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
+                        Thêm thông tin xe mới
+                    </h1>
+                    <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
+                        Định danh và tạo trạng thái vận hành của xe
+                    </p>
+                </div>
+            </div>
+
+            <div className="pt-4 grid gap-6 xl:grid-cols-[1.1fr_0.9fr] xl:items-stretch">
+                <form
+                    onSubmit={handleSubmit}
+                    className="h-full space-y-5 rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]"
+                >
+                    <section className="space-y-3">
+                        <h2 className="text-lg font-black text-[#1f2430]">
+                            Thông tin xe
+                        </h2>
+                        <div className="grid gap-3 md:grid-cols-2">
+                            <label className="space-y-1">
+                                <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                    Biển số xe
+                                </span>
+                                <input
+                                    type="text"
+                                    value={licensePlate}
+                                    onChange={(event) =>
+                                        setLicensePlate(event.target.value)
+                                    }
+                                    placeholder="51B-123.45"
+                                    className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                    required
                                 />
-                                <span className="text-[22px] font-black uppercase tracking-[-0.01em] text-[#eb8a45]">
-                                    CoachTrip
+                            </label>
+
+                            <label className="space-y-1">
+                                <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                    Loại xe
                                 </span>
-                            </div>
-                        </div>
-
-                        <div className="px-4 py-4">
-                            <div className="overflow-hidden rounded-[2px] border border-[#d8dde6] bg-white">
-                                {ADMIN_SIDEBAR_ITEMS.map((item) => {
-                                    const ItemIcon = item.icon;
-                                    const isActive = item.id === "routes";
-
-                                    return (
-                                        <button
-                                            key={item.id}
-                                            type="button"
-                                            className={`flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0 ${isActive
-                                                ? "bg-[#f4d5b4] text-[#1f2937]"
-                                                : "text-[#374151] hover:bg-[#f3f4f6]"
-                                                }`}
-                                        >
-                                            <ItemIcon size={14} className="shrink-0 text-[#111827]" />
-                                            <span>{item.label}</span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        <div className="mt-auto border-t border-[#dde2ea] bg-white px-4 py-4">
-                            <div className="flex items-center gap-2">
-                                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-black text-[#6b7280] ring-1 ring-[#d7dbe2]">
-                                    AH
-                                </span>
-                                <div>
-                                    <p className="text-[14px] font-black leading-none text-[#111827]">
-                                        Admin_Hung
-                                    </p>
-                                    <p className="mt-1 text-[11px] text-[#9ca3af]">
-                                        hung123@gmail.com
-                                    </p>
+                                <div className="relative">
+                                    <select
+                                        value={busTypeId}
+                                        onChange={(event) => setBusTypeId(event.target.value)}
+                                        className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                        required
+                                    >
+                                        <option value="">Chọn loại xe</option>
+                                        {busTypes.map((option) => (
+                                            <option key={option._id} value={option._id}>
+                                                {option.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown
+                                        size={16}
+                                        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
+                                    />
                                 </div>
-                            </div>
-
-                            <div className="mt-3 grid grid-cols-2 gap-2">
-                                <button
-                                    type="button"
-                                    className="h-7 rounded-[3px] border border-[#d9dde5] bg-[#f1f2f4] text-[11px] font-semibold text-[#6b7280]"
-                                >
-                                    Che do toi
-                                </button>
-                                <button
-                                    type="button"
-                                    className="h-7 rounded-[3px] border border-[#d9dde5] bg-[#e5e7eb] text-[11px] font-semibold text-[#b3b8c1]"
-                                >
-                                    Đăng xuất
-                                </button>
-                            </div>
+                            </label>
                         </div>
-                    </aside>
+                    </section>
 
-                    <div
-                        className={`mx-auto w-full ${ADMIN_LAYOUT_TUNE.rightContentMaxWidth} space-y-6 px-4 pb-16 pt-10 ${ADMIN_LAYOUT_TUNE.rightContentDesktopPadding}`}
-                    >
-                        <div className="mb-6 flex items-center gap-4">
-                            <button
-                                type="button"
-                                onClick={() => navigate(-1)}
-                                className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] !bg-white text-[#c2c8d2] transition duration-200 hover:!bg-white active:!bg-white hover:text-[#9aa3b1]"
-                                aria-label="Quay lai"
-                            >
-                                <ChevronLeft size={25} strokeWidth={2.3} />
-                            </button>
-                            <div>
-                                <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
-                                    Thêm thông tin xe mới
-                                </h1>
-                                <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
-                                    Định danh và tạo trạng thái vận hành của xe
-                                </p>
-                            </div>
+                    <section className="space-y-3 border-t border-[#e5e7eb] pt-4">
+                        <h2 className="text-lg font-black text-[#1f2430]">
+                            Sơ đồ ghế ngồi
+                        </h2>
+                        <label className="space-y-1">
+                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                Tên mẫu sơ đồ ghế
+                            </span>
+                            <input
+                                type="text"
+                                value={templateName}
+                                onChange={(event) => setTemplateName(event.target.value)}
+                                placeholder="Giường nằm 40 chỗ"
+                                className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                required
+                            />
+                        </label>
+
+                        <div className="grid gap-3 md:grid-cols-2">
+                            <label className="space-y-1">
+                                <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                    Số tầng
+                                </span>
+                                <div className="relative">
+                                    <select
+                                        value={floors}
+                                        onChange={(event) => {
+                                            const nextFloors =
+                                                Number(event.target.value) === 1 ? 1 : 2;
+                                            setFloors(nextFloors);
+
+                                            if (nextFloors === 1) {
+                                                setPreviewFloor(1);
+                                                setRowOverrides((prev) =>
+                                                    prev.map((item) =>
+                                                        item.floor === 1
+                                                            ? item
+                                                            : { ...item, floor: 1 as const },
+                                                    ),
+                                                );
+                                            } else {
+                                                setPreviewFloor((prev) => (prev === 2 ? 2 : 1));
+                                            }
+                                        }}
+                                        className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                    >
+                                        <option value={1}>1</option>
+                                        <option value={2}>2</option>
+                                    </select>
+                                    <ChevronDown
+                                        size={16}
+                                        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
+                                    />
+                                </div>
+                            </label>
+
+                            <label className="space-y-1">
+                                <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                    Số hàng ghế
+                                </span>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    value={rows}
+                                    onChange={(event) =>
+                                        setRows(
+                                            clampNumber(
+                                                Number.parseInt(event.target.value, 10),
+                                                1,
+                                            ),
+                                        )
+                                    }
+                                    className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                />
+                            </label>
                         </div>
 
-                        <div className="pt-4 grid gap-6 xl:grid-cols-[1.1fr_0.9fr] xl:items-stretch">
-                            <form
-                                onSubmit={handleSubmit}
-                                className="h-full space-y-5 rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]"
-                            >
-                                <section className="space-y-3">
-                                    <h2 className="text-lg font-black text-[#1f2430]">
-                                        Thông tin xe
-                                    </h2>
-                                    <div className="grid gap-3 md:grid-cols-2">
-                                        <label className="space-y-1">
-                                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
-                                                Biển số xe
-                                            </span>
-                                            <input
-                                                type="text"
-                                                value={licensePlate}
-                                                onChange={(event) =>
-                                                    setLicensePlate(event.target.value)
-                                                }
-                                                placeholder="51B-123.45"
-                                                className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
-                                                required
-                                            />
-                                        </label>
-
-                                        <label className="space-y-1">
-                                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
-                                                Loại xe
-                                            </span>
-                                            <div className="relative">
-                                                <select
-                                                    value={busTypeId}
-                                                    onChange={(event) => setBusTypeId(event.target.value)}
-                                                    className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
-                                                    required
-                                                >
-                                                    <option value="">Chọn loại xe</option>
-                                                    {busTypes.map((option) => (
-                                                        <option key={option._id} value={option._id}>
-                                                            {option.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                <ChevronDown
-                                                    size={16}
-                                                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
+                        <div className="space-y-2 border-t border-[#e5e7eb] pt-4">
+                            <p className="text-lg font-black text-[#1f2430]">
+                                Số cột ghế
+                            </p>
+                            <div className="grid grid-cols-3 gap-3">
+                                {COLUMN_ORDER.map((columnName) => (
+                                    <article key={columnName} className="space-y-2">
+                                        <label className="flex items-center gap-2 text-sm font-semibold text-[#374151]">
+                                            <span className="relative inline-flex h-4 w-4 items-center justify-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={columns[columnName].enabled}
+                                                    onChange={(event) =>
+                                                        handleToggleColumn(
+                                                            columnName,
+                                                            event.target.checked,
+                                                        )
+                                                    }
+                                                    className="peer absolute inset-0 m-0 h-4 w-4 cursor-pointer appearance-none rounded-[4px] border border-[#d1d5db] bg-white"
                                                 />
-                                            </div>
-                                        </label>
-                                    </div>
-                                </section>
-
-                                <section className="space-y-3 border-t border-[#e5e7eb] pt-4">
-                                    <h2 className="text-lg font-black text-[#1f2430]">
-                                        Sơ đồ ghế ngồi
-                                    </h2>
-                                    <label className="space-y-1">
-                                        <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
-                                            Tên mẫu sơ đồ ghế
-                                        </span>
-                                        <input
-                                            type="text"
-                                            value={templateName}
-                                            onChange={(event) => setTemplateName(event.target.value)}
-                                            placeholder="Giường nằm 40 chỗ"
-                                            className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
-                                            required
-                                        />
-                                    </label>
-
-                                    <div className="grid gap-3 md:grid-cols-2">
-                                        <label className="space-y-1">
-                                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
-                                                Số tầng
+                                                <span className="pointer-events-none absolute h-[8px] w-[5px] -translate-y-[1px] rotate-45 border-b-2 border-r-2 border-[#e8791c] opacity-0 peer-checked:opacity-100" />
                                             </span>
-                                            <div className="relative">
-                                                <select
-                                                    value={floors}
-                                                    onChange={(event) => {
-                                                        const nextFloors =
-                                                            Number(event.target.value) === 1 ? 1 : 2;
-                                                        setFloors(nextFloors);
-
-                                                        if (nextFloors === 1) {
-                                                            setPreviewFloor(1);
-                                                            setRowOverrides((prev) =>
-                                                                prev.map((item) =>
-                                                                    item.floor === 1
-                                                                        ? item
-                                                                        : { ...item, floor: 1 as const },
-                                                                ),
-                                                            );
-                                                        } else {
-                                                            setPreviewFloor((prev) => (prev === 2 ? 2 : 1));
-                                                        }
-                                                    }}
-                                                    className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
-                                                >
-                                                    <option value={1}>1</option>
-                                                    <option value={2}>2</option>
-                                                </select>
-                                                <ChevronDown
-                                                    size={16}
-                                                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
-                                                />
-                                            </div>
+                                            {COLUMN_LABEL[columnName]}
                                         </label>
 
                                         <label className="space-y-1">
-                                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
-                                                Số hàng ghế
+                                            <span className="block text-[11px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
+                                                số ghế / 1 hàng
                                             </span>
                                             <input
                                                 type="number"
                                                 min={1}
-                                                value={rows}
+                                                value={columns[columnName].seatsPerRow}
                                                 onChange={(event) =>
-                                                    setRows(
+                                                    handleColumnSeatsChange(
+                                                        columnName,
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                disabled={!columns[columnName].enabled}
+                                                className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-[#374151] disabled:opacity-100"
+                                            />
+                                        </label>
+                                    </article>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="space-y-3 border-t border-[#e5e7eb] pt-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <h2 className="text-lg font-black text-[#1f2430]">
+                                Hàng ghế đặc biệt
+                            </h2>
+                            <button
+                                type="button"
+                                onClick={handleToggleOverride}
+                                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+                            >
+                                {rowOverrides.length === 0 ? (
+                                    <Plus size={14} />
+                                ) : (
+                                    <Trash2 size={13} />
+                                )}
+                                {rowOverrides.length === 0
+                                    ? "Thêm hàng đặc biệt"
+                                    : "Xóa hàng đặc biệt"}
+                            </button>
+                        </div>
+
+                        {rowOverrides.length === 0 ? (
+                            <p className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-3 py-3 text-sm text-[#6b7280]">
+                                Chưa có hàng ghế đặc biệt. Có thể thêm để chỉnh riêng từng
+                                hàng/tầng.
+                            </p>
+                        ) : null}
+
+                        <div className="space-y-3">
+                            {rowOverrides.map((item) => (
+                                <article
+                                    key={item.id}
+                                    className="space-y-3 rounded-[10px] bg-white p-3"
+                                >
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                        <label className="space-y-1">
+                                            <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
+                                                Vị trí hàng ghế
+                                            </span>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                value={item.rowIndex}
+                                                onChange={(event) =>
+                                                    handleUpdateOverride(
+                                                        item.id,
+                                                        "rowIndex",
                                                         clampNumber(
                                                             Number.parseInt(event.target.value, 10),
                                                             1,
+                                                            rows,
                                                         ),
                                                     )
                                                 }
-                                                className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                                className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none"
                                             />
+                                        </label>
+
+                                        <label className="space-y-1">
+                                            <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
+                                                Tầng
+                                            </span>
+                                            <div className="relative">
+                                                <select
+                                                    value={item.floor}
+                                                    onChange={(event) =>
+                                                        handleUpdateOverride(
+                                                            item.id,
+                                                            "floor",
+                                                            Number(event.target.value) === 1 ? 1 : 2,
+                                                        )
+                                                    }
+                                                    disabled={floors === 1}
+                                                    className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none disabled:cursor-not-allowed disabled:bg-[#e5e7eb]"
+                                                >
+                                                    <option value={1}>Tầng 1</option>
+                                                    <option value={2}>Tầng 2</option>
+                                                </select>
+                                                <ChevronDown
+                                                    size={16}
+                                                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
+                                                />
+                                            </div>
                                         </label>
                                     </div>
 
-                                    <div className="space-y-2 border-t border-[#e5e7eb] pt-4">
-                                        <p className="text-lg font-black text-[#1f2430]">
-                                            Số cột ghế
-                                        </p>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            {COLUMN_ORDER.map((columnName) => (
-                                                <article key={columnName} className="space-y-2">
-                                                    <label className="flex items-center gap-2 text-sm font-semibold text-[#374151]">
-                                                        <span className="relative inline-flex h-4 w-4 items-center justify-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={columns[columnName].enabled}
-                                                                onChange={(event) =>
-                                                                    handleToggleColumn(
-                                                                        columnName,
-                                                                        event.target.checked,
-                                                                    )
-                                                                }
-                                                                className="peer absolute inset-0 m-0 h-4 w-4 cursor-pointer appearance-none rounded-[4px] border border-[#d1d5db] bg-white"
-                                                            />
-                                                            <span className="pointer-events-none absolute h-[8px] w-[5px] -translate-y-[1px] rotate-45 border-b-2 border-r-2 border-[#e8791c] opacity-0 peer-checked:opacity-100" />
-                                                        </span>
-                                                        {COLUMN_LABEL[columnName]}
-                                                    </label>
-
-                                                    <label className="space-y-1">
-                                                        <span className="block text-[11px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
-                                                            số ghế / 1 hàng
-                                                        </span>
-                                                        <input
-                                                            type="number"
-                                                            min={1}
-                                                            value={columns[columnName].seatsPerRow}
-                                                            onChange={(event) =>
-                                                                handleColumnSeatsChange(
-                                                                    columnName,
-                                                                    event.target.value,
-                                                                )
-                                                            }
-                                                            disabled={!columns[columnName].enabled}
-                                                            className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-[#374151] disabled:opacity-100"
-                                                        />
-                                                    </label>
-                                                </article>
-                                            ))}
-                                        </div>
+                                    <div
+                                        className={`grid gap-3 ${overrideColumnsGridClass}`}
+                                    >
+                                        {activeColumns.map((column) => {
+                                            const field = OVERRIDE_KEY_BY_COLUMN[column.name];
+                                            return (
+                                                <label
+                                                    key={`${item.id}-${column.name}`}
+                                                    className="space-y-1"
+                                                >
+                                                    <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
+                                                        {COLUMN_LABEL[column.name]}
+                                                    </span>
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        placeholder=""
+                                                        value={item[field]}
+                                                        onChange={(event) =>
+                                                            handleUpdateOverride(
+                                                                item.id,
+                                                                field,
+                                                                event.target.value,
+                                                            )
+                                                        }
+                                                        className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none"
+                                                    />
+                                                </label>
+                                            );
+                                        })}
                                     </div>
-                                </section>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
 
-                                <section className="space-y-3 border-t border-[#e5e7eb] pt-4">
-                                    <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <h2 className="text-lg font-black text-[#1f2430]">
-                                            Hàng ghế đặc biệt
-                                        </h2>
+                    {validationMessage ? (
+                        <p className="rounded-[8px] border border-[#d1d5db] bg-[#f9fafb] px-3 py-2 text-sm font-semibold text-[#4b5563]">
+                            {validationMessage}
+                        </p>
+                    ) : null}
+
+                    <button
+                        type="submit"
+                        className="w-full rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+                    >
+                        Thêm mới thông tin xe
+                    </button>
+                </form>
+
+                <aside className="h-full space-y-4 rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
+                    <div>
+                        <h2 className="text-lg font-black text-[#1f2430]">
+                            Sơ đồ ghế tự sinh
+                        </h2>
+                        <p className="mt-1 text-sm text-[#7c8493]">
+                            Sơ đồ ghế này chỉ để minh họa cấu hình chỗ ngồi.
+                        </p>
+                    </div>
+
+                    <div className="rounded-[14px] border border-[#e7eaf0] bg-white p-3">
+                        <div className="mb-3 grid grid-cols-2 gap-3 text-sm">
+                            <div className="rounded-[10px] border border-[#e3e7ef] bg-white px-3 py-2">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9aa4b2]">
+                                    Tầng 1
+                                </p>
+                                <p className="text-lg font-black text-[#1f2430]">
+                                    {floors}
+                                </p>
+                            </div>
+                            <div className="rounded-[10px] border border-[#e3e7ef] bg-white px-3 py-2">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9aa4b2]">
+                                    Tổng ghế
+                                </p>
+                                <p className="text-lg font-black text-[#1f2430]">
+                                    {totalSeats}
+                                </p>
+                            </div>
+                        </div>
+
+                        {previewFloorLayout ? (
+                            <div className="relative overflow-hidden rounded-[16px] border border-[#d7dde8] bg-white px-2 pb-3 pt-3">
+                                <div className="relative mb-3 flex items-center justify-between border-b border-[#e6e9ef] px-1 pb-2">
+                                    <div className="inline-flex items-center gap-2 text-[#6f7785]">
+                                        <h3 className="text-base font-black leading-none text-[#2b2f36]">
+                                            Tầng {previewFloorLayout.floor}
+                                        </h3>
+                                    </div>
+                                    {floors === 2 ? (
                                         <button
                                             type="button"
-                                            onClick={handleToggleOverride}
-                                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+                                            onClick={() =>
+                                                setPreviewFloor(previewFloor === 1 ? 2 : 1)
+                                            }
+                                            className="rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
                                         >
-                                            {rowOverrides.length === 0 ? (
-                                                <Plus size={14} />
-                                            ) : (
-                                                <Trash2 size={13} />
-                                            )}
-                                            {rowOverrides.length === 0
-                                                ? "Thêm hàng đặc biệt"
-                                                : "Xóa hàng đặc biệt"}
+                                            Xem tầng {previewFloor === 1 ? 2 : 1}
                                         </button>
-                                    </div>
-
-                                    {rowOverrides.length === 0 ? (
-                                        <p className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-3 py-3 text-sm text-[#6b7280]">
-                                            Chưa có hàng ghế đặc biệt. Có thể thêm để chỉnh riêng từng
-                                            hàng/tầng.
-                                        </p>
                                     ) : null}
-
-                                    <div className="space-y-3">
-                                        {rowOverrides.map((item) => (
-                                            <article
-                                                key={item.id}
-                                                className="space-y-3 rounded-[10px] bg-white p-3"
-                                            >
-                                                <div className="grid gap-3 md:grid-cols-2">
-                                                    <label className="space-y-1">
-                                                        <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
-                                                            Vị trí hàng ghế
-                                                        </span>
-                                                        <input
-                                                            type="number"
-                                                            min={1}
-                                                            value={item.rowIndex}
-                                                            onChange={(event) =>
-                                                                handleUpdateOverride(
-                                                                    item.id,
-                                                                    "rowIndex",
-                                                                    clampNumber(
-                                                                        Number.parseInt(event.target.value, 10),
-                                                                        1,
-                                                                        rows,
-                                                                    ),
-                                                                )
-                                                            }
-                                                            className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none"
-                                                        />
-                                                    </label>
-
-                                                    <label className="space-y-1">
-                                                        <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
-                                                            Tầng
-                                                        </span>
-                                                        <div className="relative">
-                                                            <select
-                                                                value={item.floor}
-                                                                onChange={(event) =>
-                                                                    handleUpdateOverride(
-                                                                        item.id,
-                                                                        "floor",
-                                                                        Number(event.target.value) === 1 ? 1 : 2,
-                                                                    )
-                                                                }
-                                                                disabled={floors === 1}
-                                                                className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none disabled:cursor-not-allowed disabled:bg-[#e5e7eb]"
-                                                            >
-                                                                <option value={1}>Tầng 1</option>
-                                                                <option value={2}>Tầng 2</option>
-                                                            </select>
-                                                            <ChevronDown
-                                                                size={16}
-                                                                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
-                                                            />
-                                                        </div>
-                                                    </label>
-                                                </div>
-
-                                                <div
-                                                    className={`grid gap-3 ${overrideColumnsGridClass}`}
-                                                >
-                                                    {activeColumns.map((column) => {
-                                                        const field = OVERRIDE_KEY_BY_COLUMN[column.name];
-                                                        return (
-                                                            <label
-                                                                key={`${item.id}-${column.name}`}
-                                                                className="space-y-1"
-                                                            >
-                                                                <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b7280]">
-                                                                    {COLUMN_LABEL[column.name]}
-                                                                </span>
-                                                                <input
-                                                                    type="number"
-                                                                    min={0}
-                                                                    placeholder=""
-                                                                    value={item[field]}
-                                                                    onChange={(event) =>
-                                                                        handleUpdateOverride(
-                                                                            item.id,
-                                                                            field,
-                                                                            event.target.value,
-                                                                        )
-                                                                    }
-                                                                    className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none"
-                                                                />
-                                                            </label>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </article>
-                                        ))}
-                                    </div>
-                                </section>
-
-                                {validationMessage ? (
-                                    <p className="rounded-[8px] border border-[#d1d5db] bg-[#f9fafb] px-3 py-2 text-sm font-semibold text-[#4b5563]">
-                                        {validationMessage}
-                                    </p>
-                                ) : null}
-
-                                <button
-                                    type="submit"
-                                    className="w-full rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
-                                >
-                                    Thêm mới thông tin xe
-                                </button>
-                            </form>
-
-                            <aside className="h-full space-y-4 rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
-                                <div>
-                                    <h2 className="text-lg font-black text-[#1f2430]">
-                                        Sơ đồ ghế tự sinh
-                                    </h2>
-                                    <p className="mt-1 text-sm text-[#7c8493]">
-                                        Sơ đồ ghế này chỉ để minh họa cấu hình chỗ ngồi.
-                                    </p>
                                 </div>
 
-                                <div className="rounded-[14px] border border-[#e7eaf0] bg-white p-3">
-                                    <div className="mb-3 grid grid-cols-2 gap-3 text-sm">
-                                        <div className="rounded-[10px] border border-[#e3e7ef] bg-white px-3 py-2">
-                                            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9aa4b2]">
-                                                Tầng 1
-                                            </p>
-                                            <p className="text-lg font-black text-[#1f2430]">
-                                                {floors}
-                                            </p>
-                                        </div>
-                                        <div className="rounded-[10px] border border-[#e3e7ef] bg-white px-3 py-2">
-                                            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#9aa4b2]">
-                                                Tổng ghế
-                                            </p>
-                                            <p className="text-lg font-black text-[#1f2430]">
-                                                {totalSeats}
-                                            </p>
-                                        </div>
-                                    </div>
+                                {activeColumns.length === 0 ? (
+                                    <p className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2 text-center text-xs text-[#6b7280]">
+                                        Chọn ít nhất một cột để tạo sơ đồ.
+                                    </p>
+                                ) : (
+                                    <div className="relative rounded-[12px] bg-white px-2 pb-3 pt-2">
+                                        <div
+                                            className="mb-3 grid items-center gap-2"
+                                            style={{ gridTemplateColumns: seatGridTemplate }}
+                                        >
+                                            {activeColumns.map((column) => (
+                                                <div
+                                                    key={`coach-head-${previewFloorLayout.floor}-${column.name}`}
+                                                    className="flex min-h-[36px] items-center justify-center gap-1"
+                                                >
+                                                    {Array.from(
+                                                        {
+                                                            length: Math.max(
+                                                                previewFloorLayout.rows[0]?.seatsByColumn[
+                                                                    column.name
+                                                                ]?.length ?? 0,
+                                                                1,
+                                                            ),
+                                                        },
+                                                        (_, slotIndex) => {
+                                                            const slotCount = Math.max(
+                                                                previewFloorLayout.rows[0]?.seatsByColumn[
+                                                                    column.name
+                                                                ]?.length ?? 0,
+                                                                1,
+                                                            );
+                                                            const isDriverSlot =
+                                                                column.name === activeColumns[0]?.name &&
+                                                                slotIndex === 0;
+                                                            const isDoorSlot =
+                                                                column.name ===
+                                                                activeColumns[activeColumns.length - 1]
+                                                                    ?.name && slotIndex === slotCount - 1;
 
-                                    {previewFloorLayout ? (
-                                        <div className="relative overflow-hidden rounded-[16px] border border-[#d7dde8] bg-white px-2 pb-3 pt-3">
-                                            <div className="relative mb-3 flex items-center justify-between border-b border-[#e6e9ef] px-1 pb-2">
-                                                <div className="inline-flex items-center gap-2 text-[#6f7785]">
-                                                    <h3 className="text-base font-black leading-none text-[#2b2f36]">
-                                                        Tầng {previewFloorLayout.floor}
-                                                    </h3>
+                                                            return (
+                                                                <span
+                                                                    key={`${column.name}-head-slot-${slotIndex}`}
+                                                                    className="inline-flex h-[36px] w-[62px] items-center justify-center text-[#6e7787]"
+                                                                >
+                                                                    {isDriverSlot ? (
+                                                                        <GiSteeringWheel size={28} />
+                                                                    ) : isDoorSlot ? (
+                                                                        <LogIn
+                                                                            size={28}
+                                                                            strokeWidth={1.9}
+                                                                            style={{ transform: "scaleX(-1)" }}
+                                                                        />
+                                                                    ) : null}
+                                                                </span>
+                                                            );
+                                                        },
+                                                    )}
                                                 </div>
-                                                {floors === 2 ? (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setPreviewFloor(previewFloor === 1 ? 2 : 1)
-                                                        }
-                                                        className="rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
-                                                    >
-                                                        Xem tầng {previewFloor === 1 ? 2 : 1}
-                                                    </button>
-                                                ) : null}
-                                            </div>
+                                            ))}
+                                        </div>
 
-                                            {activeColumns.length === 0 ? (
-                                                <p className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2 text-center text-xs text-[#6b7280]">
-                                                    Chọn ít nhất một cột để tạo sơ đồ.
-                                                </p>
-                                            ) : (
-                                                <div className="relative rounded-[12px] bg-white px-2 pb-3 pt-2">
-                                                    <div
-                                                        className="mb-3 grid items-center gap-2"
-                                                        style={{ gridTemplateColumns: seatGridTemplate }}
-                                                    >
-                                                        {activeColumns.map((column) => (
-                                                            <div
-                                                                key={`coach-head-${previewFloorLayout.floor}-${column.name}`}
-                                                                className="flex min-h-[36px] items-center justify-center gap-1"
+                                        <span className="pointer-events-none absolute bottom-3 right-3 top-[58px] border-r border-dashed border-[#d5dce8]" />
+
+                                        <div className="space-y-2">
+                                            {previewFloorLayout.rows.map((rowLayout) =>
+                                                (() => {
+                                                    const rowKey = `${previewFloorLayout.floor}-${rowLayout.rowIndex}`;
+                                                    const rowOverride =
+                                                        overrideByFloorRow.get(rowKey);
+                                                    const rowSeatCount = activeColumns.reduce(
+                                                        (total, column) =>
+                                                            total +
+                                                            (rowLayout.seatsByColumn[column.name]
+                                                                ?.length ?? 0),
+                                                        0,
+                                                    );
+
+                                                    const isSpecialMergedRow =
+                                                        !!rowOverride &&
+                                                        rowSeatCount > normalSeatsPerRow;
+
+                                                    if (isSpecialMergedRow) {
+                                                        const splitByColumn: Partial<
+                                                            Record<
+                                                                ColumnName,
+                                                                { base: SeatCell[]; extras: SeatCell[] }
                                                             >
-                                                                {Array.from(
-                                                                    {
-                                                                        length: Math.max(
-                                                                            previewFloorLayout.rows[0]?.seatsByColumn[
-                                                                                column.name
-                                                                            ]?.length ?? 0,
-                                                                            1,
-                                                                        ),
-                                                                    },
-                                                                    (_, slotIndex) => {
-                                                                        const slotCount = Math.max(
-                                                                            previewFloorLayout.rows[0]?.seatsByColumn[
-                                                                                column.name
-                                                                            ]?.length ?? 0,
-                                                                            1,
-                                                                        );
-                                                                        const isDriverSlot =
-                                                                            column.name === activeColumns[0]?.name &&
-                                                                            slotIndex === 0;
-                                                                        const isDoorSlot =
-                                                                            column.name ===
-                                                                            activeColumns[activeColumns.length - 1]
-                                                                                ?.name && slotIndex === slotCount - 1;
+                                                        > = {};
 
-                                                                        return (
-                                                                            <span
-                                                                                key={`${column.name}-head-slot-${slotIndex}`}
-                                                                                className="inline-flex h-[36px] w-[62px] items-center justify-center text-[#6e7787]"
-                                                                            >
-                                                                                {isDriverSlot ? (
-                                                                                    <GiSteeringWheel size={28} />
-                                                                                ) : isDoorSlot ? (
-                                                                                    <LogIn
-                                                                                        size={28}
-                                                                                        strokeWidth={1.9}
-                                                                                        style={{ transform: "scaleX(-1)" }}
-                                                                                    />
-                                                                                ) : null}
-                                                                            </span>
-                                                                        );
-                                                                    },
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                                        for (const column of activeColumns) {
+                                                            const seats =
+                                                                rowLayout.seatsByColumn[column.name] ??
+                                                                [];
+                                                            const defaultCount = column.seats_per_row;
+                                                            const extraCount = Math.max(
+                                                                seats.length - defaultCount,
+                                                                0,
+                                                            );
 
-                                                    <span className="pointer-events-none absolute bottom-3 right-3 top-[58px] border-r border-dashed border-[#d5dce8]" />
+                                                            if (extraCount === 0) {
+                                                                splitByColumn[column.name] = {
+                                                                    base: seats,
+                                                                    extras: [],
+                                                                };
+                                                                continue;
+                                                            }
 
-                                                    <div className="space-y-2">
-                                                        {previewFloorLayout.rows.map((rowLayout) =>
-                                                            (() => {
-                                                                const rowKey = `${previewFloorLayout.floor}-${rowLayout.rowIndex}`;
-                                                                const rowOverride =
-                                                                    overrideByFloorRow.get(rowKey);
-                                                                const rowSeatCount = activeColumns.reduce(
-                                                                    (total, column) =>
-                                                                        total +
-                                                                        (rowLayout.seatsByColumn[column.name]
-                                                                            ?.length ?? 0),
-                                                                    0,
-                                                                );
+                                                            if (column.name === "RIGHT") {
+                                                                splitByColumn[column.name] = {
+                                                                    base: seats.slice(extraCount),
+                                                                    extras: seats.slice(0, extraCount),
+                                                                };
+                                                                continue;
+                                                            }
 
-                                                                const isSpecialMergedRow =
-                                                                    !!rowOverride &&
-                                                                    rowSeatCount > normalSeatsPerRow;
+                                                            splitByColumn[column.name] = {
+                                                                base: seats.slice(0, defaultCount),
+                                                                extras: seats.slice(defaultCount),
+                                                            };
+                                                        }
 
-                                                                if (isSpecialMergedRow) {
-                                                                    const splitByColumn: Partial<
-                                                                        Record<
-                                                                            ColumnName,
-                                                                            { base: SeatCell[]; extras: SeatCell[] }
-                                                                        >
-                                                                    > = {};
+                                                        const centeredExtraSeats =
+                                                            activeColumns.flatMap(
+                                                                (column) =>
+                                                                    splitByColumn[column.name]?.extras ??
+                                                                    [],
+                                                            );
 
-                                                                    for (const column of activeColumns) {
-                                                                        const seats =
-                                                                            rowLayout.seatsByColumn[column.name] ??
-                                                                            [];
-                                                                        const defaultCount = column.seats_per_row;
-                                                                        const extraCount = Math.max(
-                                                                            seats.length - defaultCount,
-                                                                            0,
-                                                                        );
+                                                        const renderSpecialSeat = (
+                                                            seat: SeatCell,
+                                                        ) => {
+                                                            const seatVisual =
+                                                                getSeatVisualStyles("EMPTY");
 
-                                                                        if (extraCount === 0) {
-                                                                            splitByColumn[column.name] = {
-                                                                                base: seats,
-                                                                                extras: [],
-                                                                            };
-                                                                            continue;
-                                                                        }
+                                                            return (
+                                                                <div
+                                                                    key={seat.id}
+                                                                    title={`Tang ${seat.floor} - Hang ${seat.rowIndex} - ${seat.column}`}
+                                                                    className="relative h-[36px] w-[62px] overflow-visible"
+                                                                >
+                                                                    <span
+                                                                        className={`pointer-events-none absolute left-[13px] top-[1px] h-[11px] w-[35px] rounded-t-[6px] border-[2px] border-b-0 ${seatVisual.detail}`}
+                                                                    />
+                                                                    <span
+                                                                        className={`pointer-events-none absolute left-[7px] top-[10px] flex h-[17px] w-[48px] items-center justify-center rounded-[4px] border-[2px] text-[10px] font-black leading-none ${seatVisual.frame} ${seatVisual.label}`}
+                                                                    >
+                                                                        {seat.seatCode}
+                                                                    </span>
+                                                                    <span
+                                                                        className={`pointer-events-none absolute left-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
+                                                                    />
+                                                                    <span
+                                                                        className={`pointer-events-none absolute right-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        };
 
-                                                                        if (column.name === "RIGHT") {
-                                                                            splitByColumn[column.name] = {
-                                                                                base: seats.slice(extraCount),
-                                                                                extras: seats.slice(0, extraCount),
-                                                                            };
-                                                                            continue;
-                                                                        }
+                                                        const hasLeftAndRightOnly =
+                                                            activeColumns.length === 2 &&
+                                                            activeColumns.some(
+                                                                (column) => column.name === "LEFT",
+                                                            ) &&
+                                                            activeColumns.some(
+                                                                (column) => column.name === "RIGHT",
+                                                            );
 
-                                                                        splitByColumn[column.name] = {
-                                                                            base: seats.slice(0, defaultCount),
-                                                                            extras: seats.slice(defaultCount),
-                                                                        };
-                                                                    }
+                                                        if (hasLeftAndRightOnly) {
+                                                            const leftBaseSeats =
+                                                                splitByColumn.LEFT?.base ?? [];
+                                                            const rightBaseSeats =
+                                                                splitByColumn.RIGHT?.base ?? [];
 
-                                                                    const centeredExtraSeats =
-                                                                        activeColumns.flatMap(
-                                                                            (column) =>
-                                                                                splitByColumn[column.name]?.extras ??
-                                                                                [],
-                                                                        );
-
-                                                                    const renderSpecialSeat = (
-                                                                        seat: SeatCell,
-                                                                    ) => {
-                                                                        const seatVisual =
-                                                                            getSeatVisualStyles("EMPTY");
-
-                                                                        return (
-                                                                            <div
-                                                                                key={seat.id}
-                                                                                title={`Tang ${seat.floor} - Hang ${seat.rowIndex} - ${seat.column}`}
-                                                                                className="relative h-[36px] w-[62px] overflow-visible"
-                                                                            >
-                                                                                <span
-                                                                                    className={`pointer-events-none absolute left-[13px] top-[1px] h-[11px] w-[35px] rounded-t-[6px] border-[2px] border-b-0 ${seatVisual.detail}`}
-                                                                                />
-                                                                                <span
-                                                                                    className={`pointer-events-none absolute left-[7px] top-[10px] flex h-[17px] w-[48px] items-center justify-center rounded-[4px] border-[2px] text-[10px] font-black leading-none ${seatVisual.frame} ${seatVisual.label}`}
-                                                                                >
-                                                                                    {seat.seatCode}
+                                                            return (
+                                                                <div
+                                                                    key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}`}
+                                                                    className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2"
+                                                                >
+                                                                    <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
+                                                                        Hang dac biet
+                                                                    </p>
+                                                                    <div className="flex min-h-8 items-center justify-center gap-3">
+                                                                        <div className="flex min-h-8 min-w-[124px] items-center justify-end gap-1">
+                                                                            {leftBaseSeats.length > 0 ? (
+                                                                                leftBaseSeats.map((seat) =>
+                                                                                    renderSpecialSeat(seat),
+                                                                                )
+                                                                            ) : (
+                                                                                <span className="text-[11px] font-semibold text-[#c1c8d4]">
+                                                                                    -
                                                                                 </span>
-                                                                                <span
-                                                                                    className={`pointer-events-none absolute left-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
-                                                                                />
-                                                                                <span
-                                                                                    className={`pointer-events-none absolute right-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
-                                                                                />
+                                                                            )}
+                                                                        </div>
+
+                                                                        {centeredExtraSeats.length > 0 ? (
+                                                                            <div className="flex min-h-8 items-center justify-center gap-1">
+                                                                                {centeredExtraSeats.map((seat) =>
+                                                                                    renderSpecialSeat(seat),
+                                                                                )}
                                                                             </div>
-                                                                        );
-                                                                    };
+                                                                        ) : null}
 
-                                                                    const hasLeftAndRightOnly =
-                                                                        activeColumns.length === 2 &&
-                                                                        activeColumns.some(
-                                                                            (column) => column.name === "LEFT",
-                                                                        ) &&
-                                                                        activeColumns.some(
-                                                                            (column) => column.name === "RIGHT",
-                                                                        );
+                                                                        <div className="flex min-h-8 min-w-[124px] items-center justify-start gap-1">
+                                                                            {rightBaseSeats.length > 0 ? (
+                                                                                rightBaseSeats.map((seat) =>
+                                                                                    renderSpecialSeat(seat),
+                                                                                )
+                                                                            ) : (
+                                                                                <span className="text-[11px] font-semibold text-[#c1c8d4]">
+                                                                                    -
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }
 
-                                                                    if (hasLeftAndRightOnly) {
-                                                                        const leftBaseSeats =
-                                                                            splitByColumn.LEFT?.base ?? [];
-                                                                        const rightBaseSeats =
-                                                                            splitByColumn.RIGHT?.base ?? [];
+                                                        return (
+                                                            <div
+                                                                key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}`}
+                                                                className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2"
+                                                            >
+                                                                <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
+                                                                    Hang dac biet
+                                                                </p>
+                                                                <div
+                                                                    className="grid items-center gap-2"
+                                                                    style={{
+                                                                        gridTemplateColumns: seatGridTemplate,
+                                                                    }}
+                                                                >
+                                                                    {activeColumns.map((column) => {
+                                                                        const seats =
+                                                                            splitByColumn[column.name]?.base ??
+                                                                            [];
 
                                                                         return (
                                                                             <div
-                                                                                key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}`}
-                                                                                className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2"
+                                                                                key={`special-group-${previewFloorLayout.floor}-${rowLayout.rowIndex}-${column.name}`}
+                                                                                className="flex min-h-8 items-center justify-center"
                                                                             >
-                                                                                <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
-                                                                                    Hang dac biet
-                                                                                </p>
-                                                                                <div className="flex min-h-8 items-center justify-center gap-3">
-                                                                                    <div className="flex min-h-8 min-w-[124px] items-center justify-end gap-1">
-                                                                                        {leftBaseSeats.length > 0 ? (
-                                                                                            leftBaseSeats.map((seat) =>
-                                                                                                renderSpecialSeat(seat),
-                                                                                            )
-                                                                                        ) : (
-                                                                                            <span className="text-[11px] font-semibold text-[#c1c8d4]">
-                                                                                                -
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-
-                                                                                    {centeredExtraSeats.length > 0 ? (
-                                                                                        <div className="flex min-h-8 items-center justify-center gap-1">
-                                                                                            {centeredExtraSeats.map((seat) =>
-                                                                                                renderSpecialSeat(seat),
-                                                                                            )}
-                                                                                        </div>
-                                                                                    ) : null}
-
-                                                                                    <div className="flex min-h-8 min-w-[124px] items-center justify-start gap-1">
-                                                                                        {rightBaseSeats.length > 0 ? (
-                                                                                            rightBaseSeats.map((seat) =>
-                                                                                                renderSpecialSeat(seat),
-                                                                                            )
-                                                                                        ) : (
-                                                                                            <span className="text-[11px] font-semibold text-[#c1c8d4]">
-                                                                                                -
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                </div>
+                                                                                {seats.length > 0 ? (
+                                                                                    seats.map((seat) =>
+                                                                                        renderSpecialSeat(seat),
+                                                                                    )
+                                                                                ) : (
+                                                                                    <span className="text-[11px] font-semibold text-[#c1c8d4]">
+                                                                                        -
+                                                                                    </span>
+                                                                                )}
                                                                             </div>
                                                                         );
-                                                                    }
+                                                                    })}
+                                                                </div>
 
-                                                                    return (
-                                                                        <div
-                                                                            key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}`}
-                                                                            className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2"
-                                                                        >
-                                                                            <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
-                                                                                Hang dac biet
-                                                                            </p>
-                                                                            <div
-                                                                                className="grid items-center gap-2"
-                                                                                style={{
-                                                                                    gridTemplateColumns: seatGridTemplate,
-                                                                                }}
-                                                                            >
-                                                                                {activeColumns.map((column) => {
-                                                                                    const seats =
-                                                                                        splitByColumn[column.name]?.base ??
-                                                                                        [];
+                                                                {centeredExtraSeats.length > 0 ? (
+                                                                    <div className="mt-1 flex min-h-8 items-center justify-center gap-1">
+                                                                        {centeredExtraSeats.map((seat) =>
+                                                                            renderSpecialSeat(seat),
+                                                                        )}
+                                                                    </div>
+                                                                ) : null}
+                                                            </div>
+                                                        );
+                                                    }
 
-                                                                                    return (
-                                                                                        <div
-                                                                                            key={`special-group-${previewFloorLayout.floor}-${rowLayout.rowIndex}-${column.name}`}
-                                                                                            className="flex min-h-8 items-center justify-center"
-                                                                                        >
-                                                                                            {seats.length > 0 ? (
-                                                                                                seats.map((seat) =>
-                                                                                                    renderSpecialSeat(seat),
-                                                                                                )
-                                                                                            ) : (
-                                                                                                <span className="text-[11px] font-semibold text-[#c1c8d4]">
-                                                                                                    -
-                                                                                                </span>
-                                                                                            )}
-                                                                                        </div>
-                                                                                    );
-                                                                                })}
-                                                                            </div>
-
-                                                                            {centeredExtraSeats.length > 0 ? (
-                                                                                <div className="mt-1 flex min-h-8 items-center justify-center gap-1">
-                                                                                    {centeredExtraSeats.map((seat) =>
-                                                                                        renderSpecialSeat(seat),
-                                                                                    )}
-                                                                                </div>
-                                                                            ) : null}
-                                                                        </div>
-                                                                    );
-                                                                }
+                                                    return (
+                                                        <div
+                                                            key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}`}
+                                                            className="grid items-center gap-2"
+                                                            style={{
+                                                                gridTemplateColumns: seatGridTemplate,
+                                                            }}
+                                                        >
+                                                            {activeColumns.map((column) => {
+                                                                const seats =
+                                                                    rowLayout.seatsByColumn[column.name] ??
+                                                                    [];
 
                                                                 return (
                                                                     <div
-                                                                        key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}`}
-                                                                        className="grid items-center gap-2"
-                                                                        style={{
-                                                                            gridTemplateColumns: seatGridTemplate,
-                                                                        }}
+                                                                        key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}-${column.name}`}
+                                                                        className="flex min-h-8 items-center justify-center gap-1"
                                                                     >
-                                                                        {activeColumns.map((column) => {
-                                                                            const seats =
-                                                                                rowLayout.seatsByColumn[column.name] ??
-                                                                                [];
+                                                                        {seats.length > 0 ? (
+                                                                            seats.map((seat) => {
+                                                                                const seatVisual =
+                                                                                    getSeatVisualStyles("EMPTY");
 
-                                                                            return (
-                                                                                <div
-                                                                                    key={`floor-${previewFloorLayout.floor}-row-${rowLayout.rowIndex}-${column.name}`}
-                                                                                    className="flex min-h-8 items-center justify-center gap-1"
-                                                                                >
-                                                                                    {seats.length > 0 ? (
-                                                                                        seats.map((seat) => {
-                                                                                            const seatVisual =
-                                                                                                getSeatVisualStyles("EMPTY");
-
-                                                                                            return (
-                                                                                                <div
-                                                                                                    key={seat.id}
-                                                                                                    title={`Tang ${seat.floor} - Hang ${seat.rowIndex} - ${seat.column}`}
-                                                                                                    className="relative h-[36px] w-[62px] overflow-visible"
-                                                                                                >
-                                                                                                    <span
-                                                                                                        className={`pointer-events-none absolute left-[13px] top-[1px] h-[11px] w-[35px] rounded-t-[6px] border-[2px] border-b-0 ${seatVisual.detail}`}
-                                                                                                    />
-                                                                                                    <span
-                                                                                                        className={`pointer-events-none absolute left-[7px] top-[10px] flex h-[17px] w-[48px] items-center justify-center rounded-[4px] border-[2px] text-[10px] font-black leading-none ${seatVisual.frame} ${seatVisual.label}`}
-                                                                                                    >
-                                                                                                        {seat.seatCode}
-                                                                                                    </span>
-                                                                                                    <span
-                                                                                                        className={`pointer-events-none absolute left-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
-                                                                                                    />
-                                                                                                    <span
-                                                                                                        className={`pointer-events-none absolute right-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
-                                                                                                    />
-                                                                                                </div>
-                                                                                            );
-                                                                                        })
-                                                                                    ) : (
-                                                                                        <span className="text-[11px] font-semibold text-[#c1c8d4]">
-                                                                                            -
+                                                                                return (
+                                                                                    <div
+                                                                                        key={seat.id}
+                                                                                        title={`Tang ${seat.floor} - Hang ${seat.rowIndex} - ${seat.column}`}
+                                                                                        className="relative h-[36px] w-[62px] overflow-visible"
+                                                                                    >
+                                                                                        <span
+                                                                                            className={`pointer-events-none absolute left-[13px] top-[1px] h-[11px] w-[35px] rounded-t-[6px] border-[2px] border-b-0 ${seatVisual.detail}`}
+                                                                                        />
+                                                                                        <span
+                                                                                            className={`pointer-events-none absolute left-[7px] top-[10px] flex h-[17px] w-[48px] items-center justify-center rounded-[4px] border-[2px] text-[10px] font-black leading-none ${seatVisual.frame} ${seatVisual.label}`}
+                                                                                        >
+                                                                                            {seat.seatCode}
                                                                                         </span>
-                                                                                    )}
-                                                                                </div>
-                                                                            );
-                                                                        })}
+                                                                                        <span
+                                                                                            className={`pointer-events-none absolute left-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
+                                                                                        />
+                                                                                        <span
+                                                                                            className={`pointer-events-none absolute right-[20px] top-[27px] h-[6px] w-[2px] rounded-b-[1px] ${seatVisual.leg}`}
+                                                                                        />
+                                                                                    </div>
+                                                                                );
+                                                                            })
+                                                                        ) : (
+                                                                            <span className="text-[11px] font-semibold text-[#c1c8d4]">
+                                                                                -
+                                                                            </span>
+                                                                        )}
                                                                     </div>
                                                                 );
-                                                            })(),
-                                                        )}
-                                                    </div>
-                                                </div>
+                                                            })}
+                                                        </div>
+                                                    );
+                                                })(),
                                             )}
                                         </div>
-                                    ) : null}
-                                </div>
-                            </aside>
-                        </div>
-
-                        {payloadPreview ? (
-                            <section className="rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
-                                <h2 className="mb-2 text-lg font-black text-[#1f2430]">
-                                    Payload preview
-                                </h2>
-                                <pre className="overflow-x-auto rounded-[12px] bg-[#f8fafc] p-3 text-xs leading-relaxed text-[#374151]">
-                                    {payloadPreview}
-                                </pre>
-                            </section>
+                                    </div>
+                                )}
+                            </div>
                         ) : null}
                     </div>
-                </div>
-            </section>
+                </aside>
+            </div>
+
+            {payloadPreview ? (
+                <section className="rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]">
+                    <h2 className="mb-2 text-lg font-black text-[#1f2430]">
+                        Payload preview
+                    </h2>
+                    <pre className="overflow-x-auto rounded-[12px] bg-[#f8fafc] p-3 text-xs leading-relaxed text-[#374151]">
+                        {payloadPreview}
+                    </pre>
+                </section>
+            ) : null}
         </div>
+
     );
 }

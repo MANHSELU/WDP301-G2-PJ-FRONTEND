@@ -149,7 +149,7 @@ const ManageBus: React.FC = () => {
   const [buses, setBuses] = useState<BusRow[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
+  console.log("bus trong chương trình là : ", buses)
   const [activeTab, setActiveTab] = useState<"Tất cả" | "Sẵn sàng" | "Bảo trì">(
     "Tất cả"
   );
@@ -211,20 +211,21 @@ const ManageBus: React.FC = () => {
       const rawList = extractBusArray(parsed);
 
       const normalized: BusRow[] = rawList.map((b) => {
+        console.log("xe đã lấy từ api là : ", b)
         const typeObj = b.bus_type_id;
         const typeName =
           typeof typeObj === "object" && typeObj !== null
             ? (typeObj as BusTypeModel).name ?? "N/A"
             : typeof typeObj === "string"
-            ? typeObj
-            : "N/A";
+              ? typeObj
+              : "N/A";
 
         const typeId =
           typeof typeObj === "object" && typeObj !== null
             ? (typeObj as BusTypeModel)._id
             : typeof typeObj === "string"
-            ? typeObj
-            : undefined;
+              ? typeObj
+              : undefined;
 
         const seats =
           Number(
@@ -234,6 +235,7 @@ const ManageBus: React.FC = () => {
         const floors = b?.seat_layout?.floors ?? 1;
         const rows = b?.seat_layout?.rows ?? 0;
 
+        console.log("trạng thái là : ", b.status)
         return {
           id: b._id ?? b.id,
           plate: b.license_plate ?? "N/A",
@@ -562,11 +564,10 @@ const ManageBus: React.FC = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === tab
-                    ? "bg-orange-500 text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab
+                  ? "bg-orange-500 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                  }`}
               >
                 {tab}
                 {tab !== "Tất cả" && (
