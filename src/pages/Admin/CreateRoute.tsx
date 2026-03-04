@@ -167,6 +167,8 @@ export default function CreateRoute() {
       console.error(error);
     }
   };
+
+    // Hàm search các stops cho điểm xuất phát.
   const searchDepartureStops = async (keyword: string) => {
     if (!keyword.trim()) {
       setDepartureSearchInput([]);
@@ -199,11 +201,6 @@ export default function CreateRoute() {
     }, 300);
     return () => clearTimeout(delay);
   }, [destination]);
-
-  // Hàm search các stops cho điểm xuất phát.
-
-
-
 
   // Hàm lấy ra thông tin stops được gợi ý
   const getRecommendStops = async () => {
