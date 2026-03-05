@@ -111,7 +111,8 @@ export default function LichTrinh() {
     const delay = setTimeout(() => { searchDestinationStops(destination); }, 300);
     return () => clearTimeout(delay);
   }, [destination]);
-
+  {/* STATE thêm vào */ }
+  const [selectedDate, setSelectedDate] = useState("");
   const reSearch = async () => {
     console.log("giá trị id của điểm đếm và điểm đi: ", departureId, " và ", destinationId);
     try {
@@ -125,6 +126,7 @@ export default function LichTrinh() {
           body: JSON.stringify({
             nodeId_start: departureId,
             nodeId_end: destinationId,
+            date: selectedDate,
           }),
         }
       );
@@ -321,6 +323,23 @@ export default function LichTrinh() {
                 )}
               </div>
 
+              {/* ===== NGÀY ĐI (thêm mới) ===== */}
+              <div className="flex-1 relative group">
+                <div className="flex items-center gap-3 bg-white rounded-2xl px-6 py-5 border-2 border-slate-200 shadow-sm group-hover:border-orange-300 group-hover:shadow-lg transition-all duration-300">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-orange-500 flex-shrink-0">
+                    <rect x="3" y="4" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
+                    <path d="M3 9H21M8 2V5M16 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    min={new Date().toISOString().split("T")[0]}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="bg-transparent outline-none w-full text-slate-800 placeholder:text-slate-400 font-medium cursor-pointer"
+                  />
+                </div>
+              </div>
+
               {/* Search Button */}
               <button
                 className="flex-shrink-0 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-5 rounded-2xl font-bold flex items-center gap-3 shadow-2xl transition-all hover:shadow-orange-500/50 hover:scale-105 duration-300 relative overflow-hidden group"
@@ -351,7 +370,7 @@ export default function LichTrinh() {
 
           {/* ================= TRIP LIST ================= */}
           <div className="page-enter-content space-y-5">
-            {loading ? (
+            {loading && trips ? (
               <div className="text-center py-16">
                 <div className="inline-block w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4" />
                 <p className="text-slate-500 font-medium">Đang tải chuyến xe...</p>
@@ -365,7 +384,7 @@ export default function LichTrinh() {
                 <p className="text-slate-500 font-medium">Không tìm thấy chuyến xe nào.</p>
               </div>
             ) : (
-              trips.map((trip, index) => (
+              trips && trips.map((trip, index) => (
                 <div key={trip._id} className="relative group" style={{ animationDelay: `${0.1 * index}s` }}>
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-500/20 to-orange-400/0 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-2xl" />
                   <div className="bg-gradient-to-br from-white via-white to-orange-50/20 backdrop-blur-sm border-2 border-orange-100/40 rounded-2xl p-7 hover:shadow-2xl hover:border-orange-200 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
