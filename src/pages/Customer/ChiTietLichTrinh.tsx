@@ -129,9 +129,13 @@ export default function BusTripSearch() {
         });
     };
     const navigate = useNavigate()
-    const DatVe = async () => {
+    const DatVe = async (type_bus_id: any) => {
+        console.log("id của loại bus là: ", type_bus_id)
         navigate("/datve", {
-            state: { tripId: id }
+            state: {
+                tripId: id,
+                bus_type_id: type_bus_id
+            }
         });
     }
     if (loading) return <p>Loading...</p>;
@@ -428,7 +432,7 @@ export default function BusTripSearch() {
                                             {/* Book Button */}
                                             {/* <Link to={"/datve"}  */}
                                             <button
-                                                onClick={() => DatVe()}
+                                                onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
                                                 className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group">
                                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                                                 <span className="relative z-10">Chọn chuyến</span>
@@ -441,7 +445,7 @@ export default function BusTripSearch() {
                         </main>
                     </div>
                 </div>
-            </div>
+            </div >
 
             <style>{`
         .page-enter-copy {
@@ -671,6 +675,6 @@ export default function BusTripSearch() {
           }
         }
       `}</style>
-        </div>
+        </div >
     );
 }
