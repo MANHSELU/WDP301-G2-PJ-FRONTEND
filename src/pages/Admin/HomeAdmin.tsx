@@ -89,10 +89,10 @@ export default function HomeAdmin() {
                                             to={item.path}
                                             end={item.path === "/admin"}
                                             className={({ isActive }) =>
-                                                `flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] px-3 text-left text-[13px] font-medium last:border-b-0
+                                                `flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] border-l-4 px-3 text-left text-[13px] font-medium last:border-b-0
             ${isActive
-                                                    ? "bg-[#f4d5b4] text-[#1f2937]"
-                                                    : "text-[#374151] hover:bg-[#f3f4f6]"
+                                                    ? "bg-[#FFF4EB] text-[#1f2937] border-l-[#FF5722]"
+                                                    : "border-l-transparent text-[#374151] hover:bg-[#f3f4f6]"
                                                 }`
                                             }
                                         >
