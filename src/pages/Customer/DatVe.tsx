@@ -64,7 +64,6 @@ export default function BusSeatSelection() {
     const [selectedDropoffLocationId, setSelectedDropoffLocationId] = useState<string>("");
     const [loadingPickupLocations, setLoadingPickupLocations] = useState(false);
     const [loadingDropoffLocations, setLoadingDropoffLocations] = useState(false);
-
     // ── Giá vé ──
     const [ticketPrice, setTicketPrice] = useState<number | null>(null);
     const [loadingPrice, setLoadingPrice] = useState(false);
@@ -478,7 +477,7 @@ export default function BusSeatSelection() {
                                                     <option value="">-- Chọn điểm đón --</option>
                                                     {pickupPoints.map(p => (
                                                         <option key={p._id} value={p._id}>
-                                                            {p.stop_order}. {p.stop_id.province} ({p.stop_id.name})
+                                                            {p.stop_order}. {p.stop_id.province}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -555,7 +554,7 @@ export default function BusSeatSelection() {
                                                     </option>
                                                     {dropoffPoints.map(p => (
                                                         <option key={p._id} value={p._id}>
-                                                            {p.stop_order}. {p.stop_id.province} ({p.stop_id.name})
+                                                            {p.stop_order}. {p.stop_id.province}
                                                         </option>
                                                     ))}
                                                 </select>
