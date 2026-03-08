@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clock, Bus, DollarSign, X, MapPin, ChevronRight } from "lucide-react";
+import { Clock, Bus, DollarSign, MapPin, ChevronDown } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 /* ================= TYPES ================= */
@@ -8,10 +8,7 @@ type StopId = {
     _id: string;
     name: string;
     province: string;
-    location?: {
-        type: string;
-        coordinates: [number, number];
-    };
+    location?: { type: string; coordinates: [number, number] };
     is_active?: boolean;
 };
 
@@ -22,7 +19,7 @@ type TimeStop = {
     stop_order: number;
     is_pickup: boolean;
     estimated_time: number;
-    " estimated_time"?: number; // typo in API for some records
+    " estimated_time"?: number;
 };
 
 type BusTypeId = {
@@ -61,151 +58,98 @@ type Trip = {
     time: TimeStop[];
 };
 
-/* ================= SCHEDULE MODAL ================= */
+/* ================= SCHEDULE ACCORDION ================= */
 
-function ScheduleModal({ trip, onClose }: { trip: Trip; onClose: () => void }) {
-    const formatTime = (departureTime: string, estimatedMinutes: number): string => {
-        const base = new Date(departureTime);
-        base.setMinutes(base.getMinutes() + estimatedMinutes * 60); // estimated_time is in hours
-        return base.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
-    };
-
-    const formatDate = (departureTime: string, estimatedHours: number): string => {
-        const base = new Date(departureTime);
-        base.setHours(base.getHours() + estimatedHours);
-        return base.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
-    };
-
-    // Sort stops by stop_order
+function ScheduleAccordion({ trip }: { trip: Trip }) {
     const sortedStops = [...trip.time].sort((a, b) => a.stop_order - b.stop_order);
 
+    const calcArrival = (departureTime: string, estHours: number) => {
+        const base = new Date(departureTime);
+        base.setHours(base.getHours() + estHours);
+        return {
+            time: base.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+            date: base.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }),
+        };
+    };
+
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
-            onClick={onClose}
-        >
-            <div
-                className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"
-                style={{ animation: "modalPop 0.28s cubic-bezier(0.22,1,0.36,1) forwards" }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* Header */}
-                <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 px-6 py-5">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-orange-100 text-xs font-semibold uppercase tracking-widest mb-1">Lịch trình</p>
-                            <h2 className="text-white text-xl font-black">
-                                {trip.route_id.start_id.province} → {trip.route_id.stop_id.province}
-                            </h2>
-                            <p className="text-orange-100 text-sm mt-1">{trip.route_id.distance_km} km • {trip.bus_id.bus_type_id.name}</p>
-                        </div>
-                        <button
-                            onClick={onClose}
-                            className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-                        >
-                            <X size={18} className="text-white" />
-                        </button>
-                    </div>
-                </div>
+        <div className="schedule-expand border-t-2 border-orange-100">
+            <div className="px-7 pt-5 pb-6 bg-gradient-to-b from-orange-50/40 to-white">
+                <p className="text-[10px] font-bold text-orange-400 uppercase tracking-widest mb-5">
+                    Lịch trình · {sortedStops.length} điểm dừng
+                </p>
 
-                {/* Stops */}
-                <div className="px-6 py-5 overflow-y-auto max-h-[60vh]">
-                    <div className="relative">
-                        {/* Vertical line */}
-                        <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-orange-400 via-orange-300 to-orange-500" />
+                <div className="relative">
+                    {/* Vertical line */}
+                    <div
+                        className="absolute top-4 bottom-4 w-0.5"
+                        style={{ left: "15px", background: "linear-gradient(to bottom, #fb923c, #fdba74, #fb923c)" }}
+                    />
 
-                        <div className="space-y-0">
-                            {sortedStops.map((stop, idx) => {
-                                const isFirst = idx === 0;
-                                const isLast = idx === sortedStops.length - 1;
-                                // Get estimated_time (handle API typo)
-                                const estHours = stop.estimated_time ?? (stop as any)[" estimated_time"] ?? 0;
-                                const arrivalTime = formatTime(trip.departure_time, estHours);
-                                const arrivalDate = formatDate(trip.departure_time, estHours);
+                    <div className="space-y-1">
+                        {sortedStops.map((stop, idx) => {
+                            const isFirst = idx === 0;
+                            const isLast = idx === sortedStops.length - 1;
+                            const estHours = stop.estimated_time ?? (stop as any)[" estimated_time"] ?? 0;
+                            const { time, date } = calcArrival(trip.departure_time, estHours);
 
-                                return (
-                                    <div key={stop._id} className="flex gap-5 pb-6 relative">
-                                        {/* Dot */}
-                                        <div className={`relative z-10 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-md ${isFirst
-                                            ? "bg-orange-500 ring-4 ring-orange-100"
-                                            : isLast
-                                                ? "bg-orange-700 ring-4 ring-orange-100"
-                                                : "bg-white ring-2 ring-orange-300"
+                            return (
+                                <div key={stop._id} className="flex items-start gap-4 pb-4 last:pb-0">
+                                    {/* Dot */}
+                                    <div className="relative z-10 flex-shrink-0 mt-0.5">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${isFirst ? "bg-orange-500 ring-4 ring-orange-100"
+                                                : isLast ? "bg-orange-700 ring-4 ring-orange-100"
+                                                    : "bg-white ring-2 ring-orange-300"
                                             }`}>
-                                            <MapPin
-                                                size={16}
+                                            <MapPin size={14}
                                                 className={isFirst || isLast ? "text-white" : "text-orange-500"}
                                                 fill={isFirst || isLast ? "currentColor" : "none"}
                                             />
                                         </div>
+                                    </div>
 
-                                        {/* Content */}
-                                        <div className={`flex-1 pb-1 ${!isLast ? "border-b border-slate-100" : ""}`}>
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div>
-                                                    <p className={`font-bold text-base ${isFirst || isLast ? "text-orange-600" : "text-slate-800"}`}>
-                                                        {stop.stop_id.province}
-                                                    </p>
-                                                    <p className="text-xs text-slate-400 mt-0.5">{stop.stop_id.name}</p>
-                                                </div>
-                                                <div className="text-right flex-shrink-0">
-                                                    <p className="font-black text-slate-800 text-base tabular-nums">
-                                                        {arrivalTime}
-                                                    </p>
-                                                    <p className="text-xs text-slate-400 mt-0.5">{arrivalDate}</p>
-                                                </div>
-                                            </div>
-
-                                            {/* Badge */}
-                                            <div className="mt-2 flex items-center gap-2">
+                                    {/* Content */}
+                                    <div className={`flex-1 flex items-start justify-between min-w-0 pb-4 last:pb-0 ${!isLast ? "border-b border-orange-50" : ""}`}>
+                                        <div>
+                                            <p className={`font-bold text-sm ${isFirst ? "text-orange-600" : isLast ? "text-orange-700" : "text-slate-700"}`}>
+                                                {stop.stop_id.province}
+                                            </p>
+                                            <p className="text-xs text-slate-400 mt-0.5">{stop.stop_id.name}</p>
+                                            <div className="mt-2 flex items-center gap-1.5">
                                                 {isFirst && (
-                                                    <span className="bg-orange-100 text-orange-600 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                                                        Điểm khởi hành
+                                                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-600 border border-orange-200">
+                                                        Xuất phát
                                                     </span>
                                                 )}
                                                 {isLast && (
-                                                    <span className="bg-orange-700/10 text-orange-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                                                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
                                                         Điểm đến
                                                     </span>
                                                 )}
                                                 {!isFirst && !isLast && (
-                                                    <span className="bg-slate-100 text-slate-500 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                                                        Điểm dừng {idx}
+                                                    <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                                                        Điểm dừng
                                                     </span>
                                                 )}
                                                 {estHours > 0 && (
-                                                    <span className="text-slate-400 text-xs flex items-center gap-1">
-                                                        <Clock size={11} />
-                                                        +{estHours}h từ xuất phát
+                                                    <span className="text-[10px] text-orange-400 flex items-center gap-1 font-medium">
+                                                        <Clock size={10} /> +{estHours}h
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
+
+                                        <div className="text-right flex-shrink-0 ml-4">
+                                            <p className="font-black text-base text-slate-800 tabular-nums">{time}</p>
+                                            <p className="text-xs text-slate-400 mt-0.5">{date}</p>
+                                        </div>
                                     </div>
-                                );
-                            })}
-                        </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
-
-                {/* Footer */}
-                <div className="px-6 pb-5">
-                    <button
-                        onClick={onClose}
-                        className="w-full bg-gradient-to-br from-orange-500 to-orange-600 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-orange-500/40 hover:scale-[1.01] transition-all duration-200"
-                    >
-                        Đóng
-                    </button>
-                </div>
             </div>
-
-            <style>{`
-                @keyframes modalPop {
-                    from { opacity: 0; transform: scale(0.92) translateY(16px); }
-                    to { opacity: 1; transform: scale(1) translateY(0); }
-                }
-            `}</style>
         </div>
     );
 }
@@ -225,15 +169,9 @@ export default function BusTripSearch() {
 
     const [trips, setTrip] = useState<Trip[]>([]);
     const [loading, setLoading] = useState(true);
-    const [scheduleTrip, setScheduleTrip] = useState<Trip | null>(null);
+    const [openSchedule, setOpenSchedule] = useState<string | null>(null);
 
-    const timeSlots = [
-        "Sáng sớm: 0h - 6h",
-        "Buổi Sáng: 6h - 12h",
-        "Buổi Chiều: 12h - 18h",
-        "Buổi Tối: 18h - 24h",
-    ];
-
+    const timeSlots = ["Sáng sớm: 0h - 6h", "Buổi Sáng: 6h - 12h", "Buổi Chiều: 12h - 18h", "Buổi Tối: 18h - 24h"];
     const busTypes = ["Ghế Phổ", "Giường nằm", "Limousine"];
     const tiers = ["Tiêu chuẩn", "Tiêu tiết", "Tiêu cao"];
 
@@ -249,14 +187,11 @@ export default function BusTripSearch() {
     useEffect(() => {
         const fetchTrips = async () => {
             try {
-                const response = await fetch(
-                    "http://localhost:3000/api/customer/notcheck/viewTrip",
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ route_id: id }),
-                    }
-                );
+                const response = await fetch("http://localhost:3000/api/customer/notcheck/viewTrip", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ route_id: id }),
+                });
                 if (!response.ok) throw new Error("Failed to fetch trips");
                 const data = await response.json();
                 setTrip(data.data);
@@ -269,10 +204,7 @@ export default function BusTripSearch() {
         fetchTrips();
     }, []);
 
-    const calculateDuration = (
-        departure: string | Date | null | undefined,
-        arrival: string | Date | null | undefined
-    ): string => {
+    const calculateDuration = (departure: string | Date | null | undefined, arrival: string | Date | null | undefined): string => {
         if (!departure || !arrival) return "N/A";
         const start = new Date(departure);
         const end = new Date(arrival);
@@ -289,28 +221,21 @@ export default function BusTripSearch() {
         if (!value) return "N/A";
         const date = new Date(value);
         if (isNaN(date.getTime())) return "Invalid date";
-        return date.toLocaleString("vi-VN", {
-            hour: "2-digit",
-            minute: "2-digit",
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-        });
+        return date.toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" });
     };
 
     const DatVe = (type_bus_id: string) => {
         navigate("/datve", { state: { tripId: id, bus_type_id: type_bus_id } });
     };
 
+    const toggleSchedule = (tripId: string) => {
+        setOpenSchedule((prev) => (prev === tripId ? null : tripId));
+    };
+
     if (loading) return <p>Loading...</p>;
 
     return (
         <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
-            {/* Schedule Modal */}
-            {scheduleTrip && (
-                <ScheduleModal trip={scheduleTrip} onClose={() => setScheduleTrip(null)} />
-            )}
-
             {/* Background Layers */}
             <div className="absolute inset-0 bg-[linear-gradient(96deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.93)_34%,rgba(255,255,255,0.64)_56%,rgba(255,255,255,0.16)_78%,rgba(255,255,255,0)_100%)]" />
             <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#f3ece5] to-[#ece7e2]" />
@@ -326,7 +251,6 @@ export default function BusTripSearch() {
                     <span className="bus-cloud bus-cloud-5 absolute right-[-4%] top-[70%] h-[28%] w-[54%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[26px]" />
                     <span className="bus-cloud bus-cloud-6 absolute left-[4%] top-[90%] h-[16%] w-[72%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.56)_0%,rgba(255,255,255,0.14)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
                 </div>
-
                 <div className="bus-aero-trail absolute right-[-14%] top-[30%] z-0 h-[54%] w-[46%]">
                     <span className="bus-tail-cloud bus-tail-cloud-1 absolute right-[10%] top-[14%] h-[42%] w-[34%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.48)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
                     <span className="bus-tail-cloud bus-tail-cloud-2 absolute right-[28%] top-[28%] h-[38%] w-[32%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.84)_0%,rgba(255,255,255,0.4)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
@@ -336,16 +260,9 @@ export default function BusTripSearch() {
                     <span className="bus-tail-cloud bus-tail-cloud-6 absolute right-[24%] top-[44%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.38)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
                     <span className="bus-tail-cloud bus-tail-cloud-7 absolute right-[18%] top-[64%] h-[22%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.76)_0%,rgba(255,255,255,0.34)_54%,rgba(255,255,255,0)_100%)] blur-[9px]" />
                 </div>
-
                 <div className="bus-bob relative z-10">
-                    <img
-                        src="/images/bus7.png"
-                        alt="Bus overlay"
-                        className="w-full object-contain block relative"
-                        style={{
-                            imageRendering: "auto",
-                            filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))",
-                        }}
+                    <img src="/images/bus7.png" alt="Bus overlay" className="w-full object-contain block relative"
+                        style={{ imageRendering: "auto", filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))" }}
                     />
                     <div className="pointer-events-none absolute inset-0">
                         <div className="bus-front-left-passenger">
@@ -381,6 +298,7 @@ export default function BusTripSearch() {
             <div className="relative z-20 py-8 pb-20">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
+
                         {/* SIDEBAR */}
                         <aside className="space-y-6">
                             <div className="relative group">
@@ -396,12 +314,8 @@ export default function BusTripSearch() {
                                     <div className="space-y-3">
                                         {timeSlots.map((slot) => (
                                             <label key={slot} className="flex items-center gap-3 cursor-pointer group/item hover:bg-orange-50 p-2 rounded-lg transition-all">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedFilters.timeSlots.includes(slot)}
-                                                    onChange={() => toggleFilter("timeSlots", slot)}
-                                                    className="w-5 h-5 rounded border-2 border-slate-300 text-orange-500 focus:ring-2 focus:ring-orange-500/50 cursor-pointer"
-                                                />
+                                                <input type="checkbox" checked={selectedFilters.timeSlots.includes(slot)} onChange={() => toggleFilter("timeSlots", slot)}
+                                                    className="w-5 h-5 rounded border-2 border-slate-300 text-orange-500 focus:ring-2 focus:ring-orange-500/50 cursor-pointer accent-orange-500" />
                                                 <span className="text-sm text-slate-700 group-hover/item:text-slate-900 font-medium">{slot}</span>
                                             </label>
                                         ))}
@@ -419,12 +333,8 @@ export default function BusTripSearch() {
                                     <div className="space-y-3">
                                         {busTypes.map((type) => (
                                             <label key={type} className="flex items-center gap-3 cursor-pointer group/item hover:bg-orange-50 p-2 rounded-lg transition-all">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedFilters.busTypes.includes(type)}
-                                                    onChange={() => toggleFilter("busTypes", type)}
-                                                    className="w-5 h-5 rounded border-2 border-slate-300 text-orange-500 focus:ring-2 focus:ring-orange-500/50 cursor-pointer"
-                                                />
+                                                <input type="checkbox" checked={selectedFilters.busTypes.includes(type)} onChange={() => toggleFilter("busTypes", type)}
+                                                    className="w-5 h-5 rounded border-2 border-slate-300 text-orange-500 focus:ring-2 focus:ring-orange-500/50 cursor-pointer accent-orange-500" />
                                                 <span className="text-sm text-slate-700 group-hover/item:text-slate-900 font-medium">{type}</span>
                                             </label>
                                         ))}
@@ -442,12 +352,8 @@ export default function BusTripSearch() {
                                     <div className="space-y-3">
                                         {tiers.map((tier) => (
                                             <label key={tier} className="flex items-center gap-3 cursor-pointer group/item hover:bg-orange-50 p-2 rounded-lg transition-all">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedFilters.tiers.includes(tier)}
-                                                    onChange={() => toggleFilter("tiers", tier)}
-                                                    className="w-5 h-5 rounded border-2 border-slate-300 text-orange-500 focus:ring-2 focus:ring-orange-500/50 cursor-pointer"
-                                                />
+                                                <input type="checkbox" checked={selectedFilters.tiers.includes(tier)} onChange={() => toggleFilter("tiers", tier)}
+                                                    className="w-5 h-5 rounded border-2 border-slate-300 text-orange-500 focus:ring-2 focus:ring-orange-500/50 cursor-pointer accent-orange-500" />
                                                 <span className="text-sm text-slate-700 group-hover/item:text-slate-900 font-medium">{tier}</span>
                                             </label>
                                         ))}
@@ -462,104 +368,127 @@ export default function BusTripSearch() {
 
                         {/* TRIP RESULTS */}
                         <main className="space-y-5">
-                            {trips.map((trip, index) => (
-                                <div
-                                    key={trip._id}
-                                    className="relative group"
-                                    style={{
-                                        animation: "fadeInUp 0.5s ease-out forwards",
-                                        animationDelay: `${index * 0.1}s`,
-                                        opacity: 0,
-                                    }}
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-500/30 to-orange-400/0 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+                            {trips.map((trip, index) => {
+                                const isOpen = openSchedule === trip._id;
+                                return (
+                                    <div
+                                        key={trip._id}
+                                        className="relative group"
+                                        style={{ animation: "fadeInUp 0.5s ease-out forwards", animationDelay: `${index * 0.1}s`, opacity: 0 }}
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-500/30 to-orange-400/0 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
 
-                                    <div className="bg-gradient-to-br from-white via-white to-orange-50/30 rounded-2xl shadow-xl border-2 border-orange-100/50 p-7 hover:shadow-2xl hover:border-orange-200 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                        <div className={`bg-gradient-to-br from-white via-white to-orange-50/30 rounded-2xl shadow-xl border-2 transition-all duration-300 relative overflow-hidden ${isOpen ? "border-orange-300 shadow-orange-100" : "border-orange-100/50 hover:shadow-2xl hover:border-orange-200 hover:-translate-y-1"
+                                            }`}>
+                                            {/* Top accent */}
+                                            <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
 
-                                        {/* Time Section */}
-                                        <div className="flex items-center justify-between mb-6">
-                                            <div className="flex items-center gap-6">
-                                                <div className="text-center">
-                                                    <div className="text-3xl font-black text-slate-800 mb-1">
-                                                        {formatDateTime(trip.departure_time)}
-                                                    </div>
-                                                    <div className="text-sm text-slate-500 font-medium">
-                                                        {trip?.route_id?.start_id.province} ({trip?.route_id?.start_id.name})
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex flex-col items-center px-8 relative">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <div className="w-3 h-3 rounded-full bg-orange-400 ring-4 ring-orange-100" />
-                                                        <div className="h-0.5 w-24 bg-gradient-to-r from-orange-400 via-orange-300 to-orange-400 relative">
-                                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                                                <Bus className="text-orange-500 bg-white rounded-full p-1" size={24} />
+                                            {/* Card body */}
+                                            <div className="p-7">
+                                                {/* Time Section */}
+                                                <div className="flex items-center justify-between mb-6">
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="text-center">
+                                                            <div className="text-3xl font-black text-slate-800 mb-1">
+                                                                {formatDateTime(trip.departure_time)}
+                                                            </div>
+                                                            <div className="text-sm text-slate-500 font-medium">
+                                                                {trip?.route_id?.start_id.province} ({trip?.route_id?.start_id.name})
                                                             </div>
                                                         </div>
-                                                        <div className="w-3 h-3 rounded-full bg-orange-600 ring-4 ring-orange-100" />
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-xs text-slate-600 font-semibold bg-orange-50 px-3 py-1 rounded-full">
-                                                        <span>{calculateDuration(trip.departure_time, trip.arrival_time)}</span>
-                                                        <span>•</span>
-                                                        <span>{trip.route_id.distance_km} km</span>
+
+                                                        <div className="flex flex-col items-center px-8 relative">
+                                                            <div className="flex items-center gap-3 mb-2">
+                                                                <div className="w-3 h-3 rounded-full bg-orange-400 ring-4 ring-orange-100" />
+                                                                <div className="h-0.5 w-24 bg-gradient-to-r from-orange-400 via-orange-300 to-orange-400 relative">
+                                                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                                                        <Bus className="text-orange-500 bg-white rounded-full p-1" size={24} />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="w-3 h-3 rounded-full bg-orange-600 ring-4 ring-orange-100" />
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-xs text-slate-600 font-semibold bg-orange-50 px-3 py-1 rounded-full">
+                                                                <span>{calculateDuration(trip.departure_time, trip.arrival_time)}</span>
+                                                                <span>•</span>
+                                                                <span>{trip.route_id.distance_km} km</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="text-center">
+                                                            <div className="text-3xl font-black text-slate-800 mb-1">
+                                                                {formatDateTime(trip.arrival_time)}
+                                                            </div>
+                                                            <div className="text-sm text-slate-500 font-medium">
+                                                                {trip.route_id.stop_id.province} ({trip.route_id.stop_id.name})
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="text-center">
-                                                    <div className="text-3xl font-black text-slate-800 mb-1">
-                                                        {formatDateTime(trip.arrival_time)}
+                                                {/* Bottom row */}
+                                                <div className="flex items-center justify-between pt-5 border-t-2 border-orange-100">
+                                                    <div className="flex items-center gap-3 flex-wrap">
+                                                        <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl">
+                                                            <span className="text-xs font-semibold text-slate-600">Chọn Ghế</span>
+                                                        </div>
+
+                                                        {/* Lịch trình - accordion toggle */}
+                                                        <button
+                                                            onClick={() => toggleSchedule(trip._id)}
+                                                            className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all duration-200 font-semibold text-xs"
+                                                            style={{
+                                                                background: isOpen ? "#fff7ed" : "#f8fafc",
+                                                                borderColor: isOpen ? "#fb923c" : "#e2e8f0",
+                                                                color: isOpen ? "#ea580c" : "#475569",
+                                                            }}
+                                                        >
+                                                            <MapPin size={13} className={isOpen ? "text-orange-500" : "text-slate-400"} />
+                                                            Lịch Trình
+                                                            <ChevronDown
+                                                                size={13}
+                                                                className="transition-transform duration-300"
+                                                                style={{
+                                                                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                                                                    color: isOpen ? "#f97316" : "#94a3b8",
+                                                                }}
+                                                            />
+                                                        </button>
+
+                                                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 px-4 py-2 rounded-xl border border-purple-200">
+                                                            <span className="text-xs font-bold text-purple-700">
+                                                                {trip?.bus_id.bus_type_id.name}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="bg-gradient-to-br from-green-50 to-green-100 px-4 py-2 rounded-xl border border-green-200">
+                                                            <span className="text-xs font-bold text-green-700">200.000 VND</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="text-sm text-slate-500 font-medium">
-                                                        {trip.route_id.stop_id.province} ({trip.route_id.stop_id.name})
-                                                    </div>
+
+                                                    <button
+                                                        onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
+                                                        className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn"
+                                                    >
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                                                        <span className="relative z-10">Chọn chuyến</span>
+                                                    </button>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        {/* Info Row */}
-                                        <div className="flex items-center justify-between pt-5 border-t-2 border-orange-100">
-                                            <div className="flex items-center gap-6">
-                                                {/* Chọn Ghế */}
-                                                <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl">
-                                                    <span className="text-xs font-semibold text-slate-600">Chọn Ghế</span>
-                                                </div>
-
-                                                {/* Lịch Trình - NOW CLICKABLE */}
-                                                <button
-                                                    onClick={() => setScheduleTrip(trip)}
-                                                    className="flex items-center gap-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 hover:border-orange-300 px-4 py-2 rounded-xl transition-all duration-200 group/sched"
-                                                >
-                                                    <MapPin size={13} className="text-orange-500" />
-                                                    <span className="text-xs font-semibold text-orange-600">Lịch Trình</span>
-                                                    <ChevronRight size={13} className="text-orange-400 group-hover/sched:translate-x-0.5 transition-transform" />
-                                                </button>
-
-                                                {/* Bus type badge */}
-                                                <div className="bg-gradient-to-br from-purple-50 to-purple-100 px-4 py-2 rounded-xl border border-purple-200">
-                                                    <span className="text-xs font-bold text-purple-700">
-                                                        {trip?.bus_id.bus_type_id.name}
-                                                    </span>
-                                                </div>
-
-                                                {/* Price */}
-                                                <div className="bg-gradient-to-br from-green-50 to-green-100 px-4 py-2 rounded-xl border border-green-200">
-                                                    <span className="text-xs font-bold text-green-700">200.000 VND</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Book Button */}
-                                            <button
-                                                onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
-                                                className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group"
+                                            {/* Accordion schedule */}
+                                            <div
+                                                style={{
+                                                    maxHeight: isOpen ? "600px" : "0px",
+                                                    overflow: "hidden",
+                                                    transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)",
+                                                }}
                                             >
-                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                                                <span className="relative z-10">Chọn chuyến</span>
-                                            </button>
+                                                {isOpen && <ScheduleAccordion trip={trip} />}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </main>
                     </div>
                 </div>
@@ -601,11 +530,7 @@ export default function BusTripSearch() {
           animation: hero-title-shimmer-soft 5.8s linear infinite;
           will-change: background-position;
         }
-        .bus-bob {
-          animation: bus-bob 1.9s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite;
-          transform-origin: 56% 74%;
-          will-change: transform;
-        }
+        .bus-bob { animation: bus-bob 1.9s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite; transform-origin: 56% 74%; will-change: transform; }
         .bus-aero-overlay { transform: rotate(12deg); transform-origin: 22% 50%; }
         .bus-cloud { animation: bus-cloud-drift 1.75s ease-out infinite; will-change: transform, opacity; }
         .bus-cloud-1 { animation-delay: 0.06s; animation-duration: 1.95s; }
@@ -616,10 +541,8 @@ export default function BusTripSearch() {
         .bus-cloud-6 { animation-delay: 0.94s; animation-duration: 1.6s; }
         .bus-aero-trail { transform: rotate(12deg); transform-origin: 22% 50%; }
         .bus-tail-cloud { animation: bus-trail-cloud 1.55s ease-out infinite; will-change: transform, opacity; }
-        .bus-tail-cloud-1 { animation-delay: 0.06s; }
-        .bus-tail-cloud-2 { animation-delay: 0.32s; }
-        .bus-tail-cloud-3 { animation-delay: 0.54s; }
-        .bus-tail-cloud-4 { animation-delay: 0.76s; }
+        .bus-tail-cloud-1 { animation-delay: 0.06s; } .bus-tail-cloud-2 { animation-delay: 0.32s; }
+        .bus-tail-cloud-3 { animation-delay: 0.54s; } .bus-tail-cloud-4 { animation-delay: 0.76s; }
         .bus-tail-cloud-5 { animation-delay: 0.9s; animation-duration: 1.7s; }
         .bus-tail-cloud-6 { animation-delay: 0.22s; animation-duration: 1.45s; }
         .bus-tail-cloud-7 { animation-delay: 0.48s; animation-duration: 1.55s; }
@@ -641,54 +564,40 @@ export default function BusTripSearch() {
           position: absolute; left: 2%; top: 3%; width: 130%; height: 166%;
           object-fit: cover; object-position: center 10%;
           filter: saturate(0.8) contrast(1.05) brightness(0.88); opacity: 0.93;
-          transform: scaleX(-1) rotate(-2deg);
-          animation: bus-passenger-idle 1.8s ease-in-out infinite;
+          transform: scaleX(-1) rotate(-2deg); animation: bus-passenger-idle 1.8s ease-in-out infinite;
         }
         .bus-driver-fit-img {
           position: absolute; left: -2%; top: 3%; width: 95%; height: 112%;
           object-fit: cover; object-position: center 8%;
           filter: saturate(0.82) contrast(1.08) brightness(0.9); opacity: 0.95;
-          transform: scaleX(-1) rotate(5deg);
-          animation: bus-driver-idle 1.65s ease-in-out infinite; z-index: 1;
+          transform: scaleX(-1) rotate(5deg); animation: bus-driver-idle 1.65s ease-in-out infinite; z-index: 1;
         }
+        .schedule-expand { animation: expandDown 0.35s cubic-bezier(0.4,0,0.2,1); }
+        @keyframes expandDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes bus-bob {
-          0%, 100% { transform: translateY(0) rotate(-0.35deg); }
-          32% { transform: translateY(-4px) rotate(0.12deg); }
-          62% { transform: translateY(-8px) rotate(0.24deg); }
-          82% { transform: translateY(2px) rotate(-0.16deg); }
+          0%, 100% { transform: translateY(0) rotate(-0.35deg); } 32% { transform: translateY(-4px) rotate(0.12deg); }
+          62% { transform: translateY(-8px) rotate(0.24deg); } 82% { transform: translateY(2px) rotate(-0.16deg); }
         }
-        @keyframes bus-cloud-drift {
-          0% { opacity: 0.2; transform: translateX(-18px) scale(0.84); }
-          36% { opacity: 0.76; }
-          100% { opacity: 0; transform: translateX(172px) scale(1.3); }
-        }
-        @keyframes bus-trail-cloud {
-          0% { opacity: 0.62; transform: translateX(-6px) scale(0.78); }
-          34% { opacity: 0.96; }
-          100% { opacity: 0; transform: translateX(92px) scale(1.22); }
-        }
+        @keyframes bus-cloud-drift { 0% { opacity: 0.2; transform: translateX(-18px) scale(0.84); } 36% { opacity: 0.76; } 100% { opacity: 0; transform: translateX(172px) scale(1.3); } }
+        @keyframes bus-trail-cloud { 0% { opacity: 0.62; transform: translateX(-6px) scale(0.78); } 34% { opacity: 0.96; } 100% { opacity: 0; transform: translateX(92px) scale(1.22); } }
         @keyframes bus-driver-settle {
           0%, 100% { transform: perspective(760px) rotateY(-12deg) rotate(-0.55deg) translateY(0); }
           34% { transform: perspective(760px) rotateY(-12deg) rotate(-0.4deg) translateY(-1px); }
           68% { transform: perspective(760px) rotateY(-12deg) rotate(-0.75deg) translateY(1px); }
         }
         @keyframes bus-driver-idle {
-          0%, 100% { transform: scaleX(-1) rotate(5deg) translateY(0); }
-          28% { transform: scaleX(-1) rotate(4.1deg) translateY(-1px); }
-          62% { transform: scaleX(-1) rotate(5.9deg) translateY(1px); }
-          82% { transform: scaleX(-1) rotate(4.6deg) translateY(0); }
+          0%, 100% { transform: scaleX(-1) rotate(5deg) translateY(0); } 28% { transform: scaleX(-1) rotate(4.1deg) translateY(-1px); }
+          62% { transform: scaleX(-1) rotate(5.9deg) translateY(1px); } 82% { transform: scaleX(-1) rotate(4.6deg) translateY(0); }
         }
         @keyframes bus-passenger-idle {
-          0%, 100% { transform: scaleX(-1) rotate(-2deg) translateY(0); }
-          34% { transform: scaleX(-1) rotate(-1.3deg) translateY(-1px); }
+          0%, 100% { transform: scaleX(-1) rotate(-2deg) translateY(0); } 34% { transform: scaleX(-1) rotate(-1.3deg) translateY(-1px); }
           72% { transform: scaleX(-1) rotate(-2.6deg) translateY(1px); }
         }
         @keyframes page-fade-up { 0% { opacity: 0; transform: translateY(24px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes hero-title-reveal { 0% { opacity: 0; transform: translateY(14px); filter: blur(3px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
         @keyframes hero-title-shimmer-soft { 0% { background-position: 0 50%; } 100% { background-position: -520px 50%; } }
         input[type="checkbox"]:checked { background-color: #f97316; border-color: #f97316; }
-        input[type="checkbox"]:checked::before { content: "✓"; display: block; text-align: center; color: white; font-size: 14px; font-weight: bold; }
         @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
       `}</style>
         </div>
