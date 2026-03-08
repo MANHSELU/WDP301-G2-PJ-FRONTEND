@@ -241,9 +241,8 @@ export default function AdminDashboard() {
                                             <p className="text-sm text-gray-500 mb-1">{card.title}</p>
                                             <p className="text-lg font-bold text-[#1f2937]">{card.value}</p>
                                             <p
-                                                className={`mt-2 flex items-center gap-1 text-sm font-medium ${
-                                                    card.changeUp ? "text-green-600" : "text-red-600"
-                                                }`}
+                                                className={`mt-2 flex items-center gap-1 text-sm font-medium ${card.changeUp ? "text-green-600" : "text-red-600"
+                                                    }`}
                                             >
                                                 {card.changeUp ? (
                                                     <ArrowUp size={14} />
