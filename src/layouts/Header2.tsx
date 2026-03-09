@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import Footer from "./Footer";
 import type { RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -89,17 +89,19 @@ export default function Header2() {
 
                             {/* Menu Navigation */}
                             <nav className="hidden items-center gap-8 md:flex">
-                                {navItems.map((item, idx) => (
-                                    <Link
+                                {navItems.map((item) => (
+                                    <NavLink
                                         key={item.name}
                                         to={item.path}
-                                        className={`relative py-7 text-[13px] font-semibold ${idx === 0
-                                            ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
-                                            : "text-[#7c5f4a]"
-                                            }`}
+                                        className={({ isActive }) =>
+                                            `relative py-7 text-[13px] font-semibold ${isActive
+                                                ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
+                                                : "text-[#7c5f4a]"
+                                            }`
+                                        }
                                     >
                                         {item.name}
-                                    </Link>
+                                    </NavLink>
                                 ))}
                             </nav>
 

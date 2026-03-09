@@ -35,13 +35,15 @@ import CargoBooking from "./pages/LeTan/GuiHangChoKhach";
 import CargoOrderList from "./pages/LeTan/DanhSachHangHoa";
 import RevenueDashboard from "./pages/Admin/Revenue";
 import HomeAdmin from "./pages/Admin/HomeAdmin";
-import CreateTrip  from "./pages/Admin/CreateTrips";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import CreateTrip from "./pages/Admin/CreateTrips";
 export default function App() {
   return (
     <>
       <Routes>
         <Route path="admin" element={<HomeAdmin />} >
           {/* <Route path="create-coach" element={<CreateCoach />} /> */}
+          <Route index element={<AdminDashboard />} />
           <Route path="create-route" element={<CreateRoute />} />
           <Route path="manage-buses" element={<ManageBus />} />
           <Route path="manage-routes" element={<ManageRoute />} />
@@ -58,7 +60,7 @@ export default function App() {
         <Route path="/admin/manage-users" element={<ManageUser />} />
         <Route path="/admin/manage-revenue" element={<RevenueDashboard />} />  */}
 
-        <Route path="/" element={<Header2 />} >
+        <Route path="/" element={<Header2 />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/lichtrinh" element={<LichTrinh />} />
           <Route path="/lichtrinhdetail" element={<BusTripSearch />} />
@@ -71,7 +73,7 @@ export default function App() {
           <Route path="/login" element={<BustripLogin />} />
           <Route path="/register" element={<BustripRegister />} />
 
-          <Route path="user" element={<BusTripProfile />} >
+          <Route path="user" element={<BusTripProfile />}>
             <Route path="profile" element={<InformationUser />} />
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="address" element={<AddressForm />} />
@@ -81,15 +83,15 @@ export default function App() {
           <Route path="/loginCamera" element={<FaceLoginPage />} />
           <Route path="/registerCamera" element={<FaceRegister />} />
 
-          <Route path="driverBooking" element={<TransportBooking />} >
+          <Route path="driverBooking" element={<TransportBooking />}>
             <Route path="viewtrip" element={<ViewTrip />} />
             <Route path="tripdetail/:id" element={<TripDetailsDemo />} />
           </Route>
-          <Route path="assistant" element={<TripListPage />} >
+          <Route path="assistant" element={<TripListPage />}>
             <Route path="chuyendi" element={<DanhSachChuyenDi />} />
             <Route path="chitietchuyendi" element={<TripDetailPage />} />
           </Route>
-          <Route path="letan" element={<TripListPageLeTan />} >
+          <Route path="letan" element={<TripListPageLeTan />}>
             <Route path="chuyendi" element={<DanhSachChuyenDi />} />
             <Route path="chitietchuyendi" element={<TripDetailPage />} />
 
@@ -100,5 +102,5 @@ export default function App() {
         </Route>
       </Routes>
     </>
-  )
+  );
 }
