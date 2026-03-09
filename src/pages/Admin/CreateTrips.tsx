@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import baseAPIAuth from "../../api/auth";
 import type { AllRoutes } from "../../model/getRoutes";
 import type { getBuses } from "../../model/getBuses";
-import type { searchDrivers } from "../../model/searchDrivers";
+import type { getDrivers } from "../../model/getAvailableDriver";
 
 type DriverStatus = "PENDING" | "RUNNING" | "DONE";
 
@@ -14,13 +14,12 @@ interface DriverForm {
   shift_start: string;
   shift_end: string;
   status: DriverStatus;
-  keyword: string;
-  suggestions: searchDrivers[];
+  suggestions: getDrivers[];
 }
 interface AssistantForm {
   assistant_id: string;
   keyword: string;
-  suggestions: searchDrivers[];
+  suggestions: getDrivers[];
 }
 export default function CreateTrip() {
   const navigate = useNavigate();
@@ -33,7 +32,7 @@ export default function CreateTrip() {
   const [arrivalTime, setArrivalTime] = useState("");
   // đơn vị: giờ (float, ví dụ 3.706)
   const [scheduledDuration, setScheduledDuration] = useState<number | "">("");
-
+  const [availableDrivers, setAvailableDrivers] = useState<getDrivers[]>([]);
   const [drivers, setDrivers] = useState<DriverForm[]>([
     {
       id: 1,
@@ -41,7 +40,6 @@ export default function CreateTrip() {
       shift_start: "",
       shift_end: "",
       status: "PENDING",
-      keyword: "",
       suggestions: [],
     },
   ]);
@@ -63,56 +61,62 @@ export default function CreateTrip() {
   useEffect(() => {
     getAllBuses();
   }, []);
+  //Hàm lấy tài xế availble
+  useEffect(() => {
+    if (departureTime && scheduledDuration) {
+      getAvailableDrivers();
+    }
+  }, [departureTime, scheduledDuration]);
   //format time
-        const formatLocalDateTime = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
+  const formatLocalDateTime = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
   // Hàm tính thời gian kết thúc từ giờ khởi hành + duration (giờ)
-useEffect(() => {
-  if (
-    departureTime &&
-    typeof scheduledDuration === "number"
-  ) {
-    const departure = new Date(departureTime);
-    const arrival = new Date(
-      departure.getTime() + scheduledDuration * 3600000
-    );
-    setArrivalTime(formatLocalDateTime(arrival));
-  }
-}, [departureTime, scheduledDuration]);
+  useEffect(() => {
+    if (departureTime && typeof scheduledDuration === "number") {
+      const departure = new Date(departureTime);
+      const arrival = new Date(
+        departure.getTime() + scheduledDuration * 3600000,
+      );
+      setArrivalTime(formatLocalDateTime(arrival));
+    }
+  }, [departureTime, scheduledDuration]);
 
   // Helper tính shiftEnd từ giờ (dùng chung cho search)
   const calcShiftEnd = (): string | null => {
-
     if (arrivalTime) return arrivalTime;
-    if (scheduledDuration && typeof scheduledDuration === "number" && departureTime) {
+    if (
+      scheduledDuration &&
+      typeof scheduledDuration === "number" &&
+      departureTime
+    ) {
       const departure = new Date(departureTime);
-      const arrival = new Date(departure.getTime() + scheduledDuration * 3600000);
-      return formatLocalDateTime(arrival);    }
+      const arrival = new Date(
+        departure.getTime() + scheduledDuration * 3600000,
+      );
+      return formatLocalDateTime(arrival);
+    }
     return null;
   };
 
-  // Hàm search Tài xế
-  const searchDriver = async (rowId: number, keyword: string) => {
-    if (!keyword.trim() || !departureTime) return;
+  // Hàm get Tài xế đang rảnh ca
+  const getAvailableDrivers = async () => {
+    if (!departureTime) return;
     const shiftEnd = calcShiftEnd();
     if (!shiftEnd) return;
     try {
-      const res = await baseAPIAuth.get("/api/admin/check/searchDrivers", {
+      const res = await baseAPIAuth.get("/api/admin/check/getAvailableDrivers", {
         params: {
-          keyword,
           shift_start: new Date(departureTime).toISOString(),
           shift_end: new Date(shiftEnd).toISOString(),
         },
       });
-      setDrivers((prev) =>
-        prev.map((d) => (d.id === rowId ? { ...d, suggestions: res.data } : d)),
-      );
+      setAvailableDrivers(res.data);
     } catch (error) {
       console.error(error);
     }
@@ -161,11 +165,13 @@ useEffect(() => {
     }
   };
 
-  // Handle route selection and auto-fill duration (giờ)
+  // Hàm lất
   const handleRouteChange = (selectedRouteId: string) => {
     setRouteId(selectedRouteId);
     if (selectedRouteId) {
-      const selectedRoute = routes.find((route) => route._id === selectedRouteId);
+      const selectedRoute = routes.find(
+        (route) => route._id === selectedRouteId,
+      );
       if (selectedRoute && selectedRoute.estimated_duration) {
         // estimated_duration từ backend là giờ (float)
         setScheduledDuration(selectedRoute.estimated_duration);
@@ -251,7 +257,6 @@ useEffect(() => {
       await baseAPIAuth.post("/api/admin/check/trips", payload);
       setFormSuccess("Tạo chuyến đi thành công.");
       setFormError("");
-
       setRouteId("");
       setBusId("");
       setDepartureTime("");
@@ -265,7 +270,6 @@ useEffect(() => {
           shift_start: "",
           shift_end: "",
           status: "PENDING",
-          keyword: "",
           suggestions: [],
         },
       ]);
@@ -515,16 +519,25 @@ useEffect(() => {
                           Tài xế
                         </span>
                         <div className="relative">
-                          <input
-                            type="text"
-                            value={d.keyword}
-                            onChange={(e) => {
-                              handleUpdateDriver(d.id, "keyword", e.target.value);
-                              searchDriver(d.id, e.target.value);
-                            }}
-                            placeholder="Tìm tài xế..."
+                          <select
+                            value={d.driver_id}
+                            onChange={(e) =>
+                              handleUpdateDriver(
+                                d.id,
+                                "driver_id",
+                                e.target.value,
+                              )
+                            }
                             className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151]"
-                          />
+                            required
+                          >
+                            <option value="">-- Chọn tài xế rảnh --</option>
+                            {availableDrivers.map((driver) => (
+                              <option key={driver._id} value={driver._id}>
+                                {driver.name} - {driver.phone}
+                              </option>
+                            ))}
+                          </select>
 
                           {d.suggestions.length > 0 && (
                             <ul className="absolute z-50 mt-1 max-h-40 w-full overflow-y-auto rounded-md border bg-white shadow">
@@ -533,8 +546,11 @@ useEffect(() => {
                                   key={driver._id}
                                   className="cursor-pointer px-3 py-2 hover:bg-gray-100"
                                   onClick={() => {
-                                    handleUpdateDriver(d.id, "driver_id", driver._id);
-                                    handleUpdateDriver(d.id, "keyword", driver.name);
+                                    handleUpdateDriver(
+                                      d.id,
+                                      "driver_id",
+                                      driver._id,
+                                    );
                                     handleUpdateDriver(d.id, "suggestions", []);
                                   }}
                                 >
@@ -583,7 +599,11 @@ useEffect(() => {
                           type="datetime-local"
                           value={d.shift_start}
                           onChange={(e) =>
-                            handleUpdateDriver(d.id, "shift_start", e.target.value)
+                            handleUpdateDriver(
+                              d.id,
+                              "shift_start",
+                              e.target.value,
+                            )
                           }
                           className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
                           required
@@ -598,7 +618,11 @@ useEffect(() => {
                           type="datetime-local"
                           value={d.shift_end}
                           onChange={(e) =>
-                            handleUpdateDriver(d.id, "shift_end", e.target.value)
+                            handleUpdateDriver(
+                              d.id,
+                              "shift_end",
+                              e.target.value,
+                            )
                           }
                           className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
                           required
