@@ -100,7 +100,6 @@ export default function BusTripProfile() {
             {[
               { label: "Thông tin cá nhân", icon: User, path: "/user/profile" },
               { label: "Lịch sử đặt vé", icon: Ticket, path: "/user/orderhistory" },
-              { label: "Ví của tôi", icon: Wallet, path: "/profile/wallet" },
               { label: "Địa chỉ", icon: MapPin, path: "/user/address" },
               { label: "Đổi mật khẩu", icon: Settings, path: "/user/changpassword" },
             ].map((item) => {

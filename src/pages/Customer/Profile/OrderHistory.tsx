@@ -1,175 +1,331 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from "react";
+import { Clock, Bus, CreditCard, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
-interface Order {
-    id: string;
-    date: string;
-    departureTime: string;
-    arrivalTime: string;
-    departureLocation: string;
-    arrivalLocation: string;
-    duration: string;
-    distance: string;
-    seats: number;
-    schedule: string;
-    vehicleType: string;
-    seatClass: string;
-    status: 'completed' | 'pending' | 'cancelled';
-    statusText: string;
+/* ================= TYPES ================= */
+interface OrderItem {
+    _id: string;
+    order_status: "CREATED" | "PAID" | "CANCELLED";
+    total_price: number;
+    seat_labels: string[];
+    passenger_name: string;
+    passenger_phone: string;
+    created_at: string;
+    trip: {
+        _id: string;
+        departure_time: string;
+        arrival_time: string;
+        status: string;
+        bus_type_name: string | null;
+        route: {
+            from: { name: string | null; province: string | null };
+            to: { name: string | null; province: string | null };
+        };
+    } | null;
+    payment: {
+        payment_method: "ONLINE" | "CASH_ON_BOARD";
+        payment_status: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+        amount: number;
+        paid_at: string | null;
+    } | null;
 }
 
-const OrderHistory: React.FC = () => {
+interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+/* ================= HELPERS ================= */
+
+
+const formatTime = (d?: string | null) => {
+    if (!d) return "--:--";
+    return new Date(d).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+};
+
+const formatDate = (d?: string | null) => {
+    if (!d) return "--/--/----";
+    return new Date(d).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+};
+
+const calcDuration = (s?: string | null, e?: string | null) => {
+    if (!s || !e) return null;
+    const h = Math.floor((new Date(e).getTime() - new Date(s).getTime()) / 3600000);
+    return h > 0 ? `${h} giờ` : null;
+};
+
+/* ================= STATUS CONFIG ================= */
+const ORDER_STATUS: Record<string, { label: string; className: string }> = {
+    CREATED: { label: "Chờ thanh toán", className: "bg-yellow-100 text-yellow-700 border border-yellow-300" },
+    PAID: { label: "Đã thanh toán", className: "bg-green-100 text-green-700 border border-green-300" },
+    CANCELLED: { label: "Đã hủy", className: "bg-slate-100 text-slate-500 border border-slate-300" },
+};
+
+const PAYMENT_METHOD: Record<string, string> = {
+    CASH_ON_BOARD: "💵 Trả trên xe",
+    ONLINE: "📱 Online",
+};
+
+/* ================= COMPONENT ================= */
+export default function OrderHistory() {
+    const [orders, setOrders] = useState<OrderItem[]>([]);
+    const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 10, total: 0, totalPages: 1 });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
 
-    const orders: Order[] = [
-        {
-            id: '1',
-            date: '28/01/2026',
-            departureTime: '15:00',
-            arrivalTime: '17:00',
-            departureLocation: 'An hữu (Trên Giang)',
-            arrivalLocation: 'TP. Hồ Chí Minh',
-            duration: '2 giờ',
-            distance: '640km',
-            seats: 1,
-            schedule: 'Lịch Trình',
-            vehicleType: 'Limosine',
-            seatClass: 'Ghế A03',
-            status: 'completed',
-            statusText: 'Hoàn thành'
-        },
-        {
-            id: '2',
-            date: '30/01/2026',
-            departureTime: '15:00',
-            arrivalTime: '17:00',
-            departureLocation: 'An hữu (Trên Giang)',
-            arrivalLocation: 'TP. Hồ Chí Minh',
-            duration: '2 giờ',
-            distance: '640km',
-            seats: 0,
-            schedule: 'Lịch Trình',
-            vehicleType: 'Limosine',
-            seatClass: 'Gửi hàng',
-            status: 'pending',
-            statusText: 'Chờ tiết'
-        }
-    ];
+    const fetchOrders = async (page: number) => {
+        setError(null);
+        setLoading(true);
+        try {
+            const accessToken = localStorage.getItem("accessToken");
+            if (!accessToken) {
+                setError("Bạn chưa đăng nhập.");
+                return;
+            }
 
-    const totalPages = 3;
+            const res = await fetch("http://localhost:3000/api/customer/check/getOrderHistory", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({ page, limit: 10 }),
+            });
 
-    const getStatusColor = (status: Order['status']) => {
-        switch (status) {
-            case 'completed':
-                return 'bg-orange-500 text-white';
-            case 'pending':
-                return 'bg-orange-500 text-white';
-            case 'cancelled':
-                return 'bg-gray-400 text-white';
-            default:
-                return 'bg-gray-400 text-white';
+            const json = await res.json();
+            if (!res.ok) {
+                setError(json.message || "Không thể tải lịch sử đặt vé.");
+                return;
+            }
+
+            setOrders(json.data || []);
+            setPagination(json.pagination || { page, limit: 10, total: 0, totalPages: 1 });
+        } catch {
+            setError("Lỗi kết nối. Vui lòng thử lại.");
+        } finally {
+            setLoading(false);
         }
     };
 
-    const getSeatClassColor = (seatClass: string) => {
-        if (seatClass.startsWith('Ghế')) {
-            return 'bg-green-100 text-green-700';
-        }
-        return 'bg-green-100 text-green-700';
+    useEffect(() => {
+        fetchOrders(currentPage);
+    }, [currentPage]);
+
+    /* ── Pagination pages array ── */
+    const pageNumbers = () => {
+        const total = pagination.totalPages;
+        if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
+        if (currentPage <= 3) return [1, 2, 3, 4, 5];
+        if (currentPage >= total - 2) return [total - 4, total - 3, total - 2, total - 1, total];
+        return [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
     };
 
+    /* ── RENDER ── */
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 p-4 md:p-8">
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-2xl font-bold text-gray-800 mb-6">Order History</h1>
 
-                <div className="space-y-4">
-                    {orders.map((order) => (
-                        <div
-                            key={order.id}
-                            className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6"
-                        >
-                            {/* Header with time and date */}
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center space-x-4">
-                                    <div className="text-center">
-                                        <div className="text-xl font-bold text-gray-800">{order.departureTime}</div>
-                                        <div className="text-xs text-gray-500">{order.departureLocation}</div>
-                                    </div>
-
-                                    <div className="flex flex-col items-center flex-1 px-4">
-                                        <div className="flex items-center w-full">
-                                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                            <div className="flex-1 h-0.5 bg-gradient-to-r from-green-500 to-orange-500 mx-2"></div>
-                                            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                                        </div>
-                                        <div className="text-sm text-gray-600 mt-1">{order.date}</div>
-                                        <div className="text-xs text-gray-500">{order.duration} {order.distance}</div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <div className="text-xl font-bold text-gray-800">{order.arrivalTime}</div>
-                                        <div className="text-xs text-gray-500">{order.arrivalLocation}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Details */}
-                            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                                <div className="flex items-center space-x-4 text-sm">
-                                    <span className="font-semibold text-gray-700">{order.seats} ghế</span>
-                                    <span className="text-gray-500">{order.schedule}</span>
-                                    <span className="text-gray-500">• {order.vehicleType}</span>
-                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getSeatClassColor(order.seatClass)}`}>
-                                        {order.seatClass}
-                                    </span>
-                                </div>
-
-                                <button className={`px-6 py-2 rounded-full text-sm font-semibold ${getStatusColor(order.status)} transition-all hover:shadow-md`}>
-                                    {order.statusText}
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="text-2xl font-black text-slate-800">Lịch sử đặt vé</h1>
+                        {!loading && pagination.total > 0 && (
+                            <p className="text-sm text-slate-500 mt-0.5">{pagination.total} đơn đặt vé</p>
+                        )}
+                    </div>
+                    <button
+                        onClick={() => fetchOrders(currentPage)}
+                        disabled={loading}
+                        className="flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+                        Làm mới
+                    </button>
                 </div>
+
+                {/* Loading */}
+                {loading && (
+                    <div className="flex flex-col items-center justify-center py-20 gap-3">
+                        <Loader2 size={36} className="animate-spin text-orange-500" />
+                        <p className="text-slate-500 font-medium">Đang tải lịch sử...</p>
+                    </div>
+                )}
+
+                {/* Error */}
+                {!loading && error && (
+                    <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+                        <AlertCircle size={40} className="text-red-400" />
+                        <p className="text-slate-600 font-semibold">{error}</p>
+                        <button
+                            onClick={() => fetchOrders(currentPage)}
+                            className="mt-2 px-5 py-2 bg-orange-500 text-white rounded-xl font-bold text-sm hover:bg-orange-600 transition-colors"
+                        >
+                            Thử lại
+                        </button>
+                    </div>
+                )}
+
+                {/* Empty */}
+                {!loading && !error && orders.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+                        <Bus size={48} className="text-slate-300" />
+                        <p className="text-slate-500 font-semibold text-lg">Chưa có đơn đặt vé nào</p>
+                        <p className="text-slate-400 text-sm">Hãy đặt chuyến xe đầu tiên của bạn!</p>
+                    </div>
+                )}
+
+                {/* Order list */}
+                {!loading && !error && orders.length > 0 && (
+                    <div className="space-y-4">
+                        {orders.map((order) => {
+                            const trip = order.trip;
+                            const statusCfg = ORDER_STATUS[order.order_status] ?? ORDER_STATUS.CREATED;
+                            const duration = calcDuration(trip?.departure_time, trip?.arrival_time);
+
+                            return (
+                                <div key={order._id}
+                                    className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-orange-100/60">
+
+                                    {/* Status bar top */}
+                                    <div className={`h-1 w-full ${order.order_status === "PAID" ? "bg-green-400" :
+                                        order.order_status === "CANCELLED" ? "bg-slate-300" :
+                                            "bg-yellow-400"
+                                        }`} />
+
+                                    <div className="p-6">
+                                        {/* ── Trip route ── */}
+                                        <div className="flex items-center gap-4 mb-4 flex-wrap">
+
+                                            {/* Giờ đi */}
+                                            <div className="text-center min-w-[56px]">
+                                                <div className="text-xl font-black text-slate-800">{formatTime(trip?.departure_time)}</div>
+                                                <div className="text-[11px] text-slate-500 leading-tight mt-0.5 max-w-[80px]">
+                                                    {trip?.route?.from?.province || "---"}
+                                                </div>
+                                            </div>
+
+                                            {/* Line giữa */}
+                                            <div className="flex flex-col items-center flex-1 min-w-[80px]">
+                                                <div className="flex items-center w-full gap-1">
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0" />
+                                                    <div className="flex-1 h-0.5 bg-gradient-to-r from-green-500 to-orange-500" />
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0" />
+                                                </div>
+                                                <div className="text-xs text-slate-500 mt-1">{formatDate(trip?.departure_time)}</div>
+                                                {duration && (
+                                                    <div className="text-[10px] font-semibold text-orange-500">{duration}</div>
+                                                )}
+                                            </div>
+
+                                            {/* Giờ đến */}
+                                            <div className="text-center min-w-[56px]">
+                                                <div className="text-xl font-black text-slate-800">{formatTime(trip?.arrival_time)}</div>
+                                                <div className="text-[11px] text-slate-500 leading-tight mt-0.5 max-w-[80px]">
+                                                    {trip?.route?.to?.province || "---"}
+                                                </div>
+                                            </div>
+
+                                            {/* Status badge */}
+                                            <div className="ml-auto">
+                                                <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${statusCfg.className}`}>
+                                                    {statusCfg.label}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* ── Detail row ── */}
+                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-4 border-t border-slate-100 text-sm">
+
+                                            {/* Ghế */}
+                                            {order.seat_labels.length > 0 && (
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-slate-400 text-xs">🪑</span>
+                                                    <div className="flex gap-1 flex-wrap">
+                                                        {order.seat_labels.map(s => (
+                                                            <span key={s} className="bg-orange-100 text-orange-700 text-[11px] font-black px-2 py-0.5 rounded-md">
+                                                                {s}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Loại xe */}
+                                            {trip?.bus_type_name && (
+                                                <div className="flex items-center gap-1.5 text-slate-500">
+                                                    <Bus size={13} className="text-slate-400" />
+                                                    <span className="text-xs font-semibold">{trip.bus_type_name}</span>
+                                                </div>
+                                            )}
+
+                                            {/* Phương thức TT */}
+                                            {order.payment && (
+                                                <div className="flex items-center gap-1.5 text-slate-500">
+                                                    <CreditCard size={13} className="text-slate-400" />
+                                                    <span className="text-xs font-semibold">
+                                                        {PAYMENT_METHOD[order.payment.payment_method] || order.payment.payment_method}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Ngày đặt */}
+                                            <div className="flex items-center gap-1.5 text-slate-400">
+                                                <Clock size={12} />
+                                                <span className="text-xs">Đặt {formatDate(order.created_at)}</span>
+                                            </div>
+
+                                            {/* Tổng tiền */}
+                                            <div className="ml-auto font-black text-orange-600 text-base">
+                                                {order.total_price.toLocaleString("vi-VN")}₫
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
                 {/* Pagination */}
-                <div className="flex items-center justify-center space-x-2 mt-8">
-                    <button
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                        disabled={currentPage === 1}
-                    >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-
-                    {[1, 2, 3].map((page) => (
+                {!loading && !error && pagination.totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-8">
                         <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={`w-8 h-8 flex items-center justify-center rounded-full font-medium transition-all ${currentPage === page
-                                ? 'bg-orange-500 text-white shadow-md'
-                                : 'text-gray-600 hover:bg-gray-100'
-                                }`}
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors disabled:opacity-40"
                         >
-                            {page}
+                            <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
                         </button>
-                    ))}
 
-                    <button
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                        disabled={currentPage === totalPages}
-                    >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
+                        {pageNumbers().map(page => (
+                            <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${currentPage === page
+                                    ? "bg-orange-500 text-white shadow-md shadow-orange-200"
+                                    : "text-slate-600 hover:bg-slate-100"
+                                    }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
+                            disabled={currentPage === pagination.totalPages}
+                            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors disabled:opacity-40"
+                        >
+                            <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
-};
-
-export default OrderHistory;
+}

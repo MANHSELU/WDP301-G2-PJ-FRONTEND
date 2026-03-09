@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Armchair, MapPin, Navigation } from "lucide-react";
+import { ArrowLeft, Armchair, MapPin, Navigation, Loader2 } from "lucide-react";
 
 /* ================= TYPES ================= */
 type SeatStatus = "available" | "selected" | "booked";
@@ -37,12 +37,24 @@ type LocationPoint = {
     location: { type: string; coordinates: number[] };
 };
 
+/* ================= HELPERS ================= */
+
+/** Decode JWT payload (không verify — chỉ để lấy user_id) */
+function decodeJwt(token: string): Record<string, any> | null {
+    try {
+        const payload = token.split(".")[1];
+        const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+        return JSON.parse(decoded);
+    } catch {
+        return null;
+    }
+}
+
 /* ================= COMPONENT ================= */
 export default function BusBookingUI() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // ✅ Nhận toàn bộ data từ Trang 1
     const {
         selectedSeats = [] as string[],
         selectedSeatLabels = [] as string[],
@@ -51,16 +63,26 @@ export default function BusBookingUI() {
         dropoffPoint = null as StopPoint | null,
         pickupLocationPoint = null as LocationPoint | null,
         dropoffLocationPoint = null as LocationPoint | null,
-        ticketPrice = null
+        ticketPrice = 0,
     } = location.state || {};
-    console.log("pickupLocationPoint: ", pickupPoint)
+
     const activeFloor = 1;
     const [customerInfo, setCustomerInfo] = useState({ name: "", phone: "", email: "" });
     const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState<"CASH_ON_BOARD" | "ONLINE">("CASH_ON_BOARD");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [showSuccess, setShowSuccess] = useState(false);
 
-    const selectedCount = selectedSeats.length;
+    // ✅ Dùng cả 2 array — trang trước có thể truyền 1 trong 2
+    const seatList: string[] = selectedSeatLabels.length > 0 ? selectedSeatLabels : selectedSeats;
+    const selectedCount = seatList.length;
     const totalPrice = selectedCount * ticketPrice;
-    const isFormValid = customerInfo.name.trim() && customerInfo.phone.trim() && agreedToTerms;
+    const isFormValid =
+        customerInfo.name.trim() !== "" &&
+        customerInfo.phone.trim() !== "" &&
+        agreedToTerms &&
+        selectedCount > 0;
 
     /* ── Helpers ── */
     const formatTime = (d?: string) => {
@@ -85,7 +107,7 @@ export default function BusBookingUI() {
         : "Điểm đến";
     const routeLabel = `${startLabel} → ${stopLabel}`;
 
-    /* ── Tái tạo sơ đồ ghế từ seat_layout ── */
+    /* ── Tái tạo sơ đồ ghế ── */
     const generateSeatsFromLayout = (floor: number): Seat[] => {
         if (!trip?.bus_id?.seat_layout) return [];
         const { rows, columns, row_overrides } = trip.bus_id.seat_layout;
@@ -144,6 +166,75 @@ export default function BusBookingUI() {
         );
     };
 
+    /* ════════════════════════════════════════
+       GỌI API ĐẶT VÉ
+    ════════════════════════════════════════ */
+    const handleBooking = async () => {
+        setErrorMsg(null);
+
+        /* 1. Lấy token */
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) {
+            setErrorMsg("Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.");
+            return;
+        }
+
+        /* 2. Decode lấy user_id */
+        const payload = decodeJwt(accessToken);
+        const user_id = payload?.id || payload?.userId || payload?._id || payload?.sub;
+        if (!user_id) {
+            setErrorMsg("Không xác định được tài khoản. Vui lòng đăng nhập lại.");
+            return;
+        }
+
+        /* 3. Kiểm tra các trường bắt buộc */
+        if (!trip?._id || !pickupPoint?._id || !dropoffPoint?._id) {
+            setErrorMsg("Thiếu thông tin chuyến xe hoặc điểm đón/trả.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const body = {
+                user_id,
+                trip_id: trip._id,
+                start_id: pickupPoint._id,       // RouteStop _id điểm đón
+                end_id: dropoffPoint._id,          // RouteStop _id điểm trả
+                seat_labels: seatList,
+                ticket_price: ticketPrice,
+                payment_method: paymentMethod,
+                passenger_name: customerInfo.name.trim(),
+                passenger_phone: customerInfo.phone.trim(),
+                passenger_email: customerInfo.email.trim() || undefined,
+            };
+
+            const res = await fetch("http://localhost:3000/api/customer/booking/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify(body),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                // BE trả về message lỗi cụ thể (ghế trùng, ghế đã đặt, v.v.)
+                setErrorMsg(data.message || "Đặt vé thất bại. Vui lòng thử lại.");
+                return;
+            }
+
+            /* 4. Thành công → hiện modal */
+            setShowSuccess(true);
+        } catch (err) {
+            console.error("[handleBooking]", err);
+            setErrorMsg("Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const tripInfoRows = [
         { label: "Tuyến xe", value: routeLabel },
         { label: "Ngày đi", value: formatDate(trip?.departure_time) },
@@ -157,6 +248,38 @@ export default function BusBookingUI() {
     /* ── RENDER ── */
     return (
         <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
+
+            {/* ══ SUCCESS MODAL ══ */}
+            {showSuccess && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+                    style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 flex flex-col items-center text-center">
+                        {/* Vòng tích xanh */}
+                        <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-5">
+                            <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <h2 className="text-2xl font-black text-slate-800 mb-2">Đặt vé thành công!</h2>
+                        <p className="text-slate-500 text-sm mb-1">
+                            Tuyến: <span className="font-semibold text-slate-700">{routeLabel}</span>
+                        </p>
+                        <p className="text-slate-500 text-sm mb-1">
+                            Ghế: <span className="font-semibold text-orange-600">{seatList.join(", ")}</span>
+                        </p>
+                        <p className="text-slate-500 text-sm mb-6">
+                            Tổng tiền: <span className="font-bold text-orange-600">{totalPrice.toLocaleString("vi-VN")}₫</span>
+                        </p>
+                        <button
+                            onClick={() => navigate("/")}
+                            className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-base shadow-lg transition-all active:scale-95"
+                        >
+                            🏠 Về trang chủ
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#f3ece5] to-[#ece7e2]" />
 
             {/* Bus animation */}
@@ -205,9 +328,8 @@ export default function BusBookingUI() {
                         {/* ════ LEFT ════ */}
                         <div className="lg:col-span-2 space-y-8">
 
-                            {/* ══ ĐIỂM ĐÓN & ĐIỂM TRẢ ══ */}
+                            {/* ĐIỂM ĐÓN & ĐIỂM TRẢ */}
                             <div className="bg-white rounded-lg shadow-lg border-2 border-orange-300 overflow-hidden">
-                                {/* Header */}
                                 <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600">
                                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20">
                                         <MapPin size={16} className="text-white" />
@@ -216,16 +338,12 @@ export default function BusBookingUI() {
                                 </div>
 
                                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                                    {/* ── ĐIỂM ĐÓN ── */}
+                                    {/* ĐIỂM ĐÓN */}
                                     <div className="space-y-3">
-                                        {/* Label */}
                                         <div className="flex items-center gap-2">
                                             <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-white text-[11px] font-black flex-shrink-0">A</span>
                                             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Điểm đón</span>
                                         </div>
-
-                                        {/* Khu vực (từ pickupPoint) */}
                                         <div className="rounded-xl border-2 border-green-200 bg-green-50 overflow-hidden">
                                             <div className="flex items-center gap-2 px-4 py-2 bg-green-100 border-b border-green-200">
                                                 <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
@@ -242,13 +360,9 @@ export default function BusBookingUI() {
                                                         <p className="text-sm font-bold text-green-900">{pickupPoint.stop_id.name}</p>
                                                         <p className="text-xs text-green-600 mt-0.5">{pickupPoint.stop_id.province}</p>
                                                     </>
-                                                ) : (
-                                                    <p className="text-sm text-slate-400 italic">Chưa có thông tin</p>
-                                                )}
+                                                ) : <p className="text-sm text-slate-400 italic">Chưa có thông tin</p>}
                                             </div>
                                         </div>
-
-                                        {/* Vị trí cụ thể (từ pickupLocationPoint) */}
                                         {pickupLocationPoint && (
                                             <div className="rounded-xl border-2 border-green-300 bg-white overflow-hidden">
                                                 <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border-b border-green-200">
@@ -258,14 +372,10 @@ export default function BusBookingUI() {
                                                 <div className="px-4 py-3 space-y-1.5">
                                                     <p className="text-sm font-bold text-slate-800">{pickupLocationPoint.location_name}</p>
                                                     {pickupLocationPoint.location?.coordinates?.length === 2 && (
-                                                        <a
-                                                            href={`https://maps.google.com/?q=${pickupLocationPoint.location.coordinates[1]},${pickupLocationPoint.location.coordinates[0]}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-green-600 hover:text-green-700 transition-colors"
-                                                        >
-                                                            <MapPin size={11} />
-                                                            Xem trên bản đồ
+                                                        <a href={`https://maps.google.com/?q=${pickupLocationPoint.location.coordinates[1]},${pickupLocationPoint.location.coordinates[0]}`}
+                                                            target="_blank" rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-green-600 hover:text-green-700 transition-colors">
+                                                            <MapPin size={11} /> Xem trên bản đồ
                                                         </a>
                                                     )}
                                                 </div>
@@ -273,15 +383,12 @@ export default function BusBookingUI() {
                                         )}
                                     </div>
 
-                                    {/* ── ĐIỂM TRẢ ── */}
+                                    {/* ĐIỂM TRẢ */}
                                     <div className="space-y-3">
-                                        {/* Label */}
                                         <div className="flex items-center gap-2">
                                             <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-[11px] font-black flex-shrink-0">B</span>
                                             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Điểm trả</span>
                                         </div>
-
-                                        {/* Khu vực (từ dropoffPoint) */}
                                         <div className="rounded-xl border-2 border-orange-200 bg-orange-50 overflow-hidden">
                                             <div className="flex items-center gap-2 px-4 py-2 bg-orange-100 border-b border-orange-200">
                                                 <div className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0" />
@@ -298,13 +405,9 @@ export default function BusBookingUI() {
                                                         <p className="text-sm font-bold text-orange-900">{dropoffPoint.stop_id.name}</p>
                                                         <p className="text-xs text-orange-600 mt-0.5">{dropoffPoint.stop_id.province}</p>
                                                     </>
-                                                ) : (
-                                                    <p className="text-sm text-slate-400 italic">Chưa có thông tin</p>
-                                                )}
+                                                ) : <p className="text-sm text-slate-400 italic">Chưa có thông tin</p>}
                                             </div>
                                         </div>
-
-                                        {/* Vị trí cụ thể (từ dropoffLocationPoint) */}
                                         {dropoffLocationPoint && (
                                             <div className="rounded-xl border-2 border-orange-300 bg-white overflow-hidden">
                                                 <div className="flex items-center gap-2 px-4 py-2 bg-orange-50 border-b border-orange-200">
@@ -314,14 +417,10 @@ export default function BusBookingUI() {
                                                 <div className="px-4 py-3 space-y-1.5">
                                                     <p className="text-sm font-bold text-slate-800">{dropoffLocationPoint.location_name}</p>
                                                     {dropoffLocationPoint.location?.coordinates?.length === 2 && (
-                                                        <a
-                                                            href={`https://maps.google.com/?q=${dropoffLocationPoint.location.coordinates[1]},${dropoffLocationPoint.location.coordinates[0]}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-orange-600 hover:text-orange-700 transition-colors"
-                                                        >
-                                                            <MapPin size={11} />
-                                                            Xem trên bản đồ
+                                                        <a href={`https://maps.google.com/?q=${dropoffLocationPoint.location.coordinates[1]},${dropoffLocationPoint.location.coordinates[0]}`}
+                                                            target="_blank" rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-orange-600 hover:text-orange-700 transition-colors">
+                                                            <MapPin size={11} /> Xem trên bản đồ
                                                         </a>
                                                     )}
                                                 </div>
@@ -330,31 +429,24 @@ export default function BusBookingUI() {
                                     </div>
                                 </div>
 
-                                {/* Route summary bar */}
                                 {pickupPoint && dropoffPoint && (
                                     <div className="mx-6 mb-5 flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-green-50 to-orange-50 border-2 border-orange-200 rounded-xl">
                                         <div className="flex items-center gap-2 min-w-0 flex-1">
                                             <div className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0" />
                                             <div className="min-w-0">
                                                 <p className="text-xs font-bold text-green-800 truncate">{pickupPoint.stop_id.name}</p>
-                                                {pickupLocationPoint && (
-                                                    <p className="text-[10px] text-green-600 truncate">{pickupLocationPoint.location_name}</p>
-                                                )}
+                                                {pickupLocationPoint && <p className="text-[10px] text-green-600 truncate">{pickupLocationPoint.location_name}</p>}
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1 flex-shrink-0">
                                             <div className="w-12 h-px bg-gradient-to-r from-green-400 to-orange-400" />
-                                            <div className="text-[10px] font-bold text-slate-500 px-1 whitespace-nowrap">
-                                                {calcDuration(trip?.departure_time, trip?.arrival_time)}
-                                            </div>
+                                            <div className="text-[10px] font-bold text-slate-500 px-1 whitespace-nowrap">{calcDuration(trip?.departure_time, trip?.arrival_time)}</div>
                                             <div className="w-12 h-px bg-gradient-to-r from-orange-400 to-orange-500" />
                                         </div>
                                         <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
                                             <div className="min-w-0 text-right">
                                                 <p className="text-xs font-bold text-orange-800 truncate">{dropoffPoint.stop_id.name}</p>
-                                                {dropoffLocationPoint && (
-                                                    <p className="text-[10px] text-orange-600 truncate">{dropoffLocationPoint.location_name}</p>
-                                                )}
+                                                {dropoffLocationPoint && <p className="text-[10px] text-orange-600 truncate">{dropoffLocationPoint.location_name}</p>}
                                             </div>
                                             <div className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0" />
                                         </div>
@@ -365,7 +457,6 @@ export default function BusBookingUI() {
                             {/* Sơ đồ chỗ ngồi */}
                             <div className="bg-white rounded-lg p-8 shadow-lg border-2 border-orange-300">
                                 <h2 className="text-2xl font-bold text-orange-900 mb-6">🪑 Sơ đồ chỗ ngồi</h2>
-
                                 {selectedCount > 0 && (
                                     <div className="mb-6 p-4 bg-orange-50 border-2 border-orange-200 rounded-lg">
                                         <p className="text-sm font-bold text-orange-700 mb-3">✅ Ghế đã chọn ({selectedCount} ghế):</p>
@@ -378,13 +469,11 @@ export default function BusBookingUI() {
                                         </div>
                                     </div>
                                 )}
-
                                 <div className="flex gap-3 mb-8 border-b-2 border-orange-300 pb-4">
                                     <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md flex items-center gap-2">
                                         <Armchair size={17} /> Tầng {activeFloor}
                                     </div>
                                 </div>
-
                                 <div className="bg-gradient-to-br from-slate-50 to-orange-50/30 rounded-2xl p-10 mb-8 border-2 border-orange-100">
                                     <div className="w-full max-w-6xl mx-auto border-2 border-slate-300 rounded-[40px] p-12 bg-white shadow-inner">
                                         <div className="text-center text-slate-400 font-bold mb-10 tracking-widest">🚍 ĐẦU XE</div>
@@ -410,7 +499,6 @@ export default function BusBookingUI() {
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="flex flex-wrap gap-8 text-sm bg-orange-50 p-6 rounded-lg border-2 border-orange-300">
                                     <div className="flex items-center gap-3"><div className="w-6 h-6 rounded bg-white border-2 border-green-400" /><span className="text-slate-700 font-bold">Trống</span></div>
                                     <div className="flex items-center gap-3"><div className="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-orange-600" /><span className="text-slate-700 font-bold">Đã chọn</span></div>
@@ -430,9 +518,7 @@ export default function BusBookingUI() {
                                         <div key={field.key}>
                                             <label className="block text-sm font-bold text-orange-700 mb-3 uppercase">
                                                 {field.label}{" "}
-                                                {field.required
-                                                    ? <span className="text-red-500">*</span>
-                                                    : <span className="text-orange-400">(Tùy chọn)</span>}
+                                                {field.required ? <span className="text-red-500">*</span> : <span className="text-orange-400">(Tùy chọn)</span>}
                                             </label>
                                             <input
                                                 type={field.type}
@@ -442,6 +528,34 @@ export default function BusBookingUI() {
                                                 onChange={(e) => setCustomerInfo({ ...customerInfo, [field.key]: e.target.value })}
                                             />
                                         </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Phương thức thanh toán */}
+                            <div className="bg-white rounded-lg p-8 shadow-lg border-2 border-orange-300">
+                                <h2 className="text-2xl font-bold text-orange-900 mb-6">💳 Phương thức thanh toán</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                        { value: "CASH_ON_BOARD", label: "Trả tiền trên xe", desc: "Thanh toán khi lên xe", icon: "💵" },
+                                        { value: "ONLINE", label: "Thanh toán online", desc: "Chuyển khoản / ví điện tử", icon: "📱" },
+                                    ].map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            onClick={() => setPaymentMethod(opt.value as any)}
+                                            className={`flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${paymentMethod === opt.value
+                                                    ? "border-orange-500 bg-orange-50"
+                                                    : "border-slate-200 hover:border-orange-300"
+                                                }`}
+                                        >
+                                            <span className="text-2xl">{opt.icon}</span>
+                                            <div>
+                                                <p className={`font-bold text-sm ${paymentMethod === opt.value ? "text-orange-700" : "text-slate-700"}`}>{opt.label}</p>
+                                                <p className="text-xs text-slate-500 mt-0.5">{opt.desc}</p>
+                                            </div>
+                                            <div className={`ml-auto mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 ${paymentMethod === opt.value ? "border-orange-500 bg-orange-500" : "border-slate-300"
+                                                }`} />
+                                        </button>
                                     ))}
                                 </div>
                             </div>
@@ -498,8 +612,6 @@ export default function BusBookingUI() {
                                             <p className="font-semibold text-slate-900">{item.value}</p>
                                         </div>
                                     ))}
-
-                                    {/* Điểm đón */}
                                     <div className="pb-4 border-b-2 border-orange-100">
                                         <p className="text-orange-600 text-xs font-bold uppercase tracking-wide mb-1.5 flex items-center gap-1">
                                             <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500 text-white text-[9px] font-black">A</span>
@@ -510,15 +622,12 @@ export default function BusBookingUI() {
                                                 <p className="font-semibold text-slate-900">{pickupPoint.stop_id.province} — {pickupPoint.stop_id.name}</p>
                                                 {pickupLocationPoint && (
                                                     <p className="text-xs text-green-700 font-medium flex items-center gap-1">
-                                                        <MapPin size={11} className="flex-shrink-0" />
-                                                        {pickupLocationPoint.location_name}
+                                                        <MapPin size={11} className="flex-shrink-0" />{pickupLocationPoint.location_name}
                                                     </p>
                                                 )}
                                             </div>
                                         ) : <p className="font-semibold text-slate-400 italic text-xs">Chưa có thông tin</p>}
                                     </div>
-
-                                    {/* Điểm trả */}
                                     <div className="pb-0">
                                         <p className="text-orange-600 text-xs font-bold uppercase tracking-wide mb-1.5 flex items-center gap-1">
                                             <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-black">B</span>
@@ -529,8 +638,7 @@ export default function BusBookingUI() {
                                                 <p className="font-semibold text-slate-900">{dropoffPoint.stop_id.province} — {dropoffPoint.stop_id.name}</p>
                                                 {dropoffLocationPoint && (
                                                     <p className="text-xs text-orange-700 font-medium flex items-center gap-1">
-                                                        <Navigation size={11} className="flex-shrink-0" />
-                                                        {dropoffLocationPoint.location_name}
+                                                        <Navigation size={11} className="flex-shrink-0" />{dropoffLocationPoint.location_name}
                                                     </p>
                                                 )}
                                             </div>
@@ -563,6 +671,12 @@ export default function BusBookingUI() {
                                             </div>
                                         </div>
                                     )}
+                                    <div className="flex justify-between items-center bg-white bg-opacity-60 p-3 rounded-lg">
+                                        <span className="text-slate-700 font-medium">Thanh toán</span>
+                                        <span className="font-bold text-slate-700 text-xs">
+                                            {paymentMethod === "CASH_ON_BOARD" ? "💵 Trên xe" : "📱 Online"}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg p-4">
                                     <div className="text-center">
@@ -572,19 +686,34 @@ export default function BusBookingUI() {
                                 </div>
                             </div>
 
+                            {/* Thông báo lỗi */}
+                            {errorMsg && (
+                                <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 text-sm text-red-700 font-semibold">
+                                    ⚠️ {errorMsg}
+                                </div>
+                            )}
+
                             {/* Nút thanh toán */}
                             <button
-                                disabled={!isFormValid}
-                                className={`w-full py-4 rounded-lg font-bold text-white transition-all text-lg shadow-lg ${isFormValid
-                                    ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:shadow-xl active:scale-95 cursor-pointer"
-                                    : "bg-slate-300 cursor-not-allowed opacity-60"}`}
+                                disabled={!isFormValid || isSubmitting}
+                                onClick={handleBooking}
+                                className={`w-full py-4 rounded-lg font-bold text-white transition-all text-lg shadow-lg flex items-center justify-center gap-2 ${isFormValid && !isSubmitting
+                                        ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:shadow-xl active:scale-95 cursor-pointer"
+                                        : "bg-slate-300 cursor-not-allowed opacity-60"
+                                    }`}
                             >
-                                {isFormValid
-                                    ? `💳 Thanh toán ${selectedCount} ghế`
-                                    : "Điền đầy đủ thông tin & đồng ý điều khoản"}
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 size={20} className="animate-spin" />
+                                        Đang xử lý...
+                                    </>
+                                ) : isFormValid ? (
+                                    `💳 Xác nhận đặt ${selectedCount} ghế`
+                                ) : (
+                                    "Điền đầy đủ thông tin & đồng ý điều khoản"
+                                )}
                             </button>
 
-                            {/* Hỗ trợ */}
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-xs text-blue-900 shadow-sm">
                                 <p className="font-bold mb-2">ℹ️ Hỗ trợ thanh toán</p>
                                 <p>Liên hệ <span className="font-bold text-blue-700">1800-XXXXX</span> nếu có bất kỳ thắc mắc</p>
@@ -593,6 +722,55 @@ export default function BusBookingUI() {
                     </div>
                 </div>
             </div>
+
+            {/* ══ SUCCESS MODAL ══ */}
+            {showSuccess && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="relative mx-4 w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl text-center">
+                        {/* Icon tick */}
+                        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+                            <svg className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+
+                        <h2 className="text-2xl font-black text-slate-900 mb-2">Đặt vé thành công!</h2>
+                        <p className="text-slate-500 text-sm mb-1">
+                            Cảm ơn <span className="font-bold text-slate-700">{customerInfo.name}</span> đã đặt vé.
+                        </p>
+                        <p className="text-slate-500 text-sm mb-6">
+                            Chúng tôi sẽ liên hệ qua <span className="font-bold text-slate-700">{customerInfo.phone}</span> để xác nhận.
+                        </p>
+
+                        {/* Tóm tắt */}
+                        <div className="mb-6 rounded-xl bg-orange-50 border border-orange-200 p-4 text-left space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-slate-500">Tuyến xe</span>
+                                <span className="font-semibold text-slate-800 text-right max-w-[55%]">{routeLabel}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-500">Ngày đi</span>
+                                <span className="font-semibold text-slate-800">{formatDate(trip?.departure_time)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-500">Ghế</span>
+                                <span className="font-semibold text-orange-600">{actualSeatList.join(", ")}</span>
+                            </div>
+                            <div className="flex justify-between border-t border-orange-200 pt-2">
+                                <span className="text-slate-500 font-bold">Tổng tiền</span>
+                                <span className="font-black text-orange-600 text-base">{totalPrice.toLocaleString("vi-VN")}₫</span>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => navigate("/")}
+                            className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-base hover:from-orange-600 hover:to-orange-700 transition-all active:scale-95 shadow-lg"
+                        >
+                            🏠 Về trang chủ
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 .page-enter-copy { opacity: 0; animation: fadeUp 1.08s cubic-bezier(0.22, 1, 0.36, 1) forwards; animation-delay: 0.2s; }
