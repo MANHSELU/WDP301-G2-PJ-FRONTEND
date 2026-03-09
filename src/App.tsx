@@ -37,6 +37,7 @@ import RevenueDashboard from "./pages/Admin/Revenue";
 import HomeAdmin from "./pages/Admin/HomeAdmin";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import CreateTrip from "./pages/Admin/CreateTrips";
+import DriverShiftsPage from "./pages/Driver/DanhSachCaLai"
 export default function App() {
   return (
     <>
@@ -85,6 +86,7 @@ export default function App() {
 
           <Route path="driverBooking" element={<TransportBooking />}>
             <Route path="viewtrip" element={<ViewTrip />} />
+            <Route path="viewSlot" element={<DriverShiftsPage />} />
             <Route path="tripdetail/:id" element={<TripDetailsDemo />} />
           </Route>
           <Route path="assistant" element={<TripListPage />}>

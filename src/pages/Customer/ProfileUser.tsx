@@ -3,7 +3,6 @@ import axios from "axios";
 import {
   User,
   Ticket,
-  Wallet,
   Settings,
   MapPin,
 } from "lucide-react";
