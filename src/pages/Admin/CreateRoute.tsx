@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import type { recommendStops } from "../../model/recommendStops";
 import baseAPIAuth from "../../api/auth";
-import type { searchStops } from "../../model/searchStop";
+import type { allStops } from "../../model/allStops";
 
 
 // const STATION_NOTES: Record<string, string> = {
@@ -144,63 +144,30 @@ export default function CreateRoute() {
   const [destination, setDestination] = useState("");
   const [destinationId, setDestinationId] = useState("");
   const [recommendStops, setRecommendStops] = useState<recommendStops[]>([]);
-  const [searchDepartureInput, setDepartureSearchInput] = useState<searchStops[]>([]);
-  const [searchDestinationInput, setDestinationSearchInput] = useState<searchStops[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [notice, setNotice] = useState<NoticeState | null>(null);
+  const [stops, setStops] = useState<allStops[]>([]);
+  const [showManualStopDropdown, setShowManualStopDropdown] = useState(false);
+  const [manualStopSearch, setManualStopSearch] = useState("");
 
-  // Hàm search các stops cho điểm kết thúc.
-  const searchDestinationStops = async (keyword: string) => {
-    if (!keyword.trim()) {
-      setDestinationSearchInput([]);
-      return;
-    }
+
+  // UseEffect hàm getAllStops
+  useEffect(() => {
+    getAllStops();
+  },[])
+
+  // Hàm lấy tất cả stops
+  const getAllStops = async() =>{
     try {
-      const res = await baseAPIAuth.get("/api/admin/check/searchStop", {
-        params: {
-          keyword,
-        },
-      });
-      setDestinationSearchInput(res.data);
-      console.log("search data", res.data);
+      const res = await baseAPIAuth.get("/api/admin/check/getAllStops");
+      console.log(res.data);
+      setStops(res.data);
+      console.log(stops);
     } catch (error) {
       console.error(error);
     }
   };
-
-    // Hàm search các stops cho điểm xuất phát.
-  const searchDepartureStops = async (keyword: string) => {
-    if (!keyword.trim()) {
-      setDepartureSearchInput([]);
-      return;
-    }
-    try {
-      const res = await baseAPIAuth.get("/api/admin/check/searchStop", {
-        params: {
-          keyword,
-        },
-      });
-      setDepartureSearchInput(res.data);
-      console.log("search data", res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  // Hàm use effect cho điểm xuất phát departure
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      searchDepartureStops(departure);
-    }, 300);
-    return () => clearTimeout(delay);
-  }, [departure]);
-
-  // Hàm use effect cho điểm kết thúc destination
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      searchDestinationStops(destination);
-    }, 300);
-    return () => clearTimeout(delay);
-  }, [destination]);
+ 
 
   // Hàm lấy ra thông tin stops được gợi ý
   const getRecommendStops = async () => {
@@ -366,43 +333,24 @@ export default function CreateRoute() {
                   </span>
                   <span className="flex min-w-[200px] flex-1 items-center gap-2 rounded-[8px] border border-[#dbe2ee] bg-[#f5f7fb] px-4 py-2.5">
                     <MapPin size={14} className="shrink-0 text-[#e8791c]" />
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={departure}
+                      <select
+                        value={departureId}
                         onChange={(e) => {
-                          setDeparture(e.target.value);
-                        }}
-                        placeholder="Nhập điểm xuất phát"
-                        className="min-w-0 flex-1 bg-transparent text-[13px] font-black text-[#2a3444] outline-none placeholder:text-[#9ca6b7]"
-                      />
-                      {searchDepartureInput.length > 0 && (
-                        <ul className="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur-sm">
-                          {searchDepartureInput.map((stop) => (
-                            <li
-                              key={stop._id}
-                              onClick={() => {
-                                setDeparture(stop.name);
-                                setDepartureId(stop._id);
-                                setDepartureSearchInput([]);
-                              }}
-                              className="group flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
-                            >
-                              <div className="flex flex-col">
-                                <span className="group-hover:text-[#e8791c] transition">
-                                  {stop.name}
-                                </span>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">
-                                  {stop.province}
-                                </span>
-                              </div>
+                          const id = e.target.value;
+                          setDepartureId(id);
 
-                              <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover:bg-[#e8791c] transition" />
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
+                          const selected = stops.find((s) => s._id === id);
+                          if (selected) setDeparture(selected.name);
+                        }}
+                        className="w-full bg-transparent text-[13px] font-black text-[#2a3444] outline-none"
+                      >
+                        <option value="">Chọn điểm xuất phát</option>
+                        {stops.map((stop) => (
+                          <option key={stop._id} value={stop._id}>
+                            {stop.name} - {stop.province}
+                          </option>
+                        ))}
+                      </select>
                   </span>
                 </label>
 
@@ -416,41 +364,23 @@ export default function CreateRoute() {
                   </span>
                   <span className="flex min-w-[200px] flex-1 items-center gap-2 rounded-[8px] border border-[#dbe2ee] bg-[#f5f7fb] px-4 py-2.5">
                     <MapPin size={14} className="shrink-0 text-[#e8791c]" />
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={destination}
-                        onChange={(e) => setDestination(e.target.value)}
-                        placeholder="Nhập điểm kết thúc"
-                        className="min-w-0 flex-1 bg-transparent text-[13px] font-black text-[#2a3444] outline-none placeholder:text-[#9ca6b7]"
-                      />
-                      {searchDestinationInput.length > 0 && (
-                        <ul className="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)] backdrop-blur-sm">
-                          {searchDestinationInput.map((stop) => (
-                            <li
-                              key={stop._id}
-                              onClick={() => {
-                                setDestination(stop.name);
-                                setDestinationId(stop._id)
-                                setDestinationSearchInput([]);
-                              }}
-                              className="group flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
-                            >
-                              <div className="flex flex-col">
-                                <span className="group-hover:text-[#e8791c] transition">
-                                  {stop.name}
-                                </span>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">
-                                  {stop.province}
-                                </span>
-                              </div>
-
-                              <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover:bg-[#e8791c] transition" />
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
+                    <select
+                        value={destinationId}
+                        onChange={(e) => {
+                          const id = e.target.value;
+                          setDestinationId(id);
+                          const selected = stops.find((s) => s._id === id);
+                          if (selected) setDeparture(selected.name);
+                        }}
+                        className="w-full bg-transparent text-[13px] font-black text-[#2a3444] outline-none"
+                      >
+                        <option value="">Chọn điểm xuất phát</option>
+                        {stops.map((stop) => (
+                          <option key={stop._id} value={stop._id}>
+                            {stop.name} - {stop.province}
+                          </option>
+                        ))}
+                      </select>
                   </span>
                 </label>
 
@@ -494,13 +424,82 @@ export default function CreateRoute() {
                   />
                 ))}
 
-                <button
-                  type="button"
-                  className="flex h-[74px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#9ca6b7] transition hover:border-[#cfd6e2] hover:bg-[#fafbfc]"
-                >
-                  <Plus size={16} />
-                  Thêm trạm thủ công
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowManualStopDropdown(!showManualStopDropdown)}
+                    className="flex h-[74px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#9ca6b7] transition hover:border-[#cfd6e2] hover:bg-[#fafbfc]"
+                  >
+                    <Plus size={16} />
+                    Thêm trạm thủ công
+                  </button>
+
+                  {showManualStopDropdown && (
+                    <div className="absolute left-0 right-0 z-50 mt-2 rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)]">
+                      <div className="px-3 pt-3 pb-2">
+                        <input
+                          type="text"
+                          value={manualStopSearch}
+                          onChange={(e) => setManualStopSearch(e.target.value)}
+                          placeholder="Tìm trạm..."
+                          className="w-full rounded-lg border border-[#dbe2ee] bg-[#f5f7fb] px-3 py-2 text-[13px] font-semibold text-[#2a3444] outline-none placeholder:text-[#9ca6b7] focus:border-[#e8791c]"
+                          autoFocus
+                        />
+                      </div>
+                      <ul className="max-h-64 overflow-y-auto pb-2">
+                        {stops
+                          .filter((s) => {
+                            // Loại trừ departure, destination, và các stop đã có trong recommendStops
+                            if (s._id === departureId || s._id === destinationId) return false;
+                            if (recommendStops.some((rs) => rs._id === s._id)) return false;
+                            // Lọc theo từ khóa tìm kiếm
+                            if (manualStopSearch.trim()) {
+                              const keyword = manualStopSearch.toLowerCase();
+                              return s.name.toLowerCase().includes(keyword) || s.province.toLowerCase().includes(keyword);
+                            }
+                            return true;
+                          })
+                          .map((stop) => (
+                            <li
+                              key={stop._id}
+                              onClick={() => {
+                                setRecommendStops((prev) => [
+                                  ...prev,
+                                  {
+                                    _id: stop._id,
+                                    name: stop.name,
+                                    province: stop.province,
+                                    distance: "Thêm thủ công",
+                                    selected: true,
+                                  } as any,
+                                ]);
+                                setShowManualStopDropdown(false);
+                                setManualStopSearch("");
+                              }}
+                              className="group flex cursor-pointer items-center justify-between px-4 py-2.5 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
+                            >
+                              <div className="flex flex-col">
+                                <span className="group-hover:text-[#e8791c] transition">{stop.name}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">{stop.province}</span>
+                              </div>
+                              <Plus size={14} className="text-[#9ca6b7] group-hover:text-[#e8791c] transition" />
+                            </li>
+                          ))}
+                        {stops.filter((s) => {
+                          if (s._id === departureId || s._id === destinationId) return false;
+                          if (recommendStops.some((rs) => rs._id === s._id)) return false;
+                          if (manualStopSearch.trim()) {
+                            const keyword = manualStopSearch.toLowerCase();
+                            return s.name.toLowerCase().includes(keyword) || s.province.toLowerCase().includes(keyword);
+                          }
+                          return true;
+                        }).length === 0 && (
+                          <li className="px-4 py-3 text-[12px] text-[#9ca6b7] text-center">Không tìm thấy trạm nào</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
           </div>

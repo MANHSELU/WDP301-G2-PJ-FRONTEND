@@ -109,14 +109,167 @@ const BustripLogin = () => {
             {/* ===== Overlay chỉ phủ bên trái, điều chỉnh độ rộng và gradient để cân đối hơn ===== */}
             <div className="absolute left-0 top-0 h-full w-[50%] bg-gradient-to-r from-white/95 via-white/85 to-transparent" />
 
-            {/* ===== Bus bên phải, điều chỉnh vị trí và kích thước để cân bằng hơn với bên trái ===== */}
-            <div className="pointer-events-none absolute bottom-[8%] right-[5%] w-[50%] max-w-[780px] z-10">
-                <img
-                    src="/images/bus7.png"
-                    alt="Bus"
-                    className="w-full object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.2)]"
-                />
+            {/* ===== Bus bên phải với hiệu ứng animated ===== */}
+            <div className="pointer-events-none absolute top-[53%] -translate-y-1/2 right-[2%] w-[58%] max-w-[820px] z-10">
+                {/* Cloud overlay */}
+                <div className="login-bus-aero-overlay absolute inset-[-16%] z-0">
+                    <span className="login-bus-cloud login-bus-cloud-1 absolute left-[-10%] top-[-10%] h-[28%] w-[68%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.25)_54%,rgba(255,255,255,0)_100%)] blur-[30px]" />
+                    <span className="login-bus-cloud login-bus-cloud-2 absolute left-[-20%] top-[28%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.66)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
+                    <span className="login-bus-cloud login-bus-cloud-3 absolute right-[-16%] top-[34%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.18)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
+                    <span className="login-bus-cloud login-bus-cloud-4 absolute left-[-16%] top-[66%] h-[30%] w-[58%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.24)_54%,rgba(255,255,255,0)_100%)] blur-[28px]" />
+                    <span className="login-bus-cloud login-bus-cloud-5 absolute right-[-4%] top-[70%] h-[28%] w-[54%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[26px]" />
+                </div>
+
+                {/* Trail clouds */}
+                <div className="login-bus-aero-trail absolute right-[-14%] top-[30%] z-0 h-[54%] w-[46%]">
+                    <span className="login-bus-tail-cloud login-bus-tail-1 absolute right-[10%] top-[14%] h-[42%] w-[34%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.48)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+                    <span className="login-bus-tail-cloud login-bus-tail-2 absolute right-[28%] top-[28%] h-[38%] w-[32%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.84)_0%,rgba(255,255,255,0.4)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+                    <span className="login-bus-tail-cloud login-bus-tail-3 absolute right-[12%] top-[50%] h-[34%] w-[30%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,rgba(255,255,255,0.36)_54%,rgba(255,255,255,0)_100%)] blur-[10px]" />
+                    <span className="login-bus-tail-cloud login-bus-tail-4 absolute right-[38%] top-[20%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.32)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+                    <span className="login-bus-tail-cloud login-bus-tail-5 absolute right-[24%] top-[44%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.38)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+                </div>
+
+                {/* Bus with bob animation */}
+                <div className="login-bus-bob relative z-10">
+                    <img
+                        src="/images/bus7.png"
+                        alt="Bus"
+                        className="w-full object-contain"
+                        style={{
+                            filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))",
+                        }}
+                    />
+
+                    {/* Passengers */}
+                    <div className="pointer-events-none absolute inset-0">
+                        <div className="login-bus-front-passenger">
+                            <img src="/images/loxe1.png" alt="Front passenger" className="login-bus-front-passenger-img" />
+                        </div>
+                        <div className="login-bus-driver">
+                            <img src="/images/1me1.png" alt="Driver" className="login-bus-driver-img" />
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            {/* Bus animations */}
+            <style>{`
+                .login-bus-bob {
+                    animation: login-bus-bob 1.9s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite;
+                    transform-origin: 56% 74%;
+                    will-change: transform;
+                }
+                .login-bus-aero-overlay {
+                    transform: rotate(12deg);
+                    transform-origin: 22% 50%;
+                }
+                .login-bus-cloud {
+                    animation: login-cloud-drift 1.75s ease-out infinite;
+                    will-change: transform, opacity;
+                }
+                .login-bus-cloud-1 { animation-delay: 0.06s; animation-duration: 1.95s; }
+                .login-bus-cloud-2 { animation-delay: 0.26s; animation-duration: 1.55s; }
+                .login-bus-cloud-3 { animation-delay: 0.42s; animation-duration: 1.58s; }
+                .login-bus-cloud-4 { animation-delay: 0.62s; animation-duration: 1.84s; }
+                .login-bus-cloud-5 { animation-delay: 0.78s; animation-duration: 1.72s; }
+                .login-bus-aero-trail {
+                    transform: rotate(12deg);
+                    transform-origin: 22% 50%;
+                }
+                .login-bus-tail-cloud {
+                    animation: login-trail-drift 1.55s ease-out infinite;
+                    will-change: transform, opacity;
+                }
+                .login-bus-tail-1 { animation-delay: 0.06s; }
+                .login-bus-tail-2 { animation-delay: 0.32s; }
+                .login-bus-tail-3 { animation-delay: 0.54s; }
+                .login-bus-tail-4 { animation-delay: 0.76s; }
+                .login-bus-tail-5 { animation-delay: 0.22s; animation-duration: 1.45s; }
+
+                .login-bus-driver {
+                    position: absolute;
+                    left: 26.3%; top: 30.7%; width: 11.6%; height: 15.8%;
+                    overflow: hidden;
+                    clip-path: polygon(8% 1%, 96% 5%, 100% 95%, 22% 98%, 2% 56%);
+                    transform: perspective(760px) rotateY(-12deg) rotate(-0.55deg);
+                    transform-origin: 54% 50%;
+                    animation: login-driver-settle 1.9s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite;
+                    will-change: transform;
+                }
+                .login-bus-driver-img {
+                    position: absolute;
+                    left: -2%; top: 3%; width: 95%; height: 112%;
+                    object-fit: cover; object-position: center 8%;
+                    filter: saturate(0.82) contrast(1.08) brightness(0.9);
+                    opacity: 0.95;
+                    transform: scaleX(-1) rotate(5deg);
+                    animation: login-driver-idle 1.65s ease-in-out infinite;
+                    will-change: transform; z-index: 1;
+                }
+                .login-bus-front-passenger {
+                    position: absolute;
+                    left: 48.4%; top: 26.2%; width: 11.6%; height: 15.6%;
+                    overflow: hidden;
+                    clip-path: polygon(18% 2%, 94% 6%, 98% 95%, 10% 97%, 4% 52%);
+                    transform: perspective(760px) rotateY(14deg) rotate(0.7deg);
+                    transform-origin: 50% 50%;
+                    animation: login-driver-settle 2s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite;
+                    will-change: transform; z-index: 1;
+                }
+                .login-bus-front-passenger-img {
+                    position: absolute;
+                    left: 2%; top: 3%; width: 130%; height: 166%;
+                    object-fit: cover; object-position: center 10%;
+                    filter: saturate(0.8) contrast(1.05) brightness(0.88);
+                    opacity: 0.93;
+                    transform: scaleX(-1) rotate(-2deg);
+                    animation: login-passenger-idle 1.8s ease-in-out infinite;
+                    will-change: transform;
+                }
+
+                @keyframes login-bus-bob {
+                    0%, 100% { transform: translateY(0) rotate(-0.35deg); }
+                    32% { transform: translateY(-4px) rotate(0.12deg); }
+                    62% { transform: translateY(-8px) rotate(0.24deg); }
+                    82% { transform: translateY(2px) rotate(-0.16deg); }
+                }
+                @keyframes login-cloud-drift {
+                    0% { opacity: 0.2; transform: translateX(-18px) scale(0.84); }
+                    36% { opacity: 0.76; }
+                    100% { opacity: 0; transform: translateX(172px) scale(1.3); }
+                }
+                @keyframes login-trail-drift {
+                    0% { opacity: 0.62; transform: translateX(-6px) scale(0.78); }
+                    34% { opacity: 0.96; }
+                    100% { opacity: 0; transform: translateX(92px) scale(1.22); }
+                }
+                @keyframes login-driver-settle {
+                    0%, 100% { transform: perspective(760px) rotateY(-12deg) rotate(-0.55deg) translateY(0); }
+                    34% { transform: perspective(760px) rotateY(-12deg) rotate(-0.4deg) translateY(-1px); }
+                    68% { transform: perspective(760px) rotateY(-12deg) rotate(-0.75deg) translateY(1px); }
+                }
+                @keyframes login-driver-idle {
+                    0%, 100% { transform: scaleX(-1) rotate(5deg) translateY(0); }
+                    28% { transform: scaleX(-1) rotate(4.1deg) translateY(-1px); }
+                    62% { transform: scaleX(-1) rotate(5.9deg) translateY(1px); }
+                    82% { transform: scaleX(-1) rotate(4.6deg) translateY(0); }
+                }
+                @keyframes login-passenger-idle {
+                    0%, 100% { transform: scaleX(-1) rotate(-2deg) translateY(0); }
+                    34% { transform: scaleX(-1) rotate(-1.3deg) translateY(-1px); }
+                    72% { transform: scaleX(-1) rotate(-2.6deg) translateY(1px); }
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                    .login-bus-bob, .login-bus-cloud, .login-bus-tail-cloud,
+                    .login-bus-driver, .login-bus-driver-img,
+                    .login-bus-front-passenger, .login-bus-front-passenger-img {
+                        animation: none !important;
+                        opacity: 1 !important;
+                        transform: none !important;
+                    }
+                }
+            `}</style>
 
             {/* ===== Form Container - Điều chỉnh để gần giữa hơn một chút, giữ left nhưng tăng padding ===== */}
             <div className="relative z-20 flex min-h-screen w-1/2 items-center justify-end px-12 lg:px-20">
