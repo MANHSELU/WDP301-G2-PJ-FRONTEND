@@ -5,6 +5,7 @@ import baseAPIAuth from "../../api/auth";
 import type { searchStops } from "../../model/searchStop";
 import { createPortal } from "react-dom";
 import baseAPIPublic from "../../api/auth-not";
+import { ArrowRight, CalendarDays, MapPin, Users } from "lucide-react";
 
 export default function LichTrinh() {
   const [activeTab, setActiveTab] = useState("Tuyến xe");
@@ -71,8 +72,12 @@ export default function LichTrinh() {
   const [departureId, setDepartureId] = useState("");
   const [destination, setDestination] = useState("");
   const [destinationId, setDestinationId] = useState("");
-  const [searchDepartureInput, setDepartureSearchInput] = useState<searchStops[]>([]);
-  const [searchDestinationInput, setDestinationSearchInput] = useState<searchStops[]>([]);
+  const [searchDepartureInput, setDepartureSearchInput] = useState<
+    searchStops[]
+  >([]);
+  const [searchDestinationInput, setDestinationSearchInput] = useState<
+    searchStops[]
+  >([]);
 
   const departureRef = useRef<HTMLDivElement>(null);
   const destinationRef = useRef<HTMLDivElement>(null);
@@ -80,41 +85,68 @@ export default function LichTrinh() {
   const [destinationRect, setDestinationRect] = useState<DOMRect | null>(null);
 
   const updateDepartureRect = () => {
-    if (departureRef.current) setDepartureRect(departureRef.current.getBoundingClientRect());
+    if (departureRef.current)
+      setDepartureRect(departureRef.current.getBoundingClientRect());
   };
   const updateDestinationRect = () => {
-    if (destinationRef.current) setDestinationRect(destinationRef.current.getBoundingClientRect());
+    if (destinationRef.current)
+      setDestinationRect(destinationRef.current.getBoundingClientRect());
   };
 
   const searchDestinationStops = async (keyword: string) => {
-    if (!keyword.trim()) { setDestinationSearchInput([]); return; }
+    if (!keyword.trim()) {
+      setDestinationSearchInput([]);
+      return;
+    }
     try {
-      const res = await baseAPIPublic.get("/api/admin/notcheck/searchStop", { params: { keyword } });
+      const res = await baseAPIPublic.get("/api/admin/notcheck/searchStop", {
+        params: { keyword },
+      });
       setDestinationSearchInput(res.data);
-    } catch (error) { console.error(error); }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const searchDepartureStops = async (keyword: string) => {
-    if (!keyword.trim()) { setDepartureSearchInput([]); return; }
+    if (!keyword.trim()) {
+      setDepartureSearchInput([]);
+      return;
+    }
     try {
-      const res = await baseAPIAuth.get("/api/admin/notcheck/searchStop", { params: { keyword } });
+      const res = await baseAPIAuth.get("/api/admin/notcheck/searchStop", {
+        params: { keyword },
+      });
       setDepartureSearchInput(res.data);
-    } catch (error) { console.error(error); }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
-    const delay = setTimeout(() => { searchDepartureStops(departure); }, 300);
+    const delay = setTimeout(() => {
+      searchDepartureStops(departure);
+    }, 300);
     return () => clearTimeout(delay);
   }, [departure]);
 
   useEffect(() => {
-    const delay = setTimeout(() => { searchDestinationStops(destination); }, 300);
+    const delay = setTimeout(() => {
+      searchDestinationStops(destination);
+    }, 300);
     return () => clearTimeout(delay);
   }, [destination]);
-  {/* STATE thêm vào */ }
+  {
+    /* STATE thêm vào */
+  }
   const [selectedDate, setSelectedDate] = useState("");
   const reSearch = async () => {
-    console.log("giá trị id của điểm đếm và điểm đi: ", departureId, " và ", destinationId);
+    console.log(
+      "giá trị id của điểm đếm và điểm đi: ",
+      departureId,
+      " và ",
+      destinationId,
+    );
     try {
       const response = await fetch(
         "http://localhost:3000/api/customer/notcheck/search",
@@ -128,7 +160,7 @@ export default function LichTrinh() {
             nodeId_end: destinationId,
             date: selectedDate,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -142,7 +174,7 @@ export default function LichTrinh() {
       setTrips(data); // hoặc data.data nếu backend bọc trong {data: [...]}
     } catch (error) {
       console.error("Lỗi khi search:", error);
-      setError("chương trình đang bị lỗi ")
+      setError("chương trình đang bị lỗi ");
     } finally {
       setLoading(false);
     }
@@ -171,12 +203,12 @@ export default function LichTrinh() {
   //   };
   //   fetchApi();
   // }, []);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const lichtrinh = async (id: string) => {
     navigate("/lichtrinhdetail", {
-      state: { id }
+      state: { id },
     });
-  }
+  };
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
       {/* Background Layers */}
@@ -208,14 +240,26 @@ export default function LichTrinh() {
             src="/images/bus7.png"
             alt="Bus overlay"
             className="w-full object-contain block relative"
-            style={{ imageRendering: "auto", filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))" }}
+            style={{
+              imageRendering: "auto",
+              filter:
+                "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))",
+            }}
           />
           <div className="pointer-events-none absolute inset-0">
             <div className="bus-front-left-passenger">
-              <img src="/images/loxe1.png" alt="Front passenger" className="bus-front-left-passenger-img" />
+              <img
+                src="/images/loxe1.png"
+                alt="Front passenger"
+                className="bus-front-left-passenger-img"
+              />
             </div>
             <div className="bus-driver-fit">
-              <img src="/images/1me1.png" alt="Driver" className="bus-driver-fit-img" />
+              <img
+                src="/images/1me1.png"
+                alt="Driver"
+                className="bus-driver-fit-img"
+              />
             </div>
           </div>
         </div>
@@ -227,145 +271,233 @@ export default function LichTrinh() {
           <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[360px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.46)_34%,rgba(255,255,255,0.18)_56%,rgba(255,255,255,0)_78%)] blur-[26px]" />
           <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[300px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(248,250,252,0.46)_0%,rgba(248,250,252,0.14)_58%,rgba(248,250,252,0)_84%)] blur-[18px]" />
           <h1 className="hero-title relative z-10 py-1 text-[48px] font-black leading-[1.05] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
-            <span className="hero-title-line block whitespace-nowrap">Tìm và đặt ngay</span>
-            <span className="hero-title-line mt-2 block whitespace-nowrap">những chuyến xe</span>
+            <span className="hero-title-line block whitespace-nowrap">
+              Tìm và đặt ngay
+            </span>
+            <span className="hero-title-line mt-2 block whitespace-nowrap">
+              những chuyến xe
+            </span>
             <span className="hero-title-line mt-2 block whitespace-nowrap font-extrabold italic">
               <span className="text-[#0d142a]">thật</span>{" "}
               <span className="hero-title-shimmer">Dễ Dàng</span>
             </span>
           </h1>
           <p className="relative z-10 max-w-[510px] text-base leading-relaxed text-[#475569] lg:text-lg">
-            Đặt vé mọi lúc mọi nơi, đi vững ngàn hành trình đa dạng và dịch vụ chất lượng cao nhất.
+            Đặt vé mọi lúc mọi nơi, đi vững ngàn hành trình đa dạng và dịch vụ
+            chất lượng cao nhất.
           </p>
         </div>
       </div>
 
       {/* Search & Trip List Section */}
-      <div className="relative z-[100] pb-20">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-
+<div className="relative z-[100] pb-20 -mt-20">
+          <div className="max-w-7xl mx-auto px-4 py-8 ">
           {/* ================= SEARCH BAR ================= */}
           <div className="page-enter-search relative">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 via-orange-500/30 to-orange-400/20 blur-3xl -z-10 rounded-3xl" />
-            <div className="flex items-center gap-4 mb-10 bg-gradient-to-br from-white via-white to-orange-50/30 rounded-3xl p-8 shadow-2xl border-2 border-orange-100/50 relative overflow-visible" style={{ zIndex: 100 }}>
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-t-3xl" />
-
+            <div className="w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-orange-100 flex items-center px-6 py-3 gap-6">
+              {" "}
               {/* ĐIỂM ĐI */}
-              <div className="flex-1 relative group" style={{ zIndex: 200 }} ref={departureRef} onClick={updateDepartureRect}>
-                <div className="flex items-center gap-3 bg-white rounded-2xl px-6 py-5 border-2 border-slate-200 shadow-sm group-hover:border-orange-300 group-hover:shadow-lg transition-all duration-300">
-                  <Search size={20} className="text-orange-500 flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Nhập điểm đi"
-                    onFocus={updateDepartureRect}
-                    value={departure}
-                    onChange={(e) => { setDeparture(e.target.value); updateDepartureRect(); }}
-                    className="bg-transparent outline-none w-full text-slate-800 placeholder:text-slate-400 font-medium"
-                  />
+              <div
+                className="flex-1 relative group"
+                style={{ zIndex: 200 }}
+                ref={departureRef}
+                onClick={updateDepartureRect}
+              >
+                <div className="px-6 flex flex-col justify-center border-r border-[#c89463] flex-1 h-[46px]">
+                  <p className="text-[11px] font-bold text-[#c89463] uppercase mb-1">
+                    Điểm đi
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} className="text-orange-500" />
+
+                    <input
+                      type="text"
+                      placeholder="Nhập điểm đi"
+                      onFocus={updateDepartureRect}
+                      value={departure}
+                      onChange={(e) => {
+                        setDeparture(e.target.value);
+                        updateDepartureRect();
+                      }}
+                      className="w-full bg-transparent outline-none text-[14px] font-semibold text-gray-700 placeholder:text-[#8c6a4f]"
+                    />
+                  </div>
                 </div>
-                {searchDepartureInput.length > 0 && departureRect && createPortal(
-                  <ul style={{ position: "fixed", top: departureRect.bottom + 8, left: departureRect.left, width: departureRect.width, zIndex: 99999 }}
-                    className="max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-8px_rgba(15,23,42,0.25)]">
-                    {searchDepartureInput.map((stop) => (
-                      <li key={stop._id}
-                        onMouseDown={(e) => { e.preventDefault(); setDeparture(stop.province); setDepartureId(stop._id); setDepartureSearchInput([]); }}
-                        className="group/item flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]">
-                        <div className="flex flex-col">
-                          <span className="group-hover/item:text-[#e8791c] transition">{stop.name}</span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">{stop.province}</span>
-                        </div>
-                        <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover/item:bg-[#e8791c] transition" />
-                      </li>
-                    ))}
-                  </ul>,
-                  document.body
-                )}
+                {searchDepartureInput.length > 0 &&
+                  departureRect &&
+                  createPortal(
+                    <ul
+                      style={{
+                        position: "fixed",
+                        top: departureRect.bottom + 8,
+                        left: departureRect.left,
+                        width: departureRect.width,
+                        zIndex: 99999,
+                      }}
+                      className="max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-8px_rgba(15,23,42,0.25)]"
+                    >
+                      {searchDepartureInput.map((stop) => (
+                        <li
+                          key={stop._id}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setDeparture(stop.province);
+                            setDepartureId(stop._id);
+                            setDepartureSearchInput([]);
+                          }}
+                          className="group/item flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
+                        >
+                          <div className="flex flex-col">
+                            <span className="group-hover/item:text-[#e8791c] transition">
+                              {stop.name}
+                            </span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">
+                              {stop.province}
+                            </span>
+                          </div>
+                          <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover/item:bg-[#e8791c] transition" />
+                        </li>
+                      ))}
+                    </ul>,
+                    document.body,
+                  )}
               </div>
-
-              {/* Swap Icon */}
-              <div className="flex items-center justify-center flex-shrink-0">
-                <button className="bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 p-4 rounded-2xl transition-all hover:scale-110 hover:rotate-180 duration-300 shadow-lg hover:shadow-xl">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
-                    <path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </div>
-
               {/* ĐIỂM ĐẾN */}
-              <div className="flex-1 relative group" style={{ zIndex: 200 }} ref={destinationRef} onClick={updateDestinationRect}>
-                <div className="flex items-center gap-3 bg-white rounded-2xl px-6 py-5 border-2 border-slate-200 shadow-sm group-hover:border-orange-300 group-hover:shadow-lg transition-all duration-300">
-                  <Search size={20} className="text-orange-500 flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Nhập điểm đến"
-                    onFocus={updateDestinationRect}
-                    value={destination}
-                    onChange={(e) => { setDestination(e.target.value); updateDestinationRect(); }}
-                    className="bg-transparent outline-none w-full text-slate-800 placeholder:text-slate-400 font-medium"
-                  />
-                </div>
-                {searchDestinationInput.length > 0 && destinationRect && createPortal(
-                  <ul style={{ position: "fixed", top: destinationRect.bottom + 8, left: destinationRect.left, width: destinationRect.width, zIndex: 99999 }}
-                    className="max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-8px_rgba(15,23,42,0.25)]">
-                    {searchDestinationInput.map((stop) => (
-                      <li key={stop._id}
-                        onMouseDown={(e) => { e.preventDefault(); setDestination(stop.province); setDestinationId(stop._id); setDestinationSearchInput([]); }}
-                        className="group/item flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]">
-                        <div className="flex flex-col">
-                          <span className="group-hover/item:text-[#e8791c] transition">{stop.name}</span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">{stop.province}</span>
-                        </div>
-                        <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover/item:bg-[#e8791c] transition" />
-                      </li>
-                    ))}
-                  </ul>,
-                  document.body
-                )}
-              </div>
+              <div
+                className="flex-1 relative group"
+                style={{ zIndex: 200 }}
+                ref={destinationRef}
+                onClick={updateDestinationRect}
+              >
+                {/* ĐIỂM ĐẾN */}
+                <div
+                  className="px-6 flex flex-col justify-center border-r border-[#c89463] flex-1 h-[46px]"
+                  ref={destinationRef}
+                  onClick={updateDestinationRect}
+                >
+                  <p className="text-[11px] font-bold text-[#c89463] uppercase mb-1">
+                    Điểm đến
+                  </p>
 
-              {/* ===== NGÀY ĐI (thêm mới) ===== */}
-              <div className="flex-1 relative group">
-                <div className="flex items-center gap-3 bg-white rounded-2xl px-6 py-5 border-2 border-slate-200 shadow-sm group-hover:border-orange-300 group-hover:shadow-lg transition-all duration-300">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-orange-500 flex-shrink-0">
-                    <rect x="3" y="4" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2" />
-                    <path d="M3 9H21M8 2V5M16 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} className="text-orange-500" />
+
+                    <input
+                      type="text"
+                      placeholder="Nhập điểm đến"
+                      value={destination}
+                      onFocus={updateDestinationRect}
+                      onChange={(e) => {
+                        setDestination(e.target.value);
+                        updateDestinationRect();
+                      }}
+                      className="w-full bg-transparent outline-none text-[14px] font-semibold text-gray-700 placeholder:text-[#8c6a4f]"
+                    />
+                  </div>
+                </div>
+                {searchDestinationInput.length > 0 &&
+                  destinationRect &&
+                  createPortal(
+                    <ul
+                      style={{
+                        position: "fixed",
+                        top: destinationRect.bottom + 8,
+                        left: destinationRect.left,
+                        width: destinationRect.width,
+                        zIndex: 99999,
+                      }}
+                      className="max-h-64 overflow-y-auto rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-8px_rgba(15,23,42,0.25)]"
+                    >
+                      {searchDestinationInput.map((stop) => (
+                        <li
+                          key={stop._id}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setDestination(stop.province);
+                            setDestinationId(stop._id);
+                            setDestinationSearchInput([]);
+                          }}
+                          className="group/item flex cursor-pointer items-center justify-between px-4 py-3 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
+                        >
+                          <div className="flex flex-col">
+                            <span className="group-hover/item:text-[#e8791c] transition">
+                              {stop.name}
+                            </span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">
+                              {stop.province}
+                            </span>
+                          </div>
+                          <span className="h-2 w-2 rounded-full bg-[#e5e9f2] group-hover/item:bg-[#e8791c] transition" />
+                        </li>
+                      ))}
+                    </ul>,
+                    document.body,
+                  )}
+              </div>
+              {/* ===== NGÀY ĐI ===== */}
+              <div className="px-6 flex flex-col justify-center  flex-1 h-[56px]">
+                <p className="text-[11px] font-bold text-[#c89463] uppercase mb-1">
+                  Ngày đặt vé
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <CalendarDays size={16} className="text-orange-500" />
+
                   <input
                     type="date"
                     value={selectedDate}
                     min={new Date().toISOString().split("T")[0]}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="bg-transparent outline-none w-full text-slate-800 placeholder:text-slate-400 font-medium cursor-pointer"
+                    className="w-full bg-transparent outline-none text-[14px] text-gray-700 cursor-pointer"
                   />
                 </div>
               </div>
-
               {/* Search Button */}
               <button
-                className="flex-shrink-0 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-5 rounded-2xl font-bold flex items-center gap-3 shadow-2xl transition-all hover:shadow-orange-500/50 hover:scale-105 duration-300 relative overflow-hidden group"
+                className="h-[56px] px-7 flex items-center justify-center bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-medium rounded-[8px] shadow-md hover:shadow-lg transition relative overflow-hidden group"
                 onClick={() => reSearch()}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <Search size={22} className="relative z-10" />
                 <span className="relative z-10">Tìm kiếm</span>
               </button>
             </div>
           </div>
 
           {/* ================= TABS ================= */}
-          <div className="page-enter-content relative mb-8" style={{ zIndex: 1 }}>
+          <div
+            className="page-enter-content relative mt-8 mb-8"
+            style={{ zIndex: 1 }}
+          >
             <div className="absolute inset-0 bg-orange-300/20 blur-2xl -z-10 rounded-2xl w-fit" />
-            <div className="bg-gradient-to-br from-white/80 via-white/70 to-orange-50/60 backdrop-blur-md rounded-2xl p-2.5 inline-flex gap-2 border-2 border-white/60 shadow-xl">
-              {tabs.map((tab) => (
-                <button key={tab} onClick={() => setActiveTab(tab)}
-                  className={`px-7 py-3.5 rounded-xl font-bold transition-all duration-300 ${activeTab === tab
-                    ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/40 scale-105"
-                    : "text-slate-600 hover:text-slate-800 hover:bg-white/70 hover:shadow-md"
-                    }`}>
-                  {tab}
-                </button>
-              ))}
-            </div>
+<div className="flex items-center gap-8 px-8 py-5 bg-gradient-to-br from-white/80 via-white/70 to-orange-50/60 backdrop-blur-md rounded-2xl border-2 border-white/60 shadow-xl">
+
+  <div className="flex-1 font-bold text-slate-600">
+    Tuyến xe
+  </div>
+
+  <div className="min-w-[110px] text-center font-bold text-slate-600">
+    Loại xe
+  </div>
+
+  <div className="min-w-[30px] text-center font-bold text-slate-600">
+    Quãng đường
+  </div>
+
+  <div className="min-w-[100px] text-center font-bold text-slate-600">
+    Thời gian
+  </div>
+
+  <div className="min-w-[90px] text-center font-bold text-slate-600">
+    Giá vé
+  </div>
+
+    <div className="min-w-[120px] text-center font-bold text-slate-600">
+    Thao tác
+  </div>
+
+</div>
           </div>
 
           {/* ================= TRIP LIST ================= */}
@@ -373,7 +505,9 @@ export default function LichTrinh() {
             {loading && trips ? (
               <div className="text-center py-16">
                 <div className="inline-block w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-slate-500 font-medium">Đang tải chuyến xe...</p>
+                <p className="text-slate-500 font-medium">
+                  Đang tải chuyến xe...
+                </p>
               </div>
             ) : error ? (
               <div className="text-center py-16">
@@ -381,22 +515,41 @@ export default function LichTrinh() {
               </div>
             ) : trips.length === 0 ? (
               <div className="text-center py-16">
-                <p className="text-slate-500 font-medium">Không tìm thấy chuyến xe nào.</p>
+                <p className="text-slate-500 font-medium">
+                  Không tìm thấy chuyến xe nào.
+                </p>
               </div>
             ) : (
-              trips && trips.map((trip, index) => (
-                <div key={trip._id} className="relative group" style={{ animationDelay: `${0.1 * index}s` }}>
+              trips &&
+              trips.map((trip, index) => (
+                <div
+                  key={trip._id}
+                  className="relative group"
+                  style={{ animationDelay: `${0.1 * index}s` }}
+                >
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-500/20 to-orange-400/0 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-2xl" />
                   <div className="bg-gradient-to-br from-white via-white to-orange-50/20 backdrop-blur-sm border-2 border-orange-100/40 rounded-2xl p-7 hover:shadow-2xl hover:border-orange-200 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-400/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="flex items-center justify-between gap-6 relative z-10">
-                      <div className="flex items-center gap-6 flex-1 min-w-0">
+<div className="flex items-center gap-10 relative z-10">
+                        <div className="flex items-center gap-6 flex-1 min-w-0">
                         <div className="text-orange-600 font-extrabold whitespace-pre-line text-base leading-tight">
                           {trip?.start_id?.province}
                         </div>
                         <div className="flex items-center flex-shrink-0 bg-orange-50 p-2 rounded-full group-hover:bg-orange-100 group-hover:scale-110 transition-all duration-300">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-orange-500">
-                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="text-orange-500"
+                          >
+                            <path
+                              d="M5 12H19M19 12L12 5M19 12L12 19"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
                           </svg>
                         </div>
                         <div className="text-orange-600 font-extrabold text-base">
@@ -410,17 +563,20 @@ export default function LichTrinh() {
                       <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">
                         {trip?.distance_km} km
                       </div>
-                      <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">{trip.time ? `${trip.time} h ` : "---"}</div>
-                      <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">---</div>
+                      <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">
+                        {trip.time ? `${trip.time} h ` : "---"}
+                      </div>
+                      <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">
+                        ---
+                      </div>
                       {/* <Link to={"/lichtrinhdetail"} */}
                       <button
                         className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-8 py-3.5 rounded-xl font-bold text-base whitespace-nowrap transition-all hover:shadow-2xl hover:shadow-orange-500/40 hover:scale-105 duration-300 relative overflow-hidden group"
                         onClick={() => {
                           if (trip) {
-                            lichtrinh((trip._id))
+                            lichtrinh(trip._id);
                           }
-                        }
-                        }
+                        }}
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                         <span className="relative z-10">Tìm xe</span>

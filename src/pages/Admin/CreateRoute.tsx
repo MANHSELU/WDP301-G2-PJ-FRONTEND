@@ -147,7 +147,9 @@ export default function CreateRoute() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [notice, setNotice] = useState<NoticeState | null>(null);
   const [stops, setStops] = useState<allStops[]>([]);
-  
+  const [showManualStopDropdown, setShowManualStopDropdown] = useState(false);
+  const [manualStopSearch, setManualStopSearch] = useState("");
+
 
   // UseEffect hàm getAllStops
   useEffect(() => {
@@ -422,13 +424,82 @@ export default function CreateRoute() {
                   />
                 ))}
 
-                <button
-                  type="button"
-                  className="flex h-[74px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#9ca6b7] transition hover:border-[#cfd6e2] hover:bg-[#fafbfc]"
-                >
-                  <Plus size={16} />
-                  Thêm trạm thủ công
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowManualStopDropdown(!showManualStopDropdown)}
+                    className="flex h-[74px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#9ca6b7] transition hover:border-[#cfd6e2] hover:bg-[#fafbfc]"
+                  >
+                    <Plus size={16} />
+                    Thêm trạm thủ công
+                  </button>
+
+                  {showManualStopDropdown && (
+                    <div className="absolute left-0 right-0 z-50 mt-2 rounded-[14px] border border-[#e5e9f2] bg-white shadow-[0_18px_40px_-20px_rgba(15,23,42,0.35)]">
+                      <div className="px-3 pt-3 pb-2">
+                        <input
+                          type="text"
+                          value={manualStopSearch}
+                          onChange={(e) => setManualStopSearch(e.target.value)}
+                          placeholder="Tìm trạm..."
+                          className="w-full rounded-lg border border-[#dbe2ee] bg-[#f5f7fb] px-3 py-2 text-[13px] font-semibold text-[#2a3444] outline-none placeholder:text-[#9ca6b7] focus:border-[#e8791c]"
+                          autoFocus
+                        />
+                      </div>
+                      <ul className="max-h-64 overflow-y-auto pb-2">
+                        {stops
+                          .filter((s) => {
+                            // Loại trừ departure, destination, và các stop đã có trong recommendStops
+                            if (s._id === departureId || s._id === destinationId) return false;
+                            if (recommendStops.some((rs) => rs._id === s._id)) return false;
+                            // Lọc theo từ khóa tìm kiếm
+                            if (manualStopSearch.trim()) {
+                              const keyword = manualStopSearch.toLowerCase();
+                              return s.name.toLowerCase().includes(keyword) || s.province.toLowerCase().includes(keyword);
+                            }
+                            return true;
+                          })
+                          .map((stop) => (
+                            <li
+                              key={stop._id}
+                              onClick={() => {
+                                setRecommendStops((prev) => [
+                                  ...prev,
+                                  {
+                                    _id: stop._id,
+                                    name: stop.name,
+                                    province: stop.province,
+                                    distance: "Thêm thủ công",
+                                    selected: true,
+                                  } as any,
+                                ]);
+                                setShowManualStopDropdown(false);
+                                setManualStopSearch("");
+                              }}
+                              className="group flex cursor-pointer items-center justify-between px-4 py-2.5 text-[13px] font-semibold text-[#253042] transition hover:bg-[#fff7ed]"
+                            >
+                              <div className="flex flex-col">
+                                <span className="group-hover:text-[#e8791c] transition">{stop.name}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#9ca6b7]">{stop.province}</span>
+                              </div>
+                              <Plus size={14} className="text-[#9ca6b7] group-hover:text-[#e8791c] transition" />
+                            </li>
+                          ))}
+                        {stops.filter((s) => {
+                          if (s._id === departureId || s._id === destinationId) return false;
+                          if (recommendStops.some((rs) => rs._id === s._id)) return false;
+                          if (manualStopSearch.trim()) {
+                            const keyword = manualStopSearch.toLowerCase();
+                            return s.name.toLowerCase().includes(keyword) || s.province.toLowerCase().includes(keyword);
+                          }
+                          return true;
+                        }).length === 0 && (
+                          <li className="px-4 py-3 text-[12px] text-[#9ca6b7] text-center">Không tìm thấy trạm nào</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
             </section>
           </div>
