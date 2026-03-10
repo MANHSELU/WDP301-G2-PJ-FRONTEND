@@ -8,6 +8,7 @@ const TripListPage: React.FC = () => {
     // ===== Pagination Logic =====
     const menuItems = [
         { label: "Danh sách chuyến đi", icon: Bus, path: "/assistant/chuyendi" },
+        { label: "Danh sách Ca làm", icon: Bus, path: "/assistant/viewSlot" },
         { label: "Doanh thu", icon: BarChart3, path: "/driver/revenue" },
     ];
 

@@ -24,7 +24,6 @@ import OrderHistory from "./pages/Customer/Profile/OrderHistory";
 import AddressForm from "./pages/Customer/Profile/AddressUser";
 import TripListPage from "./pages/Phuxe/Home";
 import { DanhSachChuyenDi } from "./pages/Phuxe/DanhSachChuyenDi";
-import TripDetailPage from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageBus from "./pages/Admin/ManageBus";
 import ManageRoute from "./pages/Admin/ManageRoute";
 import ManageUser from "./pages/Admin/ManageUser";
@@ -37,7 +36,9 @@ import RevenueDashboard from "./pages/Admin/Revenue";
 import HomeAdmin from "./pages/Admin/HomeAdmin";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import CreateTrip from "./pages/Admin/CreateTrips";
+import AssistantShiftsPage from "./pages/Phuxe/DanhSachCalai";
 import DriverShiftsPage from "./pages/Driver/DanhSachCaLai"
+import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
 export default function App() {
   return (
     <>
@@ -90,12 +91,14 @@ export default function App() {
             <Route path="tripdetail/:id" element={<TripDetailsDemo />} />
           </Route>
           <Route path="assistant" element={<TripListPage />}>
+
             <Route path="chuyendi" element={<DanhSachChuyenDi />} />
-            <Route path="chitietchuyendi" element={<TripDetailPage />} />
+            <Route path="viewSlot" element={<AssistantShiftsPage />} />
+            <Route path="chitietchuyendi" element={<ChiTietChuyenDi />} />
           </Route>
           <Route path="letan" element={<TripListPageLeTan />}>
             <Route path="chuyendi" element={<DanhSachChuyenDi />} />
-            <Route path="chitietchuyendi" element={<TripDetailPage />} />
+            {/* <Route path="chitietchuyendi" element={<TripDetailPage />} /> */}
 
             <Route path="CargoOrderList" element={<CargoOrderList />} />
             <Route path="ticketBooking" element={<TicketBooking />} />
