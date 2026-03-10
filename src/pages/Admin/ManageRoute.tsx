@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Edit,
     ChevronLeft,
     ChevronRight,
     X,
     Search as SearchIcon,
-    Plus,
+    MapPin,
 } from "lucide-react";
 
 type ApiResponse<T = unknown> = {
@@ -114,28 +114,6 @@ const ManageRoute: React.FC = () => {
     const [updating, setUpdating] = useState(false);
     const [updateError, setUpdateError] = useState<string | null>(null);
 
-    const profileRef = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-        const onDocClick = (e: MouseEvent) => {
-            if (!profileRef.current) return;
-            if (!(e.target instanceof Node)) return;
-        };
-        document.addEventListener("click", onDocClick);
-        return () => document.removeEventListener("click", onDocClick);
-    }, []);
-
-    const getStatusStyle = (status: string) => {
-        switch (status) {
-            case "Hoạt động":
-                return "bg-green-50 text-green-700 ring-1 ring-green-100";
-            case "Tạm ngưng":
-                return "bg-red-50 text-red-700 ring-1 ring-red-100";
-            default:
-                return "bg-gray-100 text-gray-700";
-        }
-    };
-
     const fetchRoutes = async (): Promise<void> => {
         setLoading(true);
         setError(null);
@@ -207,7 +185,6 @@ const ManageRoute: React.FC = () => {
         fetchRoutes();
     }, []);
 
-    // combined filtering: tab + search
     const filteredRoutes = useMemo(() => {
         const q = searchQuery.trim().toLowerCase();
         return routes.filter((route) => {
@@ -216,7 +193,6 @@ const ManageRoute: React.FC = () => {
             if (activeTab === "Tạm ngưng" && route.status !== "Tạm ngưng")
                 return false;
             if (!q) return true;
-            // search by start, stop or code
             const hay = `${route.start} ${route.stop} ${route.code ?? ""
                 }`.toLowerCase();
             return hay.includes(q);
@@ -224,8 +200,7 @@ const ManageRoute: React.FC = () => {
     }, [routes, activeTab, searchQuery]);
 
     const handleAddNew = () => {
-        // simple navigation to add page; adjust route if app uses router
-        window.location.href = "/admin/routes/new";
+        window.location.href = "/admin/create-route";
     };
 
     const handleEdit = (route: RouteRow) => {
@@ -282,119 +257,102 @@ const ManageRoute: React.FC = () => {
         }
     };
 
-    const fmtDate = (iso?: string): string => {
-        if (!iso) return "—";
-        const d = new Date(iso);
-        if (isNaN(d.getTime())) return String(iso);
-        return d.toLocaleString();
-    };
-
     return (
         <div className="space-y-6">
-
             {/* HEADER */}
             <div className="flex items-center justify-between">
-                <h2 className="text-[20px] font-black text-[#111827]">
-                    Quản lý tuyến xe
-                </h2>
+                <div>
+                    <h2 className="text-xl font-black text-gray-900">Quản lý tuyến xe</h2>
+                    <p className="text-sm text-gray-500 mt-1">Xem và quản lý tuyến xe đang hoạt động</p>
+                </div>
 
                 <button
                     onClick={handleAddNew}
-                    className="flex items-center gap-2 rounded-[4px] bg-[#eb8a45] px-4 py-2 text-[13px] font-semibold text-white hover:opacity-90"
+                    className="flex items-center gap-2 rounded-md bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-sm hover:opacity-90 transition-opacity"
                 >
-                    <Plus size={14} />
-                    Thêm tuyến mới
+                    Thêm Tuyến Xe Mới
                 </button>
             </div>
 
             {/* STATS */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="rounded border border-[#dde2ea] bg-white p-4">
-                    <p className="text-[12px] text-[#6b7280]">Tổng số tuyến</p>
-                    <p className="mt-1 text-[24px] font-black">{routes.length}</p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
+                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <p className="text-sm font-medium text-gray-900">Tổng số tuyến</p>
+                    <p className="mt-3 text-2xl font-black text-gray-900">{routes.length} Tuyến</p>
+                    <p className="mt-4 text-xs font-medium text-green-500">+2 tuyến mới hôm nay</p>
                 </div>
-
-                <div className="rounded border border-[#dde2ea] bg-white p-4">
-                    <p className="text-[12px] text-[#6b7280]">Hoạt động</p>
-                    <p className="mt-1 text-[24px] font-black">
-                        {routes.filter((r) => r.status === "Hoạt động").length}
-                    </p>
+                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <p className="text-sm font-medium text-gray-900">Tuyến hoạt động</p>
+                    <p className="mt-3 text-2xl font-black text-gray-900">{routes.filter(r => r.status === "Hoạt động").length} Tuyến</p>
+                    <p className="mt-4 text-xs font-medium text-green-500">+1 so với hôm qua</p>
                 </div>
-
-                <div className="rounded border border-[#dde2ea] bg-white p-4">
-                    <p className="text-[12px] text-[#6b7280]">Tạm ngưng</p>
-                    <p className="mt-1 text-[24px] font-black">
-                        {routes.filter((r) => r.status === "Tạm ngưng").length}
-                    </p>
+                <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <p className="text-sm font-medium text-gray-900">Tuyến tạm ngưng</p>
+                    <p className="mt-3 text-2xl font-black text-gray-900">{routes.filter(r => r.status === "Tạm ngưng").length} Tuyến</p>
+                    <p className="mt-4 text-xs font-medium text-red-500">-1 so với hôm qua</p>
                 </div>
             </div>
 
             {/* TABLE WRAPPER */}
-            <div className="rounded border border-[#dde2ea] bg-white">
+            <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
 
                 {/* FILTER BAR */}
-                <div className="flex flex-col gap-4 border-b border-[#dde2ea] p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-2">
-                        {(["Tất cả", "Hoạt động", "Tạm ngưng"] as const).map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`rounded px-3 py-1 text-[12px] font-semibold ${activeTab === tab
-                                    ? "bg-[#f4d5b4] text-[#1f2937]"
-                                    : "text-[#6b7280] hover:bg-[#f3f4f6]"
-                                    }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center rounded border border-[#dde2ea] bg-[#f9fafb] px-2 py-1">
-                            <SearchIcon size={14} className="text-[#9ca3af]" />
+                <div className="flex flex-col gap-4 border-b border-gray-200 p-5 sm:flex-row sm:items-end sm:gap-6">
+                    <div className="flex-1 max-w-md">
+                        <label className="block text-sm font-medium text-gray-900 mb-1">Tìm tên tuyến xe</label>
+                        <div className="relative">
                             <input
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Tìm tên tuyến, điểm đi hoặc điểm đến..."
-                                className="ml-2 bg-transparent text-[12px] outline-none"
+                                placeholder="Tìm tên tuyến, điểm đi/đến..."
+                                className="w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
                             />
+                            <SearchIcon size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         </div>
+                    </div>
 
-                        <button
-                            onClick={() => setSearchQuery("")}
-                            className="text-[12px] text-[#6b7280]"
+                    {/* Removed unused bus type filter */}
+
+                    <div className="w-full sm:w-40">
+                        <label className="block text-sm font-medium text-gray-900 mb-1">Trạng thái</label>
+                        <select
+                            value={activeTab}
+                            onChange={(e) => setActiveTab(e.target.value as "Tất cả" | "Hoạt động" | "Tạm ngưng")}
+                            className="w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
                         >
-                            Xóa
-                        </button>
+                            <option value="Tất cả">Tất cả</option>
+                            <option value="Hoạt động">Hoạt động</option>
+                            <option value="Tạm ngưng">Tạm ngưng</option>
+                        </select>
                     </div>
                 </div>
 
                 {/* TABLE */}
                 <div className="overflow-x-auto">
                     {loading ? (
-                        <div className="p-8 text-center text-[#6b7280]">
+                        <div className="p-8 text-center text-gray-500 text-sm">
                             Đang tải danh sách tuyến...
                         </div>
                     ) : error ? (
-                        <div className="p-8 text-center text-red-600">
+                        <div className="p-8 text-center text-red-600 text-sm">
                             Lỗi: {error}
                         </div>
                     ) : (
-                        <table className="w-full text-[13px]">
-                            <thead className="bg-[#f9fafb] text-[#6b7280]">
+                        <table className="w-full text-sm divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-4 py-2 text-left">Đi → Đến</th>
-                                    <th className="px-4 py-2 text-left">Ngày tạo</th>
-                                    <th className="px-4 py-2 text-left">Khoảng cách (km)</th>
-                                    <th className="px-4 py-2 text-center">Trạng thái</th>
-                                    <th className="px-4 py-2"></th>
+                                    <th className="px-6 py-3 text-left font-semibold text-gray-900">Tuyến đường</th>
+                                    <th className="px-6 py-3 text-left font-semibold text-gray-900">Quãng đường</th>
+                                    {/* Removed mock columns: Thời gian, Loại xe, Tình trạng (seat) */}
+                                    <th className="px-6 py-3 text-left font-semibold text-gray-900">Trạng thái</th>
+                                    <th className="px-6 py-3 text-right font-semibold text-gray-900">Hành động</th>
                                 </tr>
                             </thead>
 
-                            <tbody>
+                            <tbody className="divide-y divide-gray-200">
                                 {filteredRoutes.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-4 py-10 text-center text-[#9ca3af]">
+                                        <td colSpan={4} className="px-6 py-10 text-center text-gray-400 text-sm">
                                             Không có tuyến phù hợp
                                         </td>
                                     </tr>
@@ -402,42 +360,38 @@ const ManageRoute: React.FC = () => {
                                     filteredRoutes.map((route, idx) => (
                                         <tr
                                             key={route.id ?? idx}
-                                            className="border-t border-[#dde2ea] hover:bg-[#f9fafb]"
+                                            className="hover:bg-gray-50 transition-colors"
                                         >
-                                            <td className="px-4 py-2">
-                                                <div className="font-semibold text-[#111827]">
-                                                    {route.start} → {route.stop}
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                                                        <MapPin size={16} className="text-orange-500" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-semibold text-gray-900">
+                                                            {route.start} → {route.stop}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-0.5">
+                                                            Mã tuyến: {route.code?.substring(0, 8).toUpperCase() ?? `RT-${100 + idx}`}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="text-[11px] text-[#9ca3af]">
-                                                    Mã: {route.code ?? "—"}
-                                                </div>
                                             </td>
-
-                                            <td className="px-4 py-2">
-                                                {fmtDate(route.created_at)}
+                                            <td className="px-6 py-4 text-gray-900">
+                                                {route.distance_km} km
                                             </td>
-
-                                            <td className="px-4 py-2">
-                                                {route.distance_km}
-                                            </td>
-
-                                            <td className="px-4 py-2 text-center">
-                                                <span
-                                                    className={`rounded px-2 py-[2px] text-[11px] font-semibold ${getStatusStyle(
-                                                        route.status
-                                                    )}`}
-                                                >
+                                            <td className="px-6 py-4">
+                                                <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${route.status === "Hoạt động" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                                                     {route.status}
                                                 </span>
                                             </td>
-
-                                            <td className="px-4 py-2 text-center">
+                                            <td className="px-6 py-4 text-right">
                                                 <button
                                                     onClick={() => handleEdit(route)}
-                                                    className="rounded p-1 hover:bg-[#f3f4f6]"
+                                                    className="text-gray-400 hover:text-orange-500 transition-colors p-1"
                                                     title="Chỉnh sửa"
                                                 >
-                                                    <Edit size={14} />
+                                                    <Edit size={16} />
                                                 </button>
                                             </td>
                                         </tr>
@@ -449,53 +403,53 @@ const ManageRoute: React.FC = () => {
                 </div>
 
                 {/* FOOTER */}
-                <div className="border-t border-[#dde2ea] px-4 py-3 text-[12px] text-[#6b7280] flex items-center justify-between">
+                <div className="border-t border-gray-200 px-6 py-3 text-xs text-gray-500 flex items-center justify-between">
                     <div>
                         Hiển thị 1–{Math.min(10, filteredRoutes.length)} của{" "}
                         {filteredRoutes.length} tuyến
                     </div>
                     <div className="flex items-center gap-2">
-                        <button className="rounded p-1 hover:bg-[#f3f4f6]" disabled>
+                        <button className="rounded p-1 hover:bg-gray-100 disabled:opacity-50" disabled>
                             <ChevronLeft size={16} />
                         </button>
-                        <span className="rounded bg-[#eb8a45] px-2 py-[2px] text-white">1</span>
-                        <button className="rounded p-1 hover:bg-[#f3f4f6]" disabled>
+                        <span className="rounded bg-orange-500 px-2 py-1 text-white font-medium">1</span>
+                        <button className="rounded p-1 hover:bg-gray-100 disabled:opacity-50" disabled>
                             <ChevronRight size={16} />
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* MODAL (GIỮ LOGIC CŨ) */}
+            {/* MODAL */}
             {isModalOpen && selectedRoute && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                    <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl">
-                        <div className="flex items-center justify-between border-b px-5 py-3">
-                            <h3 className="text-[15px] font-bold text-[#111827]">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl">
+                        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                            <h3 className="text-lg font-bold text-gray-900">
                                 Chỉnh sửa tuyến:{" "}
-                                <span className="text-[#eb8a45]">
+                                <span className="text-orange-500">
                                     {selectedRoute.start} → {selectedRoute.stop}
                                 </span>
                             </h3>
-                            <button onClick={closeModal}>
-                                <X size={18} />
+                            <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
+                                <X size={20} />
                             </button>
                         </div>
 
-                        <div className="space-y-4 p-5">
+                        <div className="space-y-6 p-6">
                             <div>
-                                <label className="block text-[12px] font-medium text-[#374151]">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Đi - Đến
                                 </label>
                                 <input
                                     value={`${selectedRoute.start} → ${selectedRoute.stop}`}
                                     disabled
-                                    className="mt-1 w-full rounded border border-[#dde2ea] bg-[#f9fafb] px-2 py-1 text-[13px]"
+                                    className="w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-[12px] font-medium text-[#374151]">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Khoảng cách (km)
                                 </label>
                                 <input
@@ -507,12 +461,12 @@ const ManageRoute: React.FC = () => {
                                             distance_km: Number(e.target.value) || 0,
                                         })
                                     }
-                                    className="mt-1 w-full rounded border border-[#dde2ea] px-2 py-1 text-[13px]"
+                                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-[12px] font-medium text-[#374151]">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Trạng thái
                                 </label>
                                 <select
@@ -523,7 +477,7 @@ const ManageRoute: React.FC = () => {
                                             status: e.target.value as FormDataType["status"],
                                         })
                                     }
-                                    className="mt-1 w-full rounded border border-[#dde2ea] px-2 py-1 text-[13px]"
+                                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                 >
                                     <option value="Hoạt động">Hoạt động</option>
                                     <option value="Tạm ngưng">Tạm ngưng</option>
@@ -531,35 +485,33 @@ const ManageRoute: React.FC = () => {
                             </div>
 
                             {updateError && (
-                                <div className="rounded bg-red-50 p-2 text-[12px] text-red-600">
+                                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
                                     {updateError}
                                 </div>
                             )}
                         </div>
 
-                        <div className="flex justify-end gap-2 border-t px-5 py-3">
+                        <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4">
                             <button
                                 onClick={closeModal}
                                 disabled={updating}
-                                className="rounded border border-[#dde2ea] px-3 py-1 text-[12px]"
+                                className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
                             <button
                                 onClick={handleUpdate}
                                 disabled={updating}
-                                className="rounded bg-[#eb8a45] px-3 py-1 text-[12px] text-white"
+                                className="rounded-md bg-orange-500 px-4 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50"
                             >
-                                {updating ? "Đang lưu..." : "Lưu"}
+                                {updating ? "Đang lưu..." : "Lưu thay đổi"}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
-
         </div>
     );
-
 };
 
 export default ManageRoute;
