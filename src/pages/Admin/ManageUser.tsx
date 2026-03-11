@@ -33,14 +33,15 @@ type UserRow = {
     contact: string;
     role: string;
     roleKey?: string;
+    status?: string;
     created_at?: string;
     raw?: AccountModel;
 };
 
-// Màu badge vai trò theo ảnh: Admin #F3E5F5, Lễ Tân #E8F5E9, Tài xế #FFF3E0, Lơ xe #E3F2FD
+// Màu badge vai trò theo ảnh: Khách hàng #F3E5F5, Lễ Tân #E8F5E9, Tài xế #FFF3E0, Lơ xe #E3F2FD
 const getRoleStyle = (role: string) => {
     const lower = (role ?? "").toLowerCase();
-    if (lower.includes("admin")) return "bg-[#F3E5F5] text-violet-800";
+    if (lower.includes("customer") || lower.includes("khách")) return "bg-[#F3E5F5] text-violet-800";
     if (lower.includes("tài xế") || lower.includes("driver") || lower.includes("tài"))
         return "bg-[#FFF3E0] text-amber-800";
     if (lower.includes("lễ tân") || lower.includes("lê tân") || lower.includes("reception"))
@@ -52,7 +53,7 @@ const getRoleStyle = (role: string) => {
 
 const getRoleDisplayName = (role: string): string => {
     const lower = (role ?? "").toLowerCase();
-    if (lower.includes("admin")) return "Admin";
+    if (lower.includes("customer") || lower.includes("khách")) return "Khách hàng";
     if (lower.includes("reception")) return "Lễ Tân";
     if (lower.includes("driver") && !lower.includes("assistant")) return "Tài xế";
     if (lower.includes("assistant") || lower.includes("lơ xe") || lower.includes("phụ xe")) return "Lơ xe";
@@ -135,7 +136,6 @@ const ManageUser: React.FC = () => {
     const [addFormData, setAddFormData] = useState({
         name: "",
         phone: "",
-        email: "",
         password: "",
         roleKey: "",
     });
@@ -168,14 +168,12 @@ const ManageUser: React.FC = () => {
                     typeof a.role === "string"
                         ? a.role
                         : isRecord(a.role)
-                          ? (a.role as RoleRef).name ?? "Không xác định"
-                          : "Không xác định";
+                            ? (a.role as RoleRef).name ?? "Không xác định"
+                            : "Không xác định";
                 const contact =
-                    typeof a.email === "string" && a.email.trim() !== ""
-                        ? a.email
-                        : typeof a.phone === "string" && a.phone.trim() !== ""
-                          ? a.phone
-                          : "—";
+                    typeof a.phone === "string" && a.phone.trim() !== ""
+                        ? a.phone
+                        : "—";
                 const created = (a.created_at as string) ?? (a.createdAt as string) ?? undefined;
                 return {
                     id: a._id,
@@ -183,6 +181,7 @@ const ManageUser: React.FC = () => {
                     contact,
                     role: getRoleDisplayName(roleName ?? ""),
                     roleKey: (a.role as RoleRef)?.name ?? (typeof a.role === "string" ? a.role : undefined),
+                    status: a.status ?? "active",
                     created_at: created,
                     raw: a,
                 };
@@ -217,10 +216,10 @@ const ManageUser: React.FC = () => {
     }, [filteredUsers, currentPage, itemsPerPage]);
 
     const ROLE_OPTIONS = [
-        { value: "admin", label: "Admin" },
-        { value: "receptionist", label: "Lễ Tân" },
-        { value: "driver", label: "Tài xế" },
-        { value: "assistant_driver", label: "Lơ xe" },
+        { value: "CUSTOMER", label: "Khách hàng" },
+        { value: "RECEPTIONIST", label: "Lễ Tân" },
+        { value: "DRIVER", label: "Tài xế" },
+        { value: "BUS_ASSISTANT", label: "Lơ xe" },
     ];
 
     const STATUS_OPTIONS = [
@@ -258,9 +257,7 @@ const ManageUser: React.FC = () => {
             const payload: { name?: string; phone?: string; email?: string; role?: string; status?: string } = {};
             if (formData.name?.trim()) payload.name = formData.name.trim();
             if (formData.contact?.trim()) {
-                const c = formData.contact.trim();
-                if (/^[\d\s\-+]{9,15}$/.test(c.replace(/\s/g, ""))) payload.phone = c;
-                else payload.email = c;
+                payload.phone = formData.contact.trim();
             }
             if (formData.roleKey?.trim()) payload.role = formData.roleKey.trim();
             else if (formData.role?.trim()) payload.role = formData.role.trim();
@@ -297,7 +294,7 @@ const ManageUser: React.FC = () => {
     };
 
     const openAddModal = () => {
-        setAddFormData({ name: "", phone: "", email: "", password: "", roleKey: "" });
+        setAddFormData({ name: "", phone: "", password: "", roleKey: "" });
         setAddError(null);
         setIsAddModalOpen(true);
     };
@@ -308,7 +305,7 @@ const ManageUser: React.FC = () => {
     };
 
     const handleCreateStaff = async () => {
-        const { name, phone, email, password, roleKey } = addFormData;
+        const { name, phone, password, roleKey } = addFormData;
         if (!name?.trim()) {
             setAddError("Họ tên là bắt buộc");
             return;
@@ -343,7 +340,6 @@ const ManageUser: React.FC = () => {
                 body: JSON.stringify({
                     name: name.trim(),
                     phone: phoneDigits,
-                    email: email?.trim() || undefined,
                     password,
                     role: roleKey,
                 }),
@@ -390,22 +386,20 @@ const ManageUser: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => setActiveTab("list")}
-                            className={`px-5 py-3 text-sm font-medium transition ${
-                                activeTab === "list"
+                            className={`px-5 py-3 text-sm font-medium transition ${activeTab === "list"
                                     ? "text-black border-b-2 border-[#FF5722]"
                                     : "text-gray-500 border-b-2 border-transparent"
-                            }`}
+                                }`}
                         >
                             Danh sách nhân sự
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab("search")}
-                            className={`px-5 py-3 text-sm font-medium transition ${
-                                activeTab === "search"
+                            className={`px-5 py-3 text-sm font-medium transition ${activeTab === "search"
                                     ? "text-black border-b-2 border-[#FF5722]"
                                     : "text-gray-500 border-b-2 border-transparent"
-                            }`}
+                                }`}
                         >
                             Tìm nhân sự
                         </button>
@@ -438,8 +432,9 @@ const ManageUser: React.FC = () => {
                                     <thead className="bg-[#F5F5F5]">
                                         <tr className="text-left text-black font-semibold">
                                             <th className="px-6 py-3">Tên</th>
-                                            <th className="px-6 py-3">Email</th>
+                                            <th className="px-6 py-3">Số điện thoại</th>
                                             <th className="px-6 py-3">Vai Trò</th>
+                                            <th className="px-6 py-3">Trạng thái</th>
                                             <th className="px-6 py-3 text-right w-14"></th>
                                         </tr>
                                     </thead>
@@ -456,6 +451,18 @@ const ManageUser: React.FC = () => {
                                                         className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getRoleStyle(u.roleKey ?? (u.raw?.role as RoleRef)?.name ?? u.role)}`}
                                                     >
                                                         {u.role}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span
+                                                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${u.status === "active"
+                                                                ? "bg-green-100 text-green-800 border border-green-200"
+                                                                : u.status === "inactive"
+                                                                    ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                                                                    : "bg-red-100 text-red-800 border border-red-200"
+                                                            }`}
+                                                    >
+                                                        {u.status === "active" ? "Hoạt động" : u.status === "inactive" ? "Tạm khóa" : "Chặn"}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
@@ -487,11 +494,10 @@ const ManageUser: React.FC = () => {
                                             key={p}
                                             type="button"
                                             onClick={() => setCurrentPage(p)}
-                                            className={`min-w-[32px] h-8 rounded-full text-sm font-medium transition ${
-                                                currentPage === p
+                                            className={`min-w-[32px] h-8 rounded-full text-sm font-medium transition ${currentPage === p
                                                     ? "bg-[#FF5722] text-white"
                                                     : "text-gray-700 bg-transparent hover:bg-gray-100"
-                                            }`}
+                                                }`}
                                         >
                                             {p}
                                         </button>
@@ -526,14 +532,12 @@ const ManageUser: React.FC = () => {
                                         role="switch"
                                         aria-checked={permissions.view_revenue_report}
                                         onClick={() => togglePermission("view_revenue_report")}
-                                        className={`relative w-10 h-6 rounded-full transition ${
-                                            permissions.view_revenue_report ? "bg-[#FF5722]" : "bg-gray-300"
-                                        }`}
+                                        className={`relative w-10 h-6 rounded-full transition ${permissions.view_revenue_report ? "bg-[#FF5722]" : "bg-gray-300"
+                                            }`}
                                     >
                                         <span
-                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${
-                                                permissions.view_revenue_report ? "translate-x-5" : "translate-x-0"
-                                            }`}
+                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${permissions.view_revenue_report ? "translate-x-5" : "translate-x-0"
+                                                }`}
                                         />
                                     </button>
                                 </div>
@@ -544,14 +548,12 @@ const ManageUser: React.FC = () => {
                                         role="switch"
                                         aria-checked={permissions.manage_staff}
                                         onClick={() => togglePermission("manage_staff")}
-                                        className={`relative w-10 h-6 rounded-full transition ${
-                                            permissions.manage_staff ? "bg-[#FF5722]" : "bg-gray-300"
-                                        }`}
+                                        className={`relative w-10 h-6 rounded-full transition ${permissions.manage_staff ? "bg-[#FF5722]" : "bg-gray-300"
+                                            }`}
                                     >
                                         <span
-                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${
-                                                permissions.manage_staff ? "translate-x-5" : "translate-x-0"
-                                            }`}
+                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${permissions.manage_staff ? "translate-x-5" : "translate-x-0"
+                                                }`}
                                         />
                                     </button>
                                 </div>
@@ -568,14 +570,12 @@ const ManageUser: React.FC = () => {
                                         role="switch"
                                         aria-checked={permissions.edit_route_schedule}
                                         onClick={() => togglePermission("edit_route_schedule")}
-                                        className={`relative w-10 h-6 rounded-full transition ${
-                                            permissions.edit_route_schedule ? "bg-[#FF5722]" : "bg-gray-300"
-                                        }`}
+                                        className={`relative w-10 h-6 rounded-full transition ${permissions.edit_route_schedule ? "bg-[#FF5722]" : "bg-gray-300"
+                                            }`}
                                     >
                                         <span
-                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${
-                                                permissions.edit_route_schedule ? "translate-x-5" : "translate-x-0"
-                                            }`}
+                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${permissions.edit_route_schedule ? "translate-x-5" : "translate-x-0"
+                                                }`}
                                         />
                                     </button>
                                 </div>
@@ -586,14 +586,12 @@ const ManageUser: React.FC = () => {
                                         role="switch"
                                         aria-checked={permissions.manage_booking}
                                         onClick={() => togglePermission("manage_booking")}
-                                        className={`relative w-10 h-6 rounded-full transition ${
-                                            permissions.manage_booking ? "bg-[#FF5722]" : "bg-gray-300"
-                                        }`}
+                                        className={`relative w-10 h-6 rounded-full transition ${permissions.manage_booking ? "bg-[#FF5722]" : "bg-gray-300"
+                                            }`}
                                     >
                                         <span
-                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${
-                                                permissions.manage_booking ? "translate-x-5" : "translate-x-0"
-                                            }`}
+                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${permissions.manage_booking ? "translate-x-5" : "translate-x-0"
+                                                }`}
                                         />
                                     </button>
                                 </div>
@@ -604,14 +602,12 @@ const ManageUser: React.FC = () => {
                                         role="switch"
                                         aria-checked={permissions.cancel_refund}
                                         onClick={() => togglePermission("cancel_refund")}
-                                        className={`relative w-10 h-6 rounded-full transition ${
-                                            permissions.cancel_refund ? "bg-[#FF5722]" : "bg-gray-300"
-                                        }`}
+                                        className={`relative w-10 h-6 rounded-full transition ${permissions.cancel_refund ? "bg-[#FF5722]" : "bg-gray-300"
+                                            }`}
                                     >
                                         <span
-                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${
-                                                permissions.cancel_refund ? "translate-x-5" : "translate-x-0"
-                                            }`}
+                                            className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition left-1 ${permissions.cancel_refund ? "translate-x-5" : "translate-x-0"
+                                                }`}
                                         />
                                     </button>
                                 </div>
@@ -652,16 +648,7 @@ const ManageUser: React.FC = () => {
                                     className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-200"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email (tùy chọn)</label>
-                                <input
-                                    type="email"
-                                    value={addFormData.email}
-                                    onChange={(e) => setAddFormData({ ...addFormData, email: e.target.value })}
-                                    placeholder="email@example.com"
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-200"
-                                />
-                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu <span className="text-red-500">*</span></label>
                                 <input
@@ -745,7 +732,7 @@ const ManageUser: React.FC = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Liên hệ (số điện thoại hoặc email)
+                                    Số điện thoại
                                 </label>
                                 <input
                                     type="text"

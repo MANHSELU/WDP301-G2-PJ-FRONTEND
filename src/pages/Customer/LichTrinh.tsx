@@ -1,72 +1,14 @@
 import { useEffect, useState, useRef } from "react";
-import { Search } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import baseAPIAuth from "../../api/auth";
 import type { searchStops } from "../../model/searchStop";
 import { createPortal } from "react-dom";
 import baseAPIPublic from "../../api/auth-not";
-import { ArrowRight, CalendarDays, MapPin, Users } from "lucide-react";
+import { CalendarDays, MapPin } from "lucide-react";
 
 export default function LichTrinh() {
-  const [activeTab, setActiveTab] = useState("Tuyến xe");
 
-  const listtrips = [
-    {
-      _id: "1",
-      start_id: { province: "Hà Nội" },
-      stop_id: { province: "Thanh Hóa" },
-      distance_km: 150,
-      is_active: true,
-      departure_time: "2026-03-10T06:00:00.000Z",
-      arrival_time: "2026-03-10T09:00:00.000Z",
-      time: 3,
-    },
-    {
-      _id: "2",
-      start_id: { province: "Hà Nội" },
-      stop_id: { province: "Nghệ An" },
-      distance_km: 300,
-      is_active: true,
 
-      departure_time: "2026-03-11T07:00:00.000Z",
-      arrival_time: "2026-03-11T13:00:00.000Z",
-      time: 6,
-      status: "SCHEDULED",
-    },
-    {
-      _id: "3",
-      start_id: { province: "Đà Nẵng" },
-      stop_id: { province: "Huế" },
-      distance_km: 100,
-      is_active: true,
-
-      departure_time: "2026-03-12T08:30:00.000Z",
-      arrival_time: "2026-03-12T11:00:00.000Z",
-      time: 2.5,
-    },
-    {
-      _id: "4",
-      start_id: { province: "TP. Hồ Chí Minh" },
-      stop_id: { province: "Vũng Tàu" },
-      distance_km: 120,
-      is_active: true,
-
-      departure_time: "2026-03-13T09:00:00.000Z",
-      arrival_time: "2026-03-13T11:30:00.000Z",
-      time: 2.5,
-    },
-    {
-      _id: "5",
-      start_id: { province: "Cần Thơ" },
-      stop_id: { province: "TP. Hồ Chí Minh" },
-      distance_km: 170,
-      is_active: true,
-      departure_time: "2026-03-14T14:00:00.000Z",
-      arrival_time: "2026-03-14T18:00:00.000Z",
-      time: 4,
-    },
-  ];
-  const tabs = ["Tuyến xe", "Loại xe", "Quãng đường", "Thời gian", "Giá vé"];
 
   const [departure, setDeparture] = useState("");
   const [departureId, setDepartureId] = useState("");
@@ -169,9 +111,9 @@ export default function LichTrinh() {
 
       const data = await response.json();
 
-      console.log("Kết quả search:", data);
+      console.log("Kết quả search:", data.data);
 
-      setTrips(data); // hoặc data.data nếu backend bọc trong {data: [...]}
+      setTrips(Array.isArray(data) ? data : (data?.data ?? [])); // hoặc data.data nếu backend bọc trong {data: [...]}
     } catch (error) {
       console.error("Lỗi khi search:", error);
       setError("chương trình đang bị lỗi ");
@@ -181,10 +123,10 @@ export default function LichTrinh() {
   };
 
   // ✅ FIX CHÍNH: useState(listtrips) thay vì useState([listtrips])
-  const [trips, setTrips] = useState(listtrips);
+  const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  console.log("trips là: ", trips)
   // useEffect(() => {
   //   const fetchApi = async () => {
   //     try {
@@ -290,8 +232,8 @@ export default function LichTrinh() {
       </div>
 
       {/* Search & Trip List Section */}
-<div className="relative z-[100] pb-20 -mt-20">
-          <div className="max-w-7xl mx-auto px-4 py-8 ">
+      <div className="relative z-[100] pb-20 -mt-20">
+        <div className="max-w-7xl mx-auto px-4 py-8 ">
           {/* ================= SEARCH BAR ================= */}
           <div className="page-enter-search relative">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 via-orange-500/30 to-orange-400/20 blur-3xl -z-10 rounded-3xl" />
@@ -471,33 +413,33 @@ export default function LichTrinh() {
             style={{ zIndex: 1 }}
           >
             <div className="absolute inset-0 bg-orange-300/20 blur-2xl -z-10 rounded-2xl w-fit" />
-<div className="flex items-center gap-8 px-8 py-5 bg-gradient-to-br from-white/80 via-white/70 to-orange-50/60 backdrop-blur-md rounded-2xl border-2 border-white/60 shadow-xl">
+            <div className="flex items-center gap-8 px-8 py-5 bg-gradient-to-br from-white/80 via-white/70 to-orange-50/60 backdrop-blur-md rounded-2xl border-2 border-white/60 shadow-xl">
 
-  <div className="flex-1 font-bold text-slate-600">
-    Tuyến xe
-  </div>
+              <div className="flex-1 font-bold text-slate-600">
+                Tuyến xe
+              </div>
 
-  <div className="min-w-[110px] text-center font-bold text-slate-600">
-    Loại xe
-  </div>
+              <div className="min-w-[110px] text-center font-bold text-slate-600">
+                Loại xe
+              </div>
 
-  <div className="min-w-[30px] text-center font-bold text-slate-600">
-    Quãng đường
-  </div>
+              <div className="min-w-[30px] text-center font-bold text-slate-600">
+                Quãng đường
+              </div>
 
-  <div className="min-w-[100px] text-center font-bold text-slate-600">
-    Thời gian
-  </div>
+              <div className="min-w-[100px] text-center font-bold text-slate-600">
+                Thời gian
+              </div>
 
-  <div className="min-w-[90px] text-center font-bold text-slate-600">
-    Giá vé
-  </div>
+              <div className="min-w-[90px] text-center font-bold text-slate-600">
+                Giá vé
+              </div>
 
-    <div className="min-w-[120px] text-center font-bold text-slate-600">
-    Thao tác
-  </div>
+              <div className="min-w-[120px] text-center font-bold text-slate-600">
+                Thao tác
+              </div>
 
-</div>
+            </div>
           </div>
 
           {/* ================= TRIP LIST ================= */}
@@ -530,8 +472,8 @@ export default function LichTrinh() {
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-500/20 to-orange-400/0 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-2xl" />
                   <div className="bg-gradient-to-br from-white via-white to-orange-50/20 backdrop-blur-sm border-2 border-orange-100/40 rounded-2xl p-7 hover:shadow-2xl hover:border-orange-200 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-400/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-<div className="flex items-center gap-10 relative z-10">
-                        <div className="flex items-center gap-6 flex-1 min-w-0">
+                    <div className="flex items-center gap-10 relative z-10">
+                      <div className="flex items-center gap-6 flex-1 min-w-0">
                         <div className="text-orange-600 font-extrabold whitespace-pre-line text-base leading-tight">
                           {trip?.start_id?.province}
                         </div>

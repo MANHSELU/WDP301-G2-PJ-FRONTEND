@@ -14,7 +14,7 @@ export default function TransportBooking() {
                                 to="viewtrip"
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 p-4 font-semibold transition
-        ${isActive
+            ${isActive
                                         ? "bg-orange-100 text-orange-600"
                                         : "text-gray-800 hover:bg-orange-50"}`
                                 }
@@ -24,10 +24,10 @@ export default function TransportBooking() {
                             </NavLink>
 
                             <NavLink
-                                to="workshift"
+                                to="viewSlot"
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 p-4 font-semibold transition
-        ${isActive
+            ${isActive
                                         ? "bg-orange-100 text-orange-600"
                                         : "text-gray-800 hover:bg-orange-50"}`
                                 }

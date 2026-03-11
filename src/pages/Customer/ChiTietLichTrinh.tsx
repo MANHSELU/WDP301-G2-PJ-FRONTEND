@@ -63,13 +63,20 @@ type Trip = {
 function ScheduleAccordion({ trip }: { trip: Trip }) {
     const sortedStops = [...trip.time].sort((a, b) => a.stop_order - b.stop_order);
 
-    const calcArrival = (departureTime: string, estHours: number) => {
-        const base = new Date(departureTime);
-        base.setHours(base.getHours() + estHours);
-        return {
-            time: base.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
-            date: base.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }),
-        };
+    // ✅ FIX: estimated_time là thời gian từ điểm TRƯỚC → phải cộng DỒN
+    // Ví dụ: Hà Nội(0h) → Hà Nam(+8h=8h) → Ninh Bình(+8h=16h) → Thanh Hóa(+11h=27h)
+    const cumulativeHours = sortedStops.reduce<number[]>((acc, stop, idx) => {
+        const h = stop.estimated_time ?? (stop as any)[" estimated_time"] ?? 0;
+        acc.push(idx === 0 ? h : acc[idx - 1] + h);
+        return acc;
+    }, []);
+
+    const calcArrival = (departureTime: string, totalHours: number) => {
+        const base = new Date(new Date(departureTime).getTime() + totalHours * 60 * 60 * 1000);
+        const time = base.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+        const day = String(base.getDate()).padStart(2, "0");
+        const month = String(base.getMonth() + 1).padStart(2, "0");
+        return { time, date: `${day}-${month}` };
     };
 
     return (
@@ -91,15 +98,16 @@ function ScheduleAccordion({ trip }: { trip: Trip }) {
                             const isFirst = idx === 0;
                             const isLast = idx === sortedStops.length - 1;
                             const estHours = stop.estimated_time ?? (stop as any)[" estimated_time"] ?? 0;
-                            const { time, date } = calcArrival(trip.departure_time, estHours);
+                            // ✅ Dùng cumulative hours để tính giờ đến đúng
+                            const { time, date } = calcArrival(trip.departure_time, cumulativeHours[idx]);
 
                             return (
                                 <div key={stop._id} className="flex items-start gap-4 pb-4 last:pb-0">
                                     {/* Dot */}
                                     <div className="relative z-10 flex-shrink-0 mt-0.5">
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${isFirst ? "bg-orange-500 ring-4 ring-orange-100"
-                                                : isLast ? "bg-orange-700 ring-4 ring-orange-100"
-                                                    : "bg-white ring-2 ring-orange-300"
+                                            : isLast ? "bg-orange-700 ring-4 ring-orange-100"
+                                                : "bg-white ring-2 ring-orange-300"
                                             }`}>
                                             <MapPin size={14}
                                                 className={isFirst || isLast ? "text-white" : "text-orange-500"}
