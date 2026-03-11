@@ -42,19 +42,27 @@ type LocationPoint = {
 /* ================= COMPONENT ================= */
 
 export default function BusSeatSelection() {
+    // ── Đọc location TRƯỚC để làm giá trị khởi tạo cho useState ─────────────
+    const location = useLocation();
+    const route_id = location.state?.tripId ?? "";
+    const bus_type_id = location.state?.bus_type_id ?? "";
+    const justBookedLabels: string[] = location.state?.justBookedLabels ?? [];
+    const restoredPickupId: string = location.state?.restoredPickupId ?? "";
+    const restoredDropoffId: string = location.state?.restoredDropoffId ?? "";
+
     const [selectedFloor, setSelectedFloor] = useState<1 | 2>(1);
     const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
-    // ── Ghế đã bị đặt (label) từ BE ──
-    const [bookedSeatLabels, setBookedSeatLabels] = useState<string[]>([]);
+    // Khởi tạo ngay với ghế vừa đặt (nếu quay lại từ trang xác nhận)
+    const [bookedSeatLabels, setBookedSeatLabels] = useState<string[]>(justBookedLabels);
 
     const [pickupPoints, setPickupPoints] = useState<StopPoint[]>([]);
     const [dropoffPoints, setDropoffPoints] = useState<StopPoint[]>([]);
 
-    const [selectedPickupId, setSelectedPickupId] = useState<string>("");
+    const [selectedPickupId, setSelectedPickupId] = useState<string>(restoredPickupId);
     const [selectedPickupStopId, setSelectedPickupStopId] = useState<string>("");
 
-    const [selectedDropoffId, setSelectedDropoffId] = useState<string>("");
+    const [selectedDropoffId, setSelectedDropoffId] = useState<string>(restoredDropoffId);
     const [selectedDropoffStopId, setSelectedDropoffStopId] = useState<string>("");
 
     const [pickupLocationPoints, setPickupLocationPoints] = useState<LocationPoint[]>([]);
@@ -73,9 +81,6 @@ export default function BusSeatSelection() {
         tiers: [] as string[],
     });
 
-    const location = useLocation();
-    const route_id = location.state?.tripId;
-    const bus_type_id = location.state?.bus_type_id;
     const [trip, setTrip] = useState<any>(null);
 
     /* ── Fetch sơ đồ xe ── */
@@ -91,29 +96,34 @@ export default function BusSeatSelection() {
             .catch(console.error);
     }, [route_id]);
 
-    /* ── Fetch ghế đã đặt (chạy sau khi có trip._id) ── */
+    /* ── Fetch ghế đã đặt ──────────────────────────────────────────────────────
+       Chỉ gọi khi đã có trip + đã chọn ĐỦ điểm đón VÀ điểm trả
+       BE chỉ trả về ghế bận trong đoạn đường overlap với đoạn khách muốn đi
+    ── */
     useEffect(() => {
-        if (!trip?._id) return;
+        if (!trip?._id || !selectedPickupId || !selectedDropoffId) {
+            // Giữ lại justBookedLabels, không xoá về [] khi chưa chọn đủ điểm
+            setBookedSeatLabels(justBookedLabels);
+            return;
+        }
         fetch("http://localhost:3000/api/customer/notcheck/booked-seats", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ trip_id: trip._id }),
+            body: JSON.stringify({
+                trip_id: trip._id,
+                start_id: selectedPickupId,   // RouteStop._id điểm đón
+                end_id: selectedDropoffId,  // RouteStop._id điểm trả
+            }),
         })
             .then(r => r.json())
             .then(res => {
-                const labels: string[] = Array.isArray(res.data) ? res.data : [];
-                setBookedSeatLabels(labels);
-                // Nếu user đang chọn ghế nào mà vừa bị người khác đặt → deselect
-                setSelectedSeats(prev =>
-                    prev.filter(id => {
-                        // id dạng "1-2-0-0", cần map sang label để check
-                        // sẽ handle trong getSeatStatus bên dưới
-                        return true;
-                    })
-                );
+                const fromBE: string[] = Array.isArray(res.data) ? res.data : [];
+                // Merge ghế từ BE + ghế vừa đặt (justBookedLabels) — dedup
+                const merged = [...new Set([...fromBE, ...justBookedLabels])];
+                setBookedSeatLabels(merged);
             })
             .catch(console.error);
-    }, [trip?._id]);
+    }, [trip?._id, selectedPickupId, selectedDropoffId]);
 
     /* ── Fetch điểm đón ── */
     useEffect(() => {
@@ -126,7 +136,13 @@ export default function BusSeatSelection() {
             .then(r => r.json())
             .then(res => {
                 const data: StopPoint[] = res.data ?? [];
-                setPickupPoints(data.sort((a, b) => a.stop_order - b.stop_order));
+                const sorted = data.sort((a, b) => a.stop_order - b.stop_order);
+                setPickupPoints(sorted);
+                // Restore selectedPickupStopId khi quay lại từ trang xác nhận
+                if (restoredPickupId) {
+                    const found = sorted.find(p => p._id === restoredPickupId);
+                    if (found) setSelectedPickupStopId(found.stop_id._id);
+                }
             })
             .catch(console.error);
     }, [route_id]);
@@ -134,8 +150,11 @@ export default function BusSeatSelection() {
     /* ── Fetch điểm trả ── */
     useEffect(() => {
         if (!route_id) return;
-        setSelectedDropoffId("");
-        setSelectedDropoffStopId("");
+        // Khi restore (quay lại từ xác nhận): KHÔNG reset selectedDropoffId
+        if (!restoredDropoffId) {
+            setSelectedDropoffId("");
+            setSelectedDropoffStopId("");
+        }
         setDropoffLocationPoints([]);
         setSelectedDropoffLocationId("");
 
@@ -147,7 +166,13 @@ export default function BusSeatSelection() {
             .then(r => r.json())
             .then(res => {
                 const data: StopPoint[] = res.data ?? [];
-                setDropoffPoints(data.sort((a, b) => a.stop_order - b.stop_order));
+                const sorted = data.sort((a, b) => a.stop_order - b.stop_order);
+                setDropoffPoints(sorted);
+                // Restore selectedDropoffStopId khi quay lại từ trang xác nhận
+                if (restoredDropoffId) {
+                    const found = sorted.find(p => p._id === restoredDropoffId);
+                    if (found) setSelectedDropoffStopId(found.stop_id._id);
+                }
             })
             .catch(console.error);
     }, [route_id, selectedPickupStopId]);
