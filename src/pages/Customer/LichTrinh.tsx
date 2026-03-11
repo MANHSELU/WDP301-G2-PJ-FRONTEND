@@ -7,9 +7,6 @@ import baseAPIPublic from "../../api/auth-not";
 import { CalendarDays, MapPin } from "lucide-react";
 
 export default function LichTrinh() {
-
-
-
   const [departure, setDeparture] = useState("");
   const [departureId, setDepartureId] = useState("");
   const [destination, setDestination] = useState("");
@@ -87,7 +84,7 @@ export default function LichTrinh() {
       "giá trị id của điểm đếm và điểm đi: ",
       departureId,
       " và ",
-      destinationId,
+      destinationId
     );
     try {
       const response = await fetch(
@@ -102,7 +99,7 @@ export default function LichTrinh() {
             nodeId_end: destinationId,
             date: selectedDate,
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -113,7 +110,7 @@ export default function LichTrinh() {
 
       console.log("Kết quả search:", data.data);
 
-      setTrips(Array.isArray(data) ? data : (data?.data ?? [])); // hoặc data.data nếu backend bọc trong {data: [...]}
+      setTrips(Array.isArray(data) ? data : data?.data ?? []); // hoặc data.data nếu backend bọc trong {data: [...]}
     } catch (error) {
       console.error("Lỗi khi search:", error);
       setError("chương trình đang bị lỗi ");
@@ -126,7 +123,7 @@ export default function LichTrinh() {
   const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  console.log("trips là: ", trips)
+  console.log("trips là: ", trips);
   // useEffect(() => {
   //   const fetchApi = async () => {
   //     try {
@@ -303,7 +300,7 @@ export default function LichTrinh() {
                         </li>
                       ))}
                     </ul>,
-                    document.body,
+                    document.body
                   )}
               </div>
               {/* ĐIỂM ĐẾN */}
@@ -375,7 +372,7 @@ export default function LichTrinh() {
                         </li>
                       ))}
                     </ul>,
-                    document.body,
+                    document.body
                   )}
               </div>
               {/* ===== NGÀY ĐI ===== */}
@@ -414,10 +411,7 @@ export default function LichTrinh() {
           >
             <div className="absolute inset-0 bg-orange-300/20 blur-2xl -z-10 rounded-2xl w-fit" />
             <div className="flex items-center gap-8 px-8 py-5 bg-gradient-to-br from-white/80 via-white/70 to-orange-50/60 backdrop-blur-md rounded-2xl border-2 border-white/60 shadow-xl">
-
-              <div className="flex-1 font-bold text-slate-600">
-                Tuyến xe
-              </div>
+              <div className="flex-1 font-bold text-slate-600">Tuyến xe</div>
 
               <div className="min-w-[110px] text-center font-bold text-slate-600">
                 Loại xe
@@ -438,7 +432,6 @@ export default function LichTrinh() {
               <div className="min-w-[120px] text-center font-bold text-slate-600">
                 Thao tác
               </div>
-
             </div>
           </div>
 
