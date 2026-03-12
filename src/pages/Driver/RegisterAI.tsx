@@ -20,6 +20,9 @@ export default function FaceRegister() {
     const imagesRef = useRef<string[]>([]);
     const lastStatusRef = useRef("");
 
+    // Responsive mobile state
+    const [isMobile, setIsMobile] = useState(false);
+
     const [status, setStatus] = useState("Sẵn sàng đăng ký khuôn mặt");
     const [cameraOn, setCameraOn] = useState(false);
     const [done, setDone] = useState(false);
@@ -86,6 +89,16 @@ export default function FaceRegister() {
             isMounted = false;
             stopCamera();
         };
+    }, []);
+
+    // Mobile detection (giống hệt FaceVerification)
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     // ---------------- CAPTURE ----------------
@@ -244,14 +257,10 @@ export default function FaceRegister() {
                 return;
             }
 
-            // resize canvas giống login
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-
-            // chụp frame
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // convert sang base64 (GIỐNG LOGIN)
             const image = canvas
                 .toDataURL("image/jpeg", 0.8)
                 .split(",")[1];
@@ -281,35 +290,85 @@ export default function FaceRegister() {
         }
     };
 
-
-
-
     const handleGoBack = () => {
         stopCamera();
         setStatus('Đã hủy đăng ký');
     };
 
+    // ========== RESPONSIVE STYLES (desktop giữ nguyên 100%, mobile như app native) ==========
+    const containerStyle = isMobile
+        ? { ...styles.container, padding: "10px" }
+        : styles.container;
+
+    const wrapperStyle = isMobile
+        ? { ...styles.wrapper, gridTemplateColumns: "1fr", gap: "20px" }
+        : styles.wrapper;
+
+    const leftSectionStyle = isMobile
+        ? { ...styles.leftSection, padding: "10px" }
+        : styles.leftSection;
+
+    const logoTextStyle = isMobile
+        ? { ...styles.logoText, fontSize: "16px", marginBottom: "20px" }
+        : styles.logoText;
+
+    const titleStyle = isMobile
+        ? { ...styles.title, fontSize: "32px" }
+        : styles.title;
+
+    const statusMessageStyle = isMobile
+        ? { ...styles.statusMessage, fontSize: "14px", minHeight: "40px", padding: "12px" }
+        : styles.statusMessage;
+
+    const buttonsStyle = isMobile
+        ? { ...styles.buttons, flexDirection: "column" as const, gap: "12px" }
+        : styles.buttons;
+
+    const baseBtnStyle = isMobile
+        ? { ...styles.btn, padding: "11px 24px", fontSize: "15px" }
+        : styles.btn;
+
+    const cameraContainerStyle = isMobile
+        ? { ...styles.cameraContainer, maxWidth: "100%", margin: "0 auto" }
+        : styles.cameraContainer;
+
+    const faceFrameStyle = isMobile
+        ? { ...styles.faceFrame, width: "260px", height: "320px" }
+        : styles.faceFrame;
+
+    const faceOvalStyle = isMobile
+        ? { ...styles.faceOval, width: "200px", height: "260px" }
+        : styles.faceOval;
+
+    const instructionStyle = isMobile
+        ? { ...styles.instruction, fontSize: "13px", padding: "10px 20px" }
+        : styles.instruction;
+
+    const statusIndicatorStyle = isMobile
+        ? { ...styles.statusIndicator, fontSize: "12px", padding: "6px 12px" }
+        : styles.statusIndicator;
+
     return (
-        <div style={styles.container}>
+        <div style={containerStyle}>
             <style>{cssString}</style>
-            <div style={styles.wrapper}>
+            <div style={wrapperStyle}>
                 {/* Left Section */}
-                <div style={styles.leftSection}>
-                    <div style={styles.logoText}>
+                <div style={leftSectionStyle}>
+                    <div style={logoTextStyle}>
                         Trở lại với <span style={styles.brandName}>Bustrip</span>
                     </div>
 
-                    <h1 style={styles.title}>
+                    <h1 style={titleStyle}>
                         ĐĂNG KÝ<br />KHUÔN MẶT
                     </h1>
 
-                    <div style={styles.statusMessage}>
+                    <div style={statusMessageStyle}>
                         {status}
                     </div>
 
-                    <div style={styles.buttons}>
+                    <div style={buttonsStyle}>
                         <button
-                            style={{ ...styles.btn, ...styles.btnBack }}
+                            style={{ ...baseBtnStyle, ...styles.btnBack }}
                             onClick={handleGoBack}
                             disabled={!cameraOn}
                         >
@@ -321,7 +380,7 @@ export default function FaceRegister() {
                                 onClick={startCamera}
                                 disabled={!modelsLoaded}
                                 style={{
-                                    ...styles.btn,
+                                    ...baseBtnStyle,
                                     ...styles.btnVerify,
                                     opacity: modelsLoaded ? 1 : 0.5,
                                     cursor: modelsLoaded ? 'pointer' : 'not-allowed'
@@ -334,7 +393,7 @@ export default function FaceRegister() {
                         {done && (
                             <button
                                 disabled
-                                style={{ ...styles.btn, ...styles.btnSuccess }}
+                                style={{ ...baseBtnStyle, ...styles.btnSuccess }}
                             >
                                 ✓ Đã đăng ký
                             </button>
@@ -344,7 +403,7 @@ export default function FaceRegister() {
 
                 {/* Right Section - Camera */}
                 <div style={styles.rightSection}>
-                    <div style={styles.cameraContainer}>
+                    <div style={cameraContainerStyle}>
                         <video
                             ref={videoRef}
                             autoPlay
@@ -361,7 +420,7 @@ export default function FaceRegister() {
 
                         {/* Overlay với khung mặt */}
                         <div style={styles.overlay}>
-                            <div style={styles.faceFrame}>
+                            <div style={faceFrameStyle}>
                                 {/* Corner brackets */}
                                 <div style={{ ...styles.corner, ...styles.cornerTL }}></div>
                                 <div style={{ ...styles.corner, ...styles.cornerTR }}></div>
@@ -369,7 +428,7 @@ export default function FaceRegister() {
                                 <div style={{ ...styles.corner, ...styles.cornerBR }}></div>
 
                                 {/* Oval face guide */}
-                                <div style={styles.faceOval}></div>
+                                <div style={faceOvalStyle}></div>
 
                                 {/* Scan line */}
                                 {cameraOn && !done && (
@@ -383,7 +442,7 @@ export default function FaceRegister() {
 
                         {/* Status indicator */}
                         {cameraOn && (
-                            <div style={styles.statusIndicator}>
+                            <div style={statusIndicatorStyle}>
                                 <div
                                     className={done ? 'status-dot success' : 'status-dot'}
                                     style={done ? { ...styles.statusDot, ...styles.statusDotSuccess } : styles.statusDot}
@@ -393,7 +452,7 @@ export default function FaceRegister() {
                         )}
 
                         {/* Instruction */}
-                        <div style={styles.instruction}>
+                        <div style={instructionStyle}>
                             {!cameraOn && !done && 'Nhấn "Bắt đầu đăng ký" để bắt đầu'}
                             {cameraOn && !done && 'Làm theo hướng dẫn trên màn hình'}
                             {done && '✓ Hoàn thành đăng ký'}
@@ -405,7 +464,7 @@ export default function FaceRegister() {
     );
 }
 
-// CSS animations
+// CSS animations (giữ nguyên)
 const cssString = `
 @keyframes scan {
   0%, 100% { top: 20%; }
@@ -438,7 +497,7 @@ const cssString = `
 }
 `;
 
-// Inline styles
+// Inline styles (desktop giữ nguyên 100%)
 const styles = {
     container: {
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
