@@ -197,6 +197,8 @@ export default function BusSeatSelection() {
                     (p: LocationPoint) => p.is_active && p.status
                 );
                 setPickupLocationPoints(data);
+                // Auto-select nếu chỉ có 1 vị trí
+                if (data.length === 1) setSelectedPickupLocationId(data[0]._id);
             })
             .catch(console.error)
             .finally(() => setLoadingPickupLocations(false));
@@ -222,6 +224,8 @@ export default function BusSeatSelection() {
                     (p: LocationPoint) => p.is_active && p.status
                 );
                 setDropoffLocationPoints(data);
+                // Auto-select nếu chỉ có 1 vị trí
+                if (data.length === 1) setSelectedDropoffLocationId(data[0]._id);
             })
             .catch(console.error)
             .finally(() => setLoadingDropoffLocations(false));
@@ -731,7 +735,8 @@ export default function BusSeatSelection() {
                                                 <Link to="/thongtindatve" state={{
                                                     selectedSeats,
                                                     selectedSeatLabels: (() => {
-                                                        const allSeats = selectedFloor === 1 ? floor1Seats : floor2Seats;
+                                                        // Lấy từ cả 2 tầng để không mất ghế tầng kia
+                                                        const allSeats = [...floor1Seats, ...floor2Seats];
                                                         return allSeats.filter(s => selectedSeats.includes(s.id)).map(s => s.label);
                                                     })(),
                                                     trip,
