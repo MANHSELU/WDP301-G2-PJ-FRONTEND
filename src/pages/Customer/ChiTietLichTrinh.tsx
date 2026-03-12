@@ -232,6 +232,10 @@ export default function BusTripSearch() {
         return date.toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" });
     };
 
+    const toggleSchedule = (tripId: string) => {
+        setOpenSchedule((prev) => (prev === tripId ? null : tripId));
+    };
+
     const DatVe = (type_bus_id: string) => {
         navigate("/datve", { state: { tripId: id, bus_type_id: type_bus_id } });
     };
@@ -375,42 +379,35 @@ export default function BusTripSearch() {
                         </aside>
 
                         {/* TRIP RESULTS */}
-                        <main className="space-y-5">
+                        <main className="space-y-4">
                             {trips.map((trip, index) => {
                                 const isOpen = openSchedule === trip._id;
                                 return (
-                                    <div
-                                        key={trip._id}
-                                        className="relative group"
-                                        style={{ animation: "fadeInUp 0.5s ease-out forwards", animationDelay: `${index * 0.1}s`, opacity: 0 }}
-                                    >
+                                    <div key={trip._id} className="relative group"
+                                        style={{ animation: "fadeInUp 0.5s ease-out forwards", animationDelay: `${index * 0.1}s`, opacity: 0 }}>
                                         <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-500/30 to-orange-400/0 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
 
-                                        <div className={`bg-gradient-to-br from-white via-white to-orange-50/30 rounded-2xl shadow-xl border-2 transition-all duration-300 relative overflow-hidden ${isOpen ? "border-orange-300 shadow-orange-100" : "border-orange-100/50 hover:shadow-2xl hover:border-orange-200 hover:-translate-y-1"
-                                            }`}>
+                                        <div className={`bg-gradient-to-br from-white via-white to-orange-50/30 rounded-2xl shadow-xl border-2 transition-all duration-300 relative overflow-hidden
+                      ${isOpen ? "border-orange-300 shadow-orange-100" : "border-orange-100/50 hover:shadow-2xl hover:border-orange-200 md:hover:-translate-y-1"}`}>
+
                                             {/* Top accent */}
                                             <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
 
-                                            {/* Card body */}
-                                            <div className="p-7">
-                                                {/* Time Section */}
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <div className="flex items-center gap-6">
-                                                        <div className="text-center">
-                                                            <div className="text-3xl font-black text-slate-800 mb-1">
-                                                                {formatDateTime(trip.departure_time)}
-                                                            </div>
-                                                            <div className="text-sm text-slate-500 font-medium">
-                                                                {trip?.route_id?.start_id.province} ({trip?.route_id?.start_id.name})
-                                                            </div>
-                                                        </div>
+                                            <div className="p-4 md:p-7">
 
-                                                        <div className="flex flex-col items-center px-8 relative">
+                                                {/* ===== DESKTOP Time row ===== */}
+                                                <div className="hidden md:flex flex-col md:flex-row items-start md:items-center mb-6 gap-6">
+                                                    <div className="flex-1 flex items-center gap-6">
+                                                        <div>
+                                                            <div className="text-2xl md:text-3xl font-black text-slate-800 mb-1">{formatDateTime(trip.departure_time)}</div>
+                                                            <div className="text-sm text-slate-500 font-medium">{trip?.route_id?.start_id.province} ({trip?.route_id?.start_id.name})</div>
+                                                        </div>
+                                                        <div className="flex flex-col items-center px-4 md:px-8">
                                                             <div className="flex items-center gap-3 mb-2">
                                                                 <div className="w-3 h-3 rounded-full bg-orange-400 ring-4 ring-orange-100" />
-                                                                <div className="h-0.5 w-24 bg-gradient-to-r from-orange-400 via-orange-300 to-orange-400 relative">
+                                                                <div className="h-0.5 w-24 md:w-40 bg-gradient-to-r from-orange-400 via-orange-300 to-orange-400 relative">
                                                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                                                        <Bus className="text-orange-500 bg-white rounded-full p-1" size={24} />
+                                                                        <Bus className="text-orange-500 bg-white rounded-full p-1" size={20} />
                                                                     </div>
                                                                 </div>
                                                                 <div className="w-3 h-3 rounded-full bg-orange-600 ring-4 ring-orange-100" />
@@ -421,15 +418,52 @@ export default function BusTripSearch() {
                                                                 <span>{trip.route_id.distance_km} km</span>
                                                             </div>
                                                         </div>
-
-                                                        <div className="text-center">
-                                                            <div className="text-3xl font-black text-slate-800 mb-1">
-                                                                {formatDateTime(trip.arrival_time)}
-                                                            </div>
-                                                            <div className="text-sm text-slate-500 font-medium">
-                                                                {trip.route_id.stop_id.province} ({trip.route_id.stop_id.name})
-                                                            </div>
+                                                        <div>
+                                                            <div className="text-2xl md:text-3xl font-black text-slate-800 mb-1">{formatDateTime(trip.arrival_time)}</div>
+                                                            <div className="text-sm text-slate-500 font-medium">{trip.route_id.stop_id.province} ({trip.route_id.stop_id.name})</div>
                                                         </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* ===== MOBILE Time row ===== */}
+                                                <div className="md:hidden mb-4">
+                                                    {/* Route tên */}
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <span className="font-extrabold text-orange-600 text-sm">{trip?.route_id?.start_id.province}</span>
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-orange-500 flex-shrink-0">
+                                                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
+                                                        <span className="font-extrabold text-orange-600 text-sm">{trip.route_id.stop_id.province}</span>
+                                                    </div>
+                                                    {/* Times */}
+                                                    <div className="flex items-center justify-between bg-orange-50/60 rounded-xl px-3 py-2.5 mb-3">
+                                                        <div>
+                                                            <p className="text-[10px] text-slate-400 font-semibold uppercase">Khởi hành</p>
+                                                            <p className="font-black text-slate-800 text-sm">{formatDateTime(trip.departure_time)}</p>
+                                                        </div>
+                                                        <div className="text-center px-2">
+                                                            <p className="text-[10px] text-orange-500 font-bold">{calculateDuration(trip.departure_time, trip.arrival_time)}</p>
+                                                            <p className="text-[10px] text-slate-400">{trip.route_id.distance_km} km</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-[10px] text-slate-400 font-semibold uppercase">Đến nơi</p>
+                                                            <p className="font-black text-slate-800 text-sm">{formatDateTime(trip.arrival_time)}</p>
+                                                        </div>
+                                                    </div>
+                                                    {/* Tags */}
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <span className="bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold px-3 py-1 rounded-lg">
+                                                            {trip?.bus_id.bus_type_id.name}
+                                                        </span>
+                                                        <span className="bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-3 py-1 rounded-lg">
+                                                            200.000 VND
+                                                        </span>
+                                                        <button onClick={() => toggleSchedule(trip._id)}
+                                                            className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg border-2 transition-all ${isOpen ? "bg-orange-50 border-orange-300 text-orange-600" : "bg-slate-50 border-slate-200 text-slate-500"}`}>
+                                                            <MapPin size={11} />
+                                                            Lịch trình
+                                                            <ChevronDown size={11} className="transition-transform duration-300" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }} />
+                                                        </button>
                                                     </div>
                                                 </div>
 
