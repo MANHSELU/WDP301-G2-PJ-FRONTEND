@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
   BadgeDollarSign,
@@ -12,6 +12,10 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
+import type { user } from "../../model/user";
+import { loginSuccess } from "../../store/slices/userSlice";
 
 const ADMIN_SIDEBAR_ITEMS = [
   {
@@ -68,7 +72,33 @@ const ADMIN_SIDEBAR_ITEMS = [
 
 export default function HomeAdmin() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const users = useSelector((state: RootState) => state.user.user as user);
+  const dispatch = useDispatch();
+  const token = localStorage.getItem("accessToken");
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/common/check/getprofile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) return;
+
+        const dataProfile = await response.json();
+        dispatch(loginSuccess(dataProfile.data));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (token) fetchProfile();
+  }, [token, dispatch]);
   const SidebarContent = (
     <>
       <div className="border-b border-[#dde2ea] bg-white px-5 py-7">
@@ -96,11 +126,10 @@ export default function HomeAdmin() {
                 end={item.path === "/admin"}
                 className={({ isActive }) =>
                   `flex h-10 w-full items-center gap-3 border-b border-[#d8dde6] border-l-4 px-3 text-left text-[13px] font-medium last:border-b-0
-            ${
-              isActive
-                ? "bg-[#FFF4EB] text-[#1f2937] border-l-[#FF5722]"
-                : "border-l-transparent text-[#374151] hover:bg-[#f3f4f6]"
-            }`
+            ${isActive
+                    ? "bg-[#FFF4EB] text-[#1f2937] border-l-[#FF5722]"
+                    : "border-l-transparent text-[#374151] hover:bg-[#f3f4f6]"
+                  }`
                 }
                 onClick={() => setMobileOpen(false)}
               >
@@ -119,9 +148,9 @@ export default function HomeAdmin() {
           </span>
           <div>
             <p className="text-[14px] font-black leading-none text-[#111827]">
-              Admin_Hung
+              {users.name}
             </p>
-            <p className="mt-1 text-[11px] text-[#9ca3af]">hung123@gmail.com</p>
+            <p className="mt-1 text-[11px] text-[#9ca3af]">{users.phone}</p>
           </div>
         </div>
 
@@ -129,7 +158,13 @@ export default function HomeAdmin() {
           <button className="h-7 rounded-[3px] border border-[#d9dde5] bg-[#f1f2f4] text-[11px] font-semibold text-[#6b7280]">
             Chế độ tối
           </button>
-          <button className="h-7 rounded-[3px] border border-[#d9dde5] bg-[#e5e7eb] text-[11px] font-semibold text-[#b3b8c1]">
+          <button
+            onClick={() => {
+              localStorage.removeItem("accessToken");
+              window.location.href = "/";
+            }}
+            className="text-sm font-semibold text-red-600 hover:text-red-700"
+          >
             Đăng xuất
           </button>
         </div>

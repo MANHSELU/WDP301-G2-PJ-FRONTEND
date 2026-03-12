@@ -348,8 +348,8 @@ export default function BusSeatSelection() {
                 disabled={status === "booked"}
                 title={status === "booked" ? `Ghế ${seat.label} đã được đặt` : `Ghế ${seat.label}`}
                 className={`relative h-[32px] w-[62px] transition-all duration-300 ${status === "available" ? "hover:scale-110 cursor-pointer" :
-                        status === "selected" ? "scale-110" :
-                            "cursor-not-allowed opacity-60"
+                    status === "selected" ? "scale-110" :
+                        "cursor-not-allowed opacity-60"
                     }`}
             >
                 <span className={`absolute left-[13px] top-0.5 h-1.5 w-[35px] rounded-t-[4px] border-[1.5px] border-b-0 ${v.detail}`} />

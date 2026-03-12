@@ -54,7 +54,7 @@ const BustripLogin = () => {
       localStorage.setItem("accessToken", token);
       alert("Đăng nhập thành công");
       const ResponseProfile = await fetch(
-        "http://localhost:3000/api/customer/check/getuser",
+        "http://localhost:3000/api/common/check/getprofile",
         {
           method: "GET",
           headers: {
@@ -80,11 +80,28 @@ const BustripLogin = () => {
           role_id: dataProfile.data.role,
         })
       );
+      console.log("data profile là : ", dataProfile)
+      const roleName = dataProfile.data.role?.name;
 
-      navigate("/home");
+      if (roleName === "RECEPTIONIST") {
+        navigate("/admin");
+      }
 
-      // 🔁 CHUYỂN TRANG
-      navigate("/");
+      else if (roleName === "ADMIN") {
+        navigate("/admin");
+      }
+      else if (roleName === "DRIVER") {
+        navigate("/driverBooking/viewtrip");
+      } else if (roleName === "BUS_ASSISTANT") {
+        navigate("/assistant/chuyendi");
+      } else {
+        navigate("/"); // CUSTOMER
+      }
+
+      // navigate("/home");
+
+      // // 🔁 CHUYỂN TRANG
+      // navigate("/");
     } catch (error: unknown) {
       console.error(error);
 
