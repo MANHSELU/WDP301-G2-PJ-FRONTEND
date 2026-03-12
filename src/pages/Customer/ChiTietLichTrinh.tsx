@@ -236,8 +236,8 @@ export default function BusTripSearch() {
         navigate("/datve", { state: { tripId: id, bus_type_id: type_bus_id } });
     };
 
-    const toggleSchedule = (tripId: string) => {
-        setOpenSchedule((prev) => (prev === tripId ? null : tripId));
+    const DatHang = (type_bus_id: string) => {
+        navigate("/dathang", { state: { tripId: id, bus_type_id: type_bus_id } });
     };
 
     if (loading) return <p>Loading...</p>;
@@ -473,13 +473,23 @@ export default function BusTripSearch() {
                                                         </div>
                                                     </div>
 
-                                                    <button
-                                                        onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
-                                                        className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn"
-                                                    >
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
-                                                        <span className="relative z-10">Chọn chuyến</span>
-                                                    </button>
+                                                    <div className="flex flex-wrap gap-3">
+                                                        <button
+                                                            onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
+                                                            className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-9 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn"
+                                                        >
+                                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                                                            <span className="relative z-10">Đặt vé</span>
+                                                        </button>
+
+                                                        <button
+                                                            onClick={() => DatHang(trip?.bus_id?.bus_type_id?._id)}
+                                                            className="bg-gradient-to-br from-green-500 via-green-600 to-green-700 hover:from-green-600 hover:via-green-700 hover:to-green-800 text-white px-6 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-green-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn"
+                                                        >
+                                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                                                            <span className="relative z-10">Gửi hàng</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
 
