@@ -232,14 +232,6 @@ export default function CreateRoute() {
           stop_order: index + 2,
           duration_from_start: s.duration_from_start,
         }));
-      if (selectedStops.length === 0) {
-        setNotice({
-          type: "error",
-          title: "Thiếu trạm dừng",
-          message: "Vui lòng chọn ít nhất một trạm dừng cho tuyến.",
-        });
-        return;
-      }
       const res = await baseAPIAuth.post("/api/admin/check/routes", {
         start_id: departureId,
         stop_id: destinationId,
@@ -274,7 +266,6 @@ export default function CreateRoute() {
           },
         },
       );
-
       return res.data;
     } catch (error) {
       console.error(error);
@@ -509,13 +500,6 @@ export default function CreateRoute() {
             >
               <Save size={16} className="text-white" />
               LƯU TUYẾN ĐƯỜNG
-            </button>
-
-            <button
-              type="button"
-              className="mt-3 h-11 w-full rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#657085] transition hover:border-[#cfd6e2] hover:bg-[#f7f9fc]"
-            >
-              Hủy
             </button>
           </aside>
         </div>

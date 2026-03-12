@@ -1,4 +1,4 @@
-export interface getDrivers{
+export interface getAssistants{
     _id: string;
     name: string;
     phone: string;
