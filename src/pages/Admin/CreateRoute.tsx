@@ -229,7 +229,7 @@ export default function CreateRoute() {
         .filter((s) => s.selected)
         .map((s, index) => ({
           stop_id: s._id,
-          stop_order: index + 1,
+          stop_order: index + 2,
           duration_from_start: s.duration_from_start,
         }));
       if (selectedStops.length === 0) {
