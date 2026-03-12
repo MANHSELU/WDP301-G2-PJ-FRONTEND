@@ -79,7 +79,7 @@ export default function LichTrinh() {
             name_end: !destinationId ? destination : null,
             date: selectedDate,
           }),
-        },
+        }
       );
 
       if (!response.ok) throw new Error("Search failed");

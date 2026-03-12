@@ -89,15 +89,24 @@ export default function BusBookingUI() {
     /* ── Helpers ── */
     const formatTime = (d?: string) => {
         if (!d) return "--:--";
-        return new Date(d).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+        return new Date(d).toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
     };
     const formatDate = (d?: string) => {
         if (!d) return "--/--/----";
-        return new Date(d).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+        return new Date(d).toLocaleDateString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        });
     };
     const calcDuration = (s?: string, e?: string) => {
         if (!s || !e) return "--";
-        const h = Math.floor((new Date(e).getTime() - new Date(s).getTime()) / 3600000);
+        const h = Math.floor(
+            (new Date(e).getTime() - new Date(s).getTime()) / 3600000
+        );
         return `~${h} giờ`;
     };
 
@@ -155,24 +164,51 @@ export default function BusBookingUI() {
     const renderSeat = (seat: Seat) => {
         const status = seat.status;
         const v = {
-            available: { detail: "border-green-400 bg-green-50", frame: "border-green-400 bg-white text-green-700", leg: "bg-green-400" },
-            selected: { detail: "border-orange-500 bg-orange-100", frame: "border-orange-500 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg", leg: "bg-orange-500" },
-            booked: { detail: "border-slate-300 bg-slate-100", frame: "border-slate-300 bg-slate-200 text-slate-400", leg: "bg-slate-300" },
+            available: {
+                detail: "border-green-400 bg-green-50",
+                frame: "border-green-400 bg-white text-green-700",
+                leg: "bg-green-400",
+            },
+            selected: {
+                detail: "border-orange-500 bg-orange-100",
+                frame:
+                    "border-orange-500 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg",
+                leg: "bg-orange-500",
+            },
+            booked: {
+                detail: "border-slate-300 bg-slate-100",
+                frame: "border-slate-300 bg-slate-200 text-slate-400",
+                leg: "bg-slate-300",
+            },
         }[status];
         return (
-            <div key={seat.id} title={seat.label}
-                className={`relative h-[32px] w-[62px] transition-all duration-300 ${status === "selected" ? "scale-110" : ""}`}>
-                <span className={`pointer-events-none absolute left-[13px] top-0.5 h-1.5 w-[35px] rounded-t-[4px] border-[1.5px] border-b-0 ${v.detail}`} />
-                <span className={`pointer-events-none absolute left-[7px] top-2 flex h-[14px] w-[48px] items-center justify-center rounded-[4px] border-[1.5px] text-[9px] font-black ${v.frame}`}>{seat.label}</span>
-                <span className={`pointer-events-none absolute left-[20px] top-[18px] h-[4px] w-[2px] ${v.leg}`} />
-                <span className={`pointer-events-none absolute right-[20px] top-[18px] h-[4px] w-[2px] ${v.leg}`} />
+            <div
+                key={seat.id}
+                title={seat.label}
+                className={`relative h-[32px] w-[62px] transition-all duration-300 ${status === "selected" ? "scale-110" : ""
+                    }`}
+            >
+                <span
+                    className={`pointer-events-none absolute left-[13px] top-0.5 h-1.5 w-[35px] rounded-t-[4px] border-[1.5px] border-b-0 ${v.detail}`}
+                />
+                <span
+                    className={`pointer-events-none absolute left-[7px] top-2 flex h-[14px] w-[48px] items-center justify-center rounded-[4px] border-[1.5px] text-[9px] font-black ${v.frame}`}
+                >
+                    {seat.label}
+                </span>
+                <span
+                    className={`pointer-events-none absolute left-[20px] top-[18px] h-[4px] w-[2px] ${v.leg}`}
+                />
+                <span
+                    className={`pointer-events-none absolute right-[20px] top-[18px] h-[4px] w-[2px] ${v.leg}`}
+                />
             </div>
         );
     };
 
     /* ════════════════════════════════════════
-       GỌI API ĐẶT VÉ
-    ════════════════════════════════════════ */
+         GỌI API ĐẶT VÉ
+      ════════════════════════════════════════ */
     const handleBooking = async () => {
         setErrorMsg(null);
 
@@ -185,7 +221,8 @@ export default function BusBookingUI() {
 
         /* 2. Decode lấy user_id */
         const payload = decodeJwt(accessToken);
-        const user_id = payload?.id || payload?.userId || payload?._id || payload?.sub;
+        const user_id =
+            payload?.id || payload?.userId || payload?._id || payload?.sub;
         if (!user_id) {
             setErrorMsg("Không xác định được tài khoản. Vui lòng đăng nhập lại.");
             return;
@@ -255,7 +292,10 @@ export default function BusBookingUI() {
         { label: "Ngày đi", value: formatDate(trip?.departure_time) },
         { label: "Giờ khởi hành", value: formatTime(trip?.departure_time) },
         { label: "Giờ đến dự kiến", value: formatTime(trip?.arrival_time) },
-        { label: "Thời gian hành trình", value: calcDuration(trip?.departure_time, trip?.arrival_time) },
+        {
+            label: "Thời gian hành trình",
+            value: calcDuration(trip?.departure_time, trip?.arrival_time),
+        },
         { label: "Loại xe", value: trip?.bus_id?.bus_type_id?.name || "---" },
         { label: "Số ghế đã chọn", value: `${selectedCount} ghế` },
     ];
@@ -421,8 +461,12 @@ export default function BusBookingUI() {
             {/* Bus animation */}
             <div className="pointer-events-none absolute top-[18%] right-[0%] z-10 w-[66%] max-w-[860px] md:top-[7%] md:w-[62%]">
                 <div className="bus-bob relative z-10">
-                    <img src="/images/bus7.png" alt="Bus" className="w-full object-contain"
-                        style={{ filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28))" }} />
+                    <img
+                        src="/images/bus7.png"
+                        alt="Bus"
+                        className="w-full object-contain"
+                        style={{ filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28))" }}
+                    />
                 </div>
             </div>
 
@@ -430,15 +474,20 @@ export default function BusBookingUI() {
             <div className="relative z-20 mx-auto flex min-h-[600px] w-full max-w-[1240px] items-center px-4 pb-20 pt-20">
                 <div className="page-enter-copy relative -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
                     <h1 className="hero-title text-[48px] font-black leading-[1.05] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
-                        <span className="hero-title-line block whitespace-nowrap">Tìm và đặt ngay</span>
-                        <span className="hero-title-line mt-2 block whitespace-nowrap">những chuyến xe</span>
+                        <span className="hero-title-line block whitespace-nowrap">
+                            Tìm và đặt ngay
+                        </span>
+                        <span className="hero-title-line mt-2 block whitespace-nowrap">
+                            những chuyến xe
+                        </span>
                         <span className="hero-title-line mt-2 block whitespace-nowrap font-extrabold italic">
                             <span className="text-[#0d142a]">thật</span>{" "}
                             <span className="hero-title-shimmer">Dễ Dàng</span>
                         </span>
                     </h1>
                     <p className="text-base leading-relaxed text-[#475569] lg:text-lg max-w-[510px]">
-                        Đặt vé mọi lúc mọi nơi, đi vững ngàn hành trình đa dạng và dịch vụ chất lượng cao nhất.
+                        Đặt vé mọi lúc mọi nơi, đi vững ngàn hành trình đa dạng và dịch vụ
+                        chất lượng cao nhất.
                     </p>
                 </div>
             </div>
@@ -446,11 +495,12 @@ export default function BusBookingUI() {
             {/* ══ BOOKING SECTION ══ */}
             <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6">
                 <div className="max-w-7xl mx-auto">
-
                     {/* Header Banner */}
                     <div className="mb-8 bg-gradient-to-r from-orange-500 to-orange-600 text-white p-8 rounded-lg shadow-lg">
-                        <button onClick={() => navigate(-1)}
-                            className="flex items-center gap-2 text-orange-100 hover:text-white text-sm font-semibold mb-4 transition-colors">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="flex items-center gap-2 text-orange-100 hover:text-white text-sm font-semibold mb-4 transition-colors"
+                        >
                             <ArrowLeft size={15} /> Quay lại chọn ghế
                         </button>
                         <h1 className="text-4xl font-bold mb-2">Đặt Vé Xe Khách</h1>
@@ -460,30 +510,36 @@ export default function BusBookingUI() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
                         {/* ════ LEFT ════ */}
                         <div className="lg:col-span-2 space-y-8">
-
                             {/* ĐIỂM ĐÓN & ĐIỂM TRẢ */}
                             <div className="bg-white rounded-lg shadow-lg border-2 border-orange-300 overflow-hidden">
                                 <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600">
                                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20">
                                         <MapPin size={16} className="text-white" />
                                     </div>
-                                    <h2 className="text-lg font-bold text-white">Thông tin lộ trình</h2>
+                                    <h2 className="text-lg font-bold text-white">
+                                        Thông tin lộ trình
+                                    </h2>
                                 </div>
 
                                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* ĐIỂM ĐÓN */}
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-2">
-                                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-white text-[11px] font-black flex-shrink-0">A</span>
-                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Điểm đón</span>
+                                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-white text-[11px] font-black flex-shrink-0">
+                                                A
+                                            </span>
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                                Điểm đón
+                                            </span>
                                         </div>
                                         <div className="rounded-xl border-2 border-green-200 bg-green-50 overflow-hidden">
                                             <div className="flex items-center gap-2 px-4 py-2 bg-green-100 border-b border-green-200">
                                                 <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-                                                <span className="text-[11px] font-bold text-green-700 uppercase tracking-wider">Khu vực</span>
+                                                <span className="text-[11px] font-bold text-green-700 uppercase tracking-wider">
+                                                    Khu vực
+                                                </span>
                                                 {pickupPoint && (
                                                     <span className="ml-auto text-[10px] font-semibold text-green-600 bg-green-200 px-2 py-0.5 rounded-full">
                                                         Điểm {pickupPoint.stop_order}
@@ -493,27 +549,46 @@ export default function BusBookingUI() {
                                             <div className="px-4 py-3">
                                                 {pickupPoint ? (
                                                     <>
-                                                        <p className="text-sm font-bold text-green-900">{pickupPoint.stop_id.name}</p>
-                                                        <p className="text-xs text-green-600 mt-0.5">{pickupPoint.stop_id.province}</p>
+                                                        <p className="text-sm font-bold text-green-900">
+                                                            {pickupPoint.stop_id.name}
+                                                        </p>
+                                                        <p className="text-xs text-green-600 mt-0.5">
+                                                            {pickupPoint.stop_id.province}
+                                                        </p>
                                                     </>
-                                                ) : <p className="text-sm text-slate-400 italic">Chưa có thông tin</p>}
+                                                ) : (
+                                                    <p className="text-sm text-slate-400 italic">
+                                                        Chưa có thông tin
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         {pickupLocationPoint && (
                                             <div className="rounded-xl border-2 border-green-300 bg-white overflow-hidden">
                                                 <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border-b border-green-200">
-                                                    <MapPin size={12} className="text-green-500 flex-shrink-0" />
-                                                    <span className="text-[11px] font-bold text-green-700 uppercase tracking-wider">Vị trí cụ thể</span>
+                                                    <MapPin
+                                                        size={12}
+                                                        className="text-green-500 flex-shrink-0"
+                                                    />
+                                                    <span className="text-[11px] font-bold text-green-700 uppercase tracking-wider">
+                                                        Vị trí cụ thể
+                                                    </span>
                                                 </div>
                                                 <div className="px-4 py-3 space-y-1.5">
-                                                    <p className="text-sm font-bold text-slate-800">{pickupLocationPoint.location_name}</p>
-                                                    {pickupLocationPoint.location?.coordinates?.length === 2 && (
-                                                        <a href={`https://maps.google.com/?q=${pickupLocationPoint.location.coordinates[1]},${pickupLocationPoint.location.coordinates[0]}`}
-                                                            target="_blank" rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-green-600 hover:text-green-700 transition-colors">
-                                                            <MapPin size={11} /> Xem trên bản đồ
-                                                        </a>
-                                                    )}
+                                                    <p className="text-sm font-bold text-slate-800">
+                                                        {pickupLocationPoint.location_name}
+                                                    </p>
+                                                    {pickupLocationPoint.location?.coordinates?.length ===
+                                                        2 && (
+                                                            <a
+                                                                href={`https://maps.google.com/?q=${pickupLocationPoint.location.coordinates[1]},${pickupLocationPoint.location.coordinates[0]}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-green-600 hover:text-green-700 transition-colors"
+                                                            >
+                                                                <MapPin size={11} /> Xem trên bản đồ
+                                                            </a>
+                                                        )}
                                                 </div>
                                             </div>
                                         )}
@@ -522,13 +597,19 @@ export default function BusBookingUI() {
                                     {/* ĐIỂM TRẢ */}
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-2">
-                                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-[11px] font-black flex-shrink-0">B</span>
-                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Điểm trả</span>
+                                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-[11px] font-black flex-shrink-0">
+                                                B
+                                            </span>
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                                Điểm trả
+                                            </span>
                                         </div>
                                         <div className="rounded-xl border-2 border-orange-200 bg-orange-50 overflow-hidden">
                                             <div className="flex items-center gap-2 px-4 py-2 bg-orange-100 border-b border-orange-200">
                                                 <div className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0" />
-                                                <span className="text-[11px] font-bold text-orange-700 uppercase tracking-wider">Khu vực</span>
+                                                <span className="text-[11px] font-bold text-orange-700 uppercase tracking-wider">
+                                                    Khu vực
+                                                </span>
                                                 {dropoffPoint && (
                                                     <span className="ml-auto text-[10px] font-semibold text-orange-600 bg-orange-200 px-2 py-0.5 rounded-full">
                                                         Điểm {dropoffPoint.stop_order}
@@ -538,27 +619,46 @@ export default function BusBookingUI() {
                                             <div className="px-4 py-3">
                                                 {dropoffPoint ? (
                                                     <>
-                                                        <p className="text-sm font-bold text-orange-900">{dropoffPoint.stop_id.name}</p>
-                                                        <p className="text-xs text-orange-600 mt-0.5">{dropoffPoint.stop_id.province}</p>
+                                                        <p className="text-sm font-bold text-orange-900">
+                                                            {dropoffPoint.stop_id.name}
+                                                        </p>
+                                                        <p className="text-xs text-orange-600 mt-0.5">
+                                                            {dropoffPoint.stop_id.province}
+                                                        </p>
                                                     </>
-                                                ) : <p className="text-sm text-slate-400 italic">Chưa có thông tin</p>}
+                                                ) : (
+                                                    <p className="text-sm text-slate-400 italic">
+                                                        Chưa có thông tin
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         {dropoffLocationPoint && (
                                             <div className="rounded-xl border-2 border-orange-300 bg-white overflow-hidden">
                                                 <div className="flex items-center gap-2 px-4 py-2 bg-orange-50 border-b border-orange-200">
-                                                    <Navigation size={12} className="text-orange-500 flex-shrink-0" />
-                                                    <span className="text-[11px] font-bold text-orange-700 uppercase tracking-wider">Vị trí cụ thể</span>
+                                                    <Navigation
+                                                        size={12}
+                                                        className="text-orange-500 flex-shrink-0"
+                                                    />
+                                                    <span className="text-[11px] font-bold text-orange-700 uppercase tracking-wider">
+                                                        Vị trí cụ thể
+                                                    </span>
                                                 </div>
                                                 <div className="px-4 py-3 space-y-1.5">
-                                                    <p className="text-sm font-bold text-slate-800">{dropoffLocationPoint.location_name}</p>
-                                                    {dropoffLocationPoint.location?.coordinates?.length === 2 && (
-                                                        <a href={`https://maps.google.com/?q=${dropoffLocationPoint.location.coordinates[1]},${dropoffLocationPoint.location.coordinates[0]}`}
-                                                            target="_blank" rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-orange-600 hover:text-orange-700 transition-colors">
-                                                            <MapPin size={11} /> Xem trên bản đồ
-                                                        </a>
-                                                    )}
+                                                    <p className="text-sm font-bold text-slate-800">
+                                                        {dropoffLocationPoint.location_name}
+                                                    </p>
+                                                    {dropoffLocationPoint.location?.coordinates
+                                                        ?.length === 2 && (
+                                                            <a
+                                                                href={`https://maps.google.com/?q=${dropoffLocationPoint.location.coordinates[1]},${dropoffLocationPoint.location.coordinates[0]}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-orange-600 hover:text-orange-700 transition-colors"
+                                                            >
+                                                                <MapPin size={11} /> Xem trên bản đồ
+                                                            </a>
+                                                        )}
                                                 </div>
                                             </div>
                                         )}
@@ -570,19 +670,33 @@ export default function BusBookingUI() {
                                         <div className="flex items-center gap-2 min-w-0 flex-1">
                                             <div className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0" />
                                             <div className="min-w-0">
-                                                <p className="text-xs font-bold text-green-800 truncate">{pickupPoint.stop_id.name}</p>
-                                                {pickupLocationPoint && <p className="text-[10px] text-green-600 truncate">{pickupLocationPoint.location_name}</p>}
+                                                <p className="text-xs font-bold text-green-800 truncate">
+                                                    {pickupPoint.stop_id.name}
+                                                </p>
+                                                {pickupLocationPoint && (
+                                                    <p className="text-[10px] text-green-600 truncate">
+                                                        {pickupLocationPoint.location_name}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1 flex-shrink-0">
                                             <div className="w-12 h-px bg-gradient-to-r from-green-400 to-orange-400" />
-                                            <div className="text-[10px] font-bold text-slate-500 px-1 whitespace-nowrap">{calcDuration(trip?.departure_time, trip?.arrival_time)}</div>
+                                            <div className="text-[10px] font-bold text-slate-500 px-1 whitespace-nowrap">
+                                                {calcDuration(trip?.departure_time, trip?.arrival_time)}
+                                            </div>
                                             <div className="w-12 h-px bg-gradient-to-r from-orange-400 to-orange-500" />
                                         </div>
                                         <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
                                             <div className="min-w-0 text-right">
-                                                <p className="text-xs font-bold text-orange-800 truncate">{dropoffPoint.stop_id.name}</p>
-                                                {dropoffLocationPoint && <p className="text-[10px] text-orange-600 truncate">{dropoffLocationPoint.location_name}</p>}
+                                                <p className="text-xs font-bold text-orange-800 truncate">
+                                                    {dropoffPoint.stop_id.name}
+                                                </p>
+                                                {dropoffLocationPoint && (
+                                                    <p className="text-[10px] text-orange-600 truncate">
+                                                        {dropoffLocationPoint.location_name}
+                                                    </p>
+                                                )}
                                             </div>
                                             <div className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0" />
                                         </div>
@@ -592,13 +706,23 @@ export default function BusBookingUI() {
 
                             {/* Sơ đồ chỗ ngồi */}
                             <div className="bg-white rounded-lg p-8 shadow-lg border-2 border-orange-300">
-                                <h2 className="text-2xl font-bold text-orange-900 mb-6">🪑 Sơ đồ chỗ ngồi</h2>
+                                <h2 className="text-2xl font-bold text-orange-900 mb-6">
+                                    🪑 Sơ đồ chỗ ngồi
+                                </h2>
                                 {selectedCount > 0 && (
                                     <div className="mb-6 p-4 bg-orange-50 border-2 border-orange-200 rounded-lg">
-                                        <p className="text-sm font-bold text-orange-700 mb-3">✅ Ghế đã chọn ({selectedCount} ghế):</p>
+                                        <p className="text-sm font-bold text-orange-700 mb-3">
+                                            ✅ Ghế đã chọn ({selectedCount} ghế):
+                                        </p>
                                         <div className="flex flex-wrap gap-2">
-                                            {(selectedSeatLabels.length > 0 ? selectedSeatLabels : selectedSeats).map((s: string) => (
-                                                <span key={s} className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs font-black px-3 py-1.5 rounded-lg shadow">
+                                            {(selectedSeatLabels.length > 0
+                                                ? selectedSeatLabels
+                                                : selectedSeats
+                                            ).map((s: string) => (
+                                                <span
+                                                    key={s}
+                                                    className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xs font-black px-3 py-1.5 rounded-lg shadow"
+                                                >
                                                     Ghế {s}
                                                 </span>
                                             ))}
@@ -612,23 +736,35 @@ export default function BusBookingUI() {
                                 </div>
                                 <div className="bg-gradient-to-br from-slate-50 to-orange-50/30 rounded-2xl p-10 mb-8 border-2 border-orange-100">
                                     <div className="w-full max-w-6xl mx-auto border-2 border-slate-300 rounded-[40px] p-12 bg-white shadow-inner">
-                                        <div className="text-center text-slate-400 font-bold mb-10 tracking-widest">🚍 ĐẦU XE</div>
+                                        <div className="text-center text-slate-400 font-bold mb-10 tracking-widest">
+                                            🚍 ĐẦU XE
+                                        </div>
                                         <div className="flex flex-col gap-10 items-center w-full">
                                             {Object.keys(groupedSeats).map((rowKey) => {
                                                 const row = groupedSeats[Number(rowKey)];
                                                 const totalSeats = row.LEFT.length + row.RIGHT.length;
                                                 if (totalSeats % 2 !== 0) {
                                                     return (
-                                                        <div key={rowKey} className="flex justify-center gap-6 mb-10">
+                                                        <div
+                                                            key={rowKey}
+                                                            className="flex justify-center gap-6 mb-10"
+                                                        >
                                                             {[...row.LEFT, ...row.RIGHT].map(renderSeat)}
                                                         </div>
                                                     );
                                                 }
                                                 return (
-                                                    <div key={rowKey} className="grid grid-cols-[1fr_120px_1fr] items-center mb-10 w-full max-w-3xl mx-auto">
-                                                        <div className="flex justify-end gap-6">{row.LEFT.map(renderSeat)}</div>
+                                                    <div
+                                                        key={rowKey}
+                                                        className="grid grid-cols-[1fr_120px_1fr] items-center mb-10 w-full max-w-3xl mx-auto"
+                                                    >
+                                                        <div className="flex justify-end gap-6">
+                                                            {row.LEFT.map(renderSeat)}
+                                                        </div>
                                                         <div />
-                                                        <div className="flex justify-start gap-6">{row.RIGHT.map(renderSeat)}</div>
+                                                        <div className="flex justify-start gap-6">
+                                                            {row.RIGHT.map(renderSeat)}
+                                                        </div>
                                                     </div>
                                                 );
                                             })}
@@ -636,9 +772,18 @@ export default function BusBookingUI() {
                                     </div>
                                 </div>
                                 <div className="flex flex-wrap gap-8 text-sm bg-orange-50 p-6 rounded-lg border-2 border-orange-300">
-                                    <div className="flex items-center gap-3"><div className="w-6 h-6 rounded bg-white border-2 border-green-400" /><span className="text-slate-700 font-bold">Trống</span></div>
-                                    <div className="flex items-center gap-3"><div className="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-orange-600" /><span className="text-slate-700 font-bold">Đã chọn</span></div>
-                                    <div className="flex items-center gap-3"><div className="w-6 h-6 rounded bg-slate-200 border-2 border-slate-400" /><span className="text-slate-700 font-bold">Đã bán</span></div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-6 h-6 rounded bg-white border-2 border-green-400" />
+                                        <span className="text-slate-700 font-bold">Trống</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-orange-600" />
+                                        <span className="text-slate-700 font-bold">Đã chọn</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-6 h-6 rounded bg-slate-200 border-2 border-slate-400" />
+                                        <span className="text-slate-700 font-bold">Đã bán</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -725,7 +870,6 @@ export default function BusBookingUI() {
 
                         {/* ════ RIGHT SIDEBAR ════ */}
                         <div className="space-y-8 lg:sticky lg:top-6 h-fit">
-
                             {/* Thông tin chuyến đi */}
                             <div className="bg-gradient-to-br from-orange-50 to-white rounded-lg p-8 shadow-lg border-2 border-orange-200">
                                 <h3 className="text-xl font-bold text-orange-900 mb-6 flex items-center gap-2">
@@ -733,42 +877,69 @@ export default function BusBookingUI() {
                                 </h3>
                                 <div className="space-y-4 text-sm">
                                     {tripInfoRows.map((item) => (
-                                        <div key={item.label} className="pb-4 border-b-2 border-orange-100 last:border-0 last:pb-0">
-                                            <p className="text-orange-600 text-xs font-bold uppercase tracking-wide mb-1">{item.label}</p>
-                                            <p className="font-semibold text-slate-900">{item.value}</p>
+                                        <div
+                                            key={item.label}
+                                            className="pb-4 border-b-2 border-orange-100 last:border-0 last:pb-0"
+                                        >
+                                            <p className="text-orange-600 text-xs font-bold uppercase tracking-wide mb-1">
+                                                {item.label}
+                                            </p>
+                                            <p className="font-semibold text-slate-900">
+                                                {item.value}
+                                            </p>
                                         </div>
                                     ))}
                                     <div className="pb-4 border-b-2 border-orange-100">
                                         <p className="text-orange-600 text-xs font-bold uppercase tracking-wide mb-1.5 flex items-center gap-1">
-                                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500 text-white text-[9px] font-black">A</span>
+                                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500 text-white text-[9px] font-black">
+                                                A
+                                            </span>
                                             Điểm đón
                                         </p>
                                         {pickupPoint ? (
                                             <div className="space-y-0.5">
-                                                <p className="font-semibold text-slate-900">{pickupPoint.stop_id.province} — {pickupPoint.stop_id.name}</p>
+                                                <p className="font-semibold text-slate-900">
+                                                    {pickupPoint.stop_id.province} —{" "}
+                                                    {pickupPoint.stop_id.name}
+                                                </p>
                                                 {pickupLocationPoint && (
                                                     <p className="text-xs text-green-700 font-medium flex items-center gap-1">
-                                                        <MapPin size={11} className="flex-shrink-0" />{pickupLocationPoint.location_name}
+                                                        <MapPin size={11} className="flex-shrink-0" />
+                                                        {pickupLocationPoint.location_name}
                                                     </p>
                                                 )}
                                             </div>
-                                        ) : <p className="font-semibold text-slate-400 italic text-xs">Chưa có thông tin</p>}
+                                        ) : (
+                                            <p className="font-semibold text-slate-400 italic text-xs">
+                                                Chưa có thông tin
+                                            </p>
+                                        )}
                                     </div>
                                     <div className="pb-0">
                                         <p className="text-orange-600 text-xs font-bold uppercase tracking-wide mb-1.5 flex items-center gap-1">
-                                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-black">B</span>
+                                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-black">
+                                                B
+                                            </span>
                                             Điểm trả
                                         </p>
                                         {dropoffPoint ? (
                                             <div className="space-y-0.5">
-                                                <p className="font-semibold text-slate-900">{dropoffPoint.stop_id.province} — {dropoffPoint.stop_id.name}</p>
+                                                <p className="font-semibold text-slate-900">
+                                                    {dropoffPoint.stop_id.province} —{" "}
+                                                    {dropoffPoint.stop_id.name}
+                                                </p>
                                                 {dropoffLocationPoint && (
                                                     <p className="text-xs text-orange-700 font-medium flex items-center gap-1">
-                                                        <Navigation size={11} className="flex-shrink-0" />{dropoffLocationPoint.location_name}
+                                                        <Navigation size={11} className="flex-shrink-0" />
+                                                        {dropoffLocationPoint.location_name}
                                                     </p>
                                                 )}
                                             </div>
-                                        ) : <p className="font-semibold text-slate-400 italic text-xs">Chưa có thông tin</p>}
+                                        ) : (
+                                            <p className="font-semibold text-slate-400 italic text-xs">
+                                                Chưa có thông tin
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -780,34 +951,58 @@ export default function BusBookingUI() {
                                 </h3>
                                 <div className="space-y-4 text-sm mb-6 pb-6 border-b-2 border-orange-300">
                                     <div className="flex justify-between items-center bg-white bg-opacity-60 p-3 rounded-lg">
-                                        <span className="text-slate-700 font-medium">Giá vé (1 ghế)</span>
-                                        <span className="font-bold text-orange-600">{ticketPrice.toLocaleString("vi-VN")}đ</span>
+                                        <span className="text-slate-700 font-medium">
+                                            Giá vé (1 ghế)
+                                        </span>
+                                        <span className="font-bold text-orange-600">
+                                            {ticketPrice.toLocaleString("vi-VN")}đ
+                                        </span>
                                     </div>
                                     <div className="flex justify-between items-center bg-white bg-opacity-60 p-3 rounded-lg">
-                                        <span className="text-slate-700 font-medium">Số ghế đã chọn</span>
-                                        <span className="font-bold text-orange-600 text-lg">{selectedCount}</span>
+                                        <span className="text-slate-700 font-medium">
+                                            Số ghế đã chọn
+                                        </span>
+                                        <span className="font-bold text-orange-600 text-lg">
+                                            {selectedCount}
+                                        </span>
                                     </div>
                                     {selectedCount > 0 && (
                                         <div className="flex justify-between items-start bg-white bg-opacity-60 p-3 rounded-lg">
                                             <span className="text-slate-700 font-medium">Ghế</span>
                                             <div className="flex flex-wrap gap-1 justify-end max-w-[160px]">
-                                                {(selectedSeatLabels.length > 0 ? selectedSeatLabels : selectedSeats).map((s: string) => (
-                                                    <span key={s} className="bg-orange-100 text-orange-700 text-[10px] font-black px-2 py-0.5 rounded">{s}</span>
+                                                {(selectedSeatLabels.length > 0
+                                                    ? selectedSeatLabels
+                                                    : selectedSeats
+                                                ).map((s: string) => (
+                                                    <span
+                                                        key={s}
+                                                        className="bg-orange-100 text-orange-700 text-[10px] font-black px-2 py-0.5 rounded"
+                                                    >
+                                                        {s}
+                                                    </span>
                                                 ))}
                                             </div>
                                         </div>
                                     )}
                                     <div className="flex justify-between items-center bg-white bg-opacity-60 p-3 rounded-lg">
-                                        <span className="text-slate-700 font-medium">Thanh toán</span>
+                                        <span className="text-slate-700 font-medium">
+                                            Thanh toán
+                                        </span>
                                         <span className="font-bold text-slate-700 text-xs">
-                                            {paymentMethod === "CASH_ON_BOARD" ? "💵 Trên xe" : "📱 Online"}
+                                            {paymentMethod === "CASH_ON_BOARD"
+                                                ? "💵 Trên xe"
+                                                : "📱 Online"}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg p-4">
                                     <div className="text-center">
-                                        <p className="text-orange-100 text-sm mb-1 font-medium">Tổng tiền</p>
-                                        <p className="text-4xl font-black">{totalPrice.toLocaleString("vi-VN")}₫</p>
+                                        <p className="text-orange-100 text-sm mb-1 font-medium">
+                                            Tổng tiền
+                                        </p>
+                                        <p className="text-4xl font-black">
+                                            {totalPrice.toLocaleString("vi-VN")}₫
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -842,7 +1037,11 @@ export default function BusBookingUI() {
 
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-xs text-blue-900 shadow-sm">
                                 <p className="font-bold mb-2">ℹ️ Hỗ trợ thanh toán</p>
-                                <p>Liên hệ <span className="font-bold text-blue-700">1800-XXXXX</span> nếu có bất kỳ thắc mắc</p>
+                                <p>
+                                    Liên hệ{" "}
+                                    <span className="font-bold text-blue-700">1800-XXXXX</span>{" "}
+                                    nếu có bất kỳ thắc mắc
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -855,36 +1054,64 @@ export default function BusBookingUI() {
                     <div className="relative mx-4 w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl text-center">
                         {/* Icon tick */}
                         <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-                            <svg className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            <svg
+                                className="h-10 w-10 text-green-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2.5}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M5 13l4 4L19 7"
+                                />
                             </svg>
                         </div>
 
-                        <h2 className="text-2xl font-black text-slate-900 mb-2">Đặt vé thành công!</h2>
+                        <h2 className="text-2xl font-black text-slate-900 mb-2">
+                            Đặt vé thành công!
+                        </h2>
                         <p className="text-slate-500 text-sm mb-1">
-                            Cảm ơn <span className="font-bold text-slate-700">{customerInfo.name}</span> đã đặt vé.
+                            Cảm ơn{" "}
+                            <span className="font-bold text-slate-700">
+                                {customerInfo.name}
+                            </span>{" "}
+                            đã đặt vé.
                         </p>
                         <p className="text-slate-500 text-sm mb-6">
-                            Chúng tôi sẽ liên hệ qua <span className="font-bold text-slate-700">{customerInfo.phone}</span> để xác nhận.
+                            Chúng tôi sẽ liên hệ qua{" "}
+                            <span className="font-bold text-slate-700">
+                                {customerInfo.phone}
+                            </span>{" "}
+                            để xác nhận.
                         </p>
 
                         {/* Tóm tắt */}
                         <div className="mb-6 rounded-xl bg-orange-50 border border-orange-200 p-4 text-left space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Tuyến xe</span>
-                                <span className="font-semibold text-slate-800 text-right max-w-[55%]">{routeLabel}</span>
+                                <span className="font-semibold text-slate-800 text-right max-w-[55%]">
+                                    {routeLabel}
+                                </span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Ngày đi</span>
-                                <span className="font-semibold text-slate-800">{formatDate(trip?.departure_time)}</span>
+                                <span className="font-semibold text-slate-800">
+                                    {formatDate(trip?.departure_time)}
+                                </span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Ghế</span>
-                                <span className="font-semibold text-orange-600">{actualSeatList.join(", ")}</span>
+                                <span className="font-semibold text-orange-600">
+                                    {actualSeatList.join(", ")}
+                                </span>
                             </div>
                             <div className="flex justify-between border-t border-orange-200 pt-2">
                                 <span className="text-slate-500 font-bold">Tổng tiền</span>
-                                <span className="font-black text-orange-600 text-base">{totalPrice.toLocaleString("vi-VN")}₫</span>
+                                <span className="font-black text-orange-600 text-base">
+                                    {totalPrice.toLocaleString("vi-VN")}₫
+                                </span>
                             </div>
                         </div>
 

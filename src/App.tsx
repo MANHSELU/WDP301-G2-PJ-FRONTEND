@@ -37,13 +37,14 @@ import HomeAdmin from "./pages/Admin/HomeAdmin";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import CreateTrip from "./pages/Admin/CreateTrips";
 import AssistantShiftsPage from "./pages/Phuxe/DanhSachCalai";
-import DriverShiftsPage from "./pages/Driver/DanhSachCaLai"
+import DriverShiftsPage from "./pages/Driver/DanhSachCaLai";
 import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
+import ManageTrip from "./pages/Admin/ManageTrip";
 export default function App() {
   return (
     <>
       <Routes>
-        <Route path="admin" element={<HomeAdmin />} >
+        <Route path="admin" element={<HomeAdmin />}>
           {/* <Route path="create-coach" element={<CreateCoach />} /> */}
           <Route index element={<AdminDashboard />} />
           <Route path="create-route" element={<CreateRoute />} />
@@ -54,8 +55,12 @@ export default function App() {
           <Route path="create-coach" element={<CreateCoach />} />
           <Route path="create-stop-location" element={<CreateStopLocation />} />
           <Route path="create-trips" element={<CreateTrip />} />
+          <Route path="manage-trips" element={<ManageTrip />} />
         </Route>
-        <Route path="/admin/create-stop-location" element={<CreateStopLocation />} />
+        <Route
+          path="/admin/create-stop-location"
+          element={<CreateStopLocation />}
+        />
         {/* <Route path="/admin/create-route" element={<CreateRoute />} />
         <Route path="/admin/manage-buses" element={<ManageBus />} />
         <Route path="/admin/manage-routes" element={<ManageRoute />} />
@@ -91,7 +96,6 @@ export default function App() {
             <Route path="tripdetail/:id" element={<TripDetailsDemo />} />
           </Route>
           <Route path="assistant" element={<TripListPage />}>
-
             <Route path="chuyendi" element={<DanhSachChuyenDi />} />
             <Route path="viewSlot" element={<AssistantShiftsPage />} />
             <Route path="chitietchuyendi" element={<ChiTietChuyenDi />} />
