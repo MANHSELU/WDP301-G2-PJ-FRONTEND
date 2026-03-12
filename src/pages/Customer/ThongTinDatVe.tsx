@@ -440,7 +440,7 @@ export default function BusBookingUI() {
                             🪑 Chọn thêm ghế
                         </button>
                         <button
-                            onClick={() => navigate("/orderhistory")}
+                            onClick={() => navigate("/user/orderhistory")}
                             className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold shadow-lg transition-all active:scale-95 min-w-[140px]"
                         >
                             📋 Lịch sử đặt vé
