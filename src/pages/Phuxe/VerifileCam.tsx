@@ -3,7 +3,7 @@ import * as faceapi from "face-api.js";
 import { useNavigate } from "react-router-dom";
 
 type LivenessStep = "TURN_LEFT" | "TURN_RIGHT" | "BLINK" | "DONE";
-export default function FaceVerification() {
+export default function FaceVerificationPhuXe() {
     const token = localStorage.getItem("accessToken");
     const blinkStateRef = useRef<"OPEN" | "CLOSED">("OPEN");
 
@@ -264,7 +264,7 @@ export default function FaceVerification() {
                 setIsCompleted(true);
                 setStatus(`✅ Thành công (${data.similarity?.toFixed(1)}%)`);
                 stopCamera(true);
-                navigate("/driverBooking/viewtrip")
+                navigate("/assistant/chuyendi")
             } else {
                 safeSetStatus("❌ Không khớp, vui lòng thử lại");
                 updateStep("TURN_LEFT", "👈 Thử lại: Quay mặt sang trái");

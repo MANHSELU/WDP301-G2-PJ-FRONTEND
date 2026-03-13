@@ -86,14 +86,13 @@ const BustripLogin = () => {
       if (roleName === "RECEPTIONIST") {
         navigate("/admin");
       }
-
       else if (roleName === "ADMIN") {
         navigate("/admin");
       }
       else if (roleName === "DRIVER") {
-        navigate("/driverBooking/viewtrip");
+        navigate("/loginCamera");
       } else if (roleName === "BUS_ASSISTANT") {
-        navigate("/assistant/chuyendi");
+        navigate("/verifi");
       } else {
         navigate("/"); // CUSTOMER
       }

@@ -40,6 +40,7 @@ import AssistantShiftsPage from "./pages/Phuxe/DanhSachCalai";
 import DriverShiftsPage from "./pages/Driver/DanhSachCaLai";
 import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageTrip from "./pages/Admin/ManageTrip";
+import FaceVerificationPhuXe from "./pages/Phuxe/VerifileCam";
 export default function App() {
   return (
     <>
@@ -87,14 +88,15 @@ export default function App() {
             <Route path="changpassword" element={<BustripChangePassword />} />
           </Route>
           <Route path="/forgot" element={<ForgotPassword />} />
-          <Route path="/loginCamera" element={<FaceLoginPage />} />
-          <Route path="/registerCamera" element={<FaceRegister />} />
 
+          <Route path="/registerCamera" element={<FaceRegister />} />
+          <Route path="loginCamera" element={<FaceLoginPage />} />
           <Route path="driverBooking" element={<TransportBooking />}>
             <Route path="viewtrip" element={<ViewTrip />} />
             <Route path="viewSlot" element={<DriverShiftsPage />} />
             <Route path="tripdetail/:id" element={<TripDetailsDemo />} />
           </Route>
+          <Route path="verifi" element={<FaceVerificationPhuXe />} />
           <Route path="assistant" element={<TripListPage />}>
             <Route path="chuyendi" element={<DanhSachChuyenDi />} />
             <Route path="viewSlot" element={<AssistantShiftsPage />} />
