@@ -149,7 +149,7 @@ const ManageBus: React.FC = () => {
   const [buses, setBuses] = useState<BusRow[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  console.log("bus trong chương trình là : ", buses)
+  console.log("bus trong chương trình là : ", buses);
   const [activeTab, setActiveTab] = useState<"Tất cả" | "Sẵn sàng" | "Bảo trì">(
     "Tất cả"
   );
@@ -211,21 +211,21 @@ const ManageBus: React.FC = () => {
       const rawList = extractBusArray(parsed);
 
       const normalized: BusRow[] = rawList.map((b) => {
-        console.log("xe đã lấy từ api là : ", b)
+        console.log("xe đã lấy từ api là : ", b);
         const typeObj = b.bus_type_id;
         const typeName =
           typeof typeObj === "object" && typeObj !== null
             ? (typeObj as BusTypeModel).name ?? "N/A"
             : typeof typeObj === "string"
-              ? typeObj
-              : "N/A";
+            ? typeObj
+            : "N/A";
 
         const typeId =
           typeof typeObj === "object" && typeObj !== null
             ? (typeObj as BusTypeModel)._id
             : typeof typeObj === "string"
-              ? typeObj
-              : undefined;
+            ? typeObj
+            : undefined;
 
         const seats =
           Number(
@@ -235,7 +235,7 @@ const ManageBus: React.FC = () => {
         const floors = b?.seat_layout?.floors ?? 1;
         const rows = b?.seat_layout?.rows ?? 0;
 
-        console.log("trạng thái là : ", b.status)
+        console.log("trạng thái là : ", b.status);
         return {
           id: b._id ?? b.id,
           plate: b.license_plate ?? "N/A",
@@ -493,7 +493,7 @@ const ManageBus: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 sm:p-6 bg-[#f9fafb] min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -559,15 +559,16 @@ const ManageBus: React.FC = () => {
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
         {/* Filter Bar */}
         <div className="flex flex-col gap-4 border-b border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between bg-gray-50">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {(["Tất cả", "Sẵn sàng", "Bảo trì"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab
-                  ? "bg-orange-500 text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                  }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === tab
+                    ? "bg-orange-500 text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                }`}
               >
                 {tab}
                 {tab !== "Tất cả" && (
@@ -581,14 +582,14 @@ const ManageBus: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center rounded-lg border border-gray-200 bg-white px-3 py-2">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center rounded-lg border border-gray-200 bg-white px-3 py-2 w-full sm:w-auto">
               <SearchIcon size={16} className="text-gray-400" />
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Tìm biển số, loại xe..."
-                className="ml-2 bg-transparent text-sm outline-none w-48"
+                className="ml-2 bg-transparent text-sm outline-none w-full sm:w-48"
               />
               {searchQuery && (
                 <button
@@ -602,8 +603,91 @@ const ManageBus: React.FC = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* MOBILE LIST (cards) - shown on small screens */}
+        <div className="block md:hidden divide-y divide-gray-200">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 size={32} className="animate-spin text-orange-500" />
+              <span className="ml-3 text-gray-500">Đang tải...</span>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center py-12 text-red-500">
+              <AlertCircle size={20} className="mr-2" />
+              {error}
+            </div>
+          ) : filteredBuses.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+              <Bus size={48} className="mb-3 text-gray-300" />
+              <p>Không tìm thấy xe nào</p>
+            </div>
+          ) : (
+            filteredBuses.map((bus) => (
+              <div key={bus.id} className="p-4 bg-white">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-gray-500">Biển số</div>
+                        <div className="font-semibold text-gray-900">
+                          {bus.plate}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(
+                            bus.status
+                          )}`}
+                        >
+                          {getStatusIcon(bus.status)}
+                          {bus.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-gray-600">
+                      <div>
+                        <div className="text-xs text-gray-400">Loại xe</div>
+                        <div className="font-medium text-gray-800">
+                          {bus.type}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-400">Số ghế</div>
+                        <div className="font-medium text-gray-800">
+                          {bus.seats} chỗ
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="text-xs text-gray-400">Cấu hình</div>
+                        <div className="text-sm text-gray-600">
+                          {bus.floors} tầng × {bus.rows} hàng
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center gap-2 justify-end">
+                  <button
+                    onClick={() => handleView(bus)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-md text-sm border border-gray-200 hover:bg-gray-50"
+                  >
+                    <Eye size={16} /> Xem
+                  </button>
+                  <button
+                    onClick={() => handleEdit(bus)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-md text-sm bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100"
+                  >
+                    <Edit size={16} /> Sửa
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* DESKTOP / TABLE (hidden on small screens) */}
+        <div className="hidden md:block overflow-x-auto">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 size={32} className="animate-spin text-orange-500" />

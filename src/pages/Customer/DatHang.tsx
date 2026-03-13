@@ -219,7 +219,7 @@ export default function ShippingCart() {
             </div>
 
             {/* Hero Section */}
-            <div className="relative z-20 mx-auto flex min-h-[520px] w-full max-w-[1240px] items-center px-4 pb-16 pt-24 lg:min-h-[580px] lg:pt-20">
+            <div className="relative z-20 mx-auto flex min-h-[280px] w-full max-w-[1240px] items-center px-4 pb-8 pt-24 md:min-h-[380px] lg:min-h-[420px] lg:pt-20">
                 <div className="page-enter-copy relative isolate -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
                     <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[360px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.46)_34%,rgba(255,255,255,0.18)_56%,rgba(255,255,255,0)_78%)] blur-[26px]" />
                     <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[300px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(248,250,252,0.46)_0%,rgba(248,250,252,0.14)_58%,rgba(248,250,252,0)_84%)] blur-[18px]" />
@@ -242,90 +242,131 @@ export default function ShippingCart() {
                 </div>
             </div>
 
+            {/* Gradient bridge — merge hero → content seamlessly */}
+            <div className="relative z-30 h-44 bg-gradient-to-b from-transparent to-[#f0ebe6]" />
+
             {/* Main Content */}
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-slate-100 py-12 px-4">
+            <div className="relative z-30 bg-[#f0ebe6] pb-12 px-4 -mt-px">
                 <div className="max-w-7xl mx-auto">
                     {/* Page Title */}
-                    <h2 className="text-4xl font-black text-slate-800 mb-8 text-center relative z-30">
-                        Danh sách hàng gửi
-                    </h2>
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl md:text-4xl font-black text-[#0d142a] tracking-tight">
+                            Danh sách hàng gửi
+                        </h2>
+                        <p className="mt-2 text-sm text-[#8c6a4f]">Quản lý các món hàng bạn muốn gửi theo chuyến xe</p>
+                    </div>
 
-                    <div className="relative z-30 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Cart Items Section */}
-                        <div className="lg:col-span-2">
-                            <div className="bg-white rounded-3xl shadow-xl border-2 border-orange-100/50 overflow-hidden">
-                                {/* Table Header */}
-                                <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-orange-50 border-b-2 border-orange-100 font-bold text-sm text-slate-700 uppercase tracking-wide">
-                                    <div className="col-span-5">PRODUCT</div>
-                                    <div className="col-span-2 text-center">GIÁ</div>
-                                    <div className="col-span-3 text-center">SỐ LƯỢNG</div>
-                                    <div className="col-span-2 text-center">TỔNG TIỀN</div>
+                        <div className="lg:col-span-2 space-y-5">
+                            <div className="rounded-[14px] border border-[#f2e5d8] bg-white/95 shadow-[0_8px_30px_-12px_rgba(251,146,60,0.25)] backdrop-blur overflow-hidden">
+                                {/* Table Header - ẩn trên mobile */}
+                                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3.5 bg-gradient-to-r from-[#fff8f1] to-[#fff3e6] border-b border-[#f2e5d8]">
+                                    <div className="col-span-5 text-[11px] font-bold text-[#c89463] uppercase tracking-wider">Hàng hóa</div>
+                                    <div className="col-span-2 text-[11px] font-bold text-[#c89463] uppercase tracking-wider text-center">Giá</div>
+                                    <div className="col-span-3 text-[11px] font-bold text-[#c89463] uppercase tracking-wider text-center">Số lượng</div>
+                                    <div className="col-span-2 text-[11px] font-bold text-[#c89463] uppercase tracking-wider text-center">Tổng</div>
                                 </div>
 
                                 {/* Cart Items */}
-                                <div className="divide-y divide-slate-100">
+                                <div className="divide-y divide-[#f2e5d8]/60">
                                     {cartItems.length === 0 ? (
                                         <div className="px-6 py-16 text-center">
-                                            <p className="text-slate-400 text-lg">
-                                                Chưa có hàng nào
+                                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-50 mb-4">
+                                                <Tag className="text-[#c89463]" size={28} />
+                                            </div>
+                                            <p className="text-[#8c6a4f] text-base font-medium">
+                                                Chưa có hàng nào trong danh sách
                                             </p>
                                         </div>
                                     ) : (
                                         cartItems.map((item) => (
                                             <div
                                                 key={item.id}
-                                                className="grid grid-cols-12 gap-4 px-6 py-6 items-center hover:bg-orange-50/30 transition-colors"
+                                                className="group px-5 py-4 hover:bg-[#fffaf5] transition-colors duration-200"
                                             >
-                                                {/* Product Info */}
-                                                <div className="col-span-5 flex items-center gap-4">
+                                                {/* Desktop row */}
+                                                <div className="hidden md:grid grid-cols-12 gap-4 items-center">
+                                                    <div className="col-span-5 flex items-center gap-4">
+                                                        <img
+                                                            src={item.image}
+                                                            alt={item.name}
+                                                            className="w-16 h-16 object-cover rounded-[10px] border border-[#f2e5d8] shadow-sm"
+                                                        />
+                                                        <span className="font-semibold text-[14px] text-[#253042]">
+                                                            {item.name}
+                                                        </span>
+                                                    </div>
+                                                    <div className="col-span-2 text-center text-[14px] font-bold text-[#475569]">
+                                                        {formatCurrency(item.price)}
+                                                    </div>
+                                                    <div className="col-span-3 flex items-center justify-center gap-1.5">
+                                                        <button
+                                                            onClick={() => updateQuantity(item.id, -1)}
+                                                            className="w-8 h-8 rounded-lg border border-[#f2e5d8] bg-white hover:bg-orange-50 text-[#c89463] flex items-center justify-center transition-colors"
+                                                        >
+                                                            <Minus size={14} />
+                                                        </button>
+                                                        <span className="w-10 h-8 flex items-center justify-center text-[14px] font-bold text-[#253042] bg-[#fff8f1] border border-[#f2e5d8] rounded-lg">
+                                                            {item.quantity}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => updateQuantity(item.id, 1)}
+                                                            className="w-8 h-8 rounded-lg border border-[#f2e5d8] bg-white hover:bg-orange-50 text-[#c89463] flex items-center justify-center transition-colors"
+                                                        >
+                                                            <Plus size={14} />
+                                                        </button>
+                                                    </div>
+                                                    <div className="col-span-2 flex items-center justify-center gap-2">
+                                                        <span className="font-bold text-[14px] text-[#e8791c]">
+                                                            {formatCurrency(item.price * item.quantity)}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => removeItem(item.id)}
+                                                            className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-500 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                                                        >
+                                                            <X size={15} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Mobile card */}
+                                                <div className="md:hidden flex items-start gap-3">
                                                     <img
                                                         src={item.image}
                                                         alt={item.name}
-                                                        className="w-20 h-20 object-cover rounded-xl border-2 border-orange-200"
+                                                        className="w-16 h-16 object-cover rounded-[10px] border border-[#f2e5d8] shadow-sm flex-shrink-0"
                                                     />
-                                                    <span className="font-semibold text-slate-800">
-                                                        {item.name}
-                                                    </span>
-                                                </div>
-
-                                                {/* Price */}
-                                                <div className="col-span-2 text-center font-bold text-slate-700">
-                                                    {formatCurrency(item.price)}
-                                                </div>
-
-                                                {/* Quantity Controls */}
-                                                <div className="col-span-3 flex items-center justify-center gap-2">
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, -1)}
-                                                        className="w-8 h-8 rounded-lg bg-orange-100 hover:bg-orange-200 text-orange-700 flex items-center justify-center transition-colors"
-                                                    >
-                                                        <Minus size={16} />
-                                                    </button>
-                                                    <input
-                                                        type="text"
-                                                        value={item.quantity}
-                                                        readOnly
-                                                        className="w-12 h-8 text-center font-bold text-slate-800 bg-white border-2 border-orange-200 rounded-lg"
-                                                    />
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, 1)}
-                                                        className="w-8 h-8 rounded-lg bg-orange-100 hover:bg-orange-200 text-orange-700 flex items-center justify-center transition-colors"
-                                                    >
-                                                        <Plus size={16} />
-                                                    </button>
-                                                </div>
-
-                                                {/* Total & Remove */}
-                                                <div className="col-span-2 flex items-center justify-center gap-3">
-                                                    <span className="font-bold text-slate-800">
-                                                        {formatCurrency(item.price * item.quantity)}
-                                                    </span>
-                                                    <button
-                                                        onClick={() => removeItem(item.id)}
-                                                        className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition-colors"
-                                                    >
-                                                        <X size={18} />
-                                                    </button>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <span className="font-semibold text-[14px] text-[#253042] truncate">{item.name}</span>
+                                                            <button
+                                                                onClick={() => removeItem(item.id)}
+                                                                className="w-6 h-6 rounded-md bg-red-50 text-red-400 flex items-center justify-center flex-shrink-0"
+                                                            >
+                                                                <X size={13} />
+                                                            </button>
+                                                        </div>
+                                                        <p className="text-[13px] text-[#8c6a4f] mt-0.5">{formatCurrency(item.price)}/món</p>
+                                                        <div className="flex items-center justify-between mt-2">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <button onClick={() => updateQuantity(item.id, -1)}
+                                                                    className="w-7 h-7 rounded-md border border-[#f2e5d8] bg-white text-[#c89463] flex items-center justify-center">
+                                                                    <Minus size={13} />
+                                                                </button>
+                                                                <span className="w-8 h-7 flex items-center justify-center text-[13px] font-bold text-[#253042] bg-[#fff8f1] border border-[#f2e5d8] rounded-md">
+                                                                    {item.quantity}
+                                                                </span>
+                                                                <button onClick={() => updateQuantity(item.id, 1)}
+                                                                    className="w-7 h-7 rounded-md border border-[#f2e5d8] bg-white text-[#c89463] flex items-center justify-center">
+                                                                    <Plus size={13} />
+                                                                </button>
+                                                            </div>
+                                                            <span className="font-bold text-[14px] text-[#e8791c]">
+                                                                {formatCurrency(item.price * item.quantity)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))
@@ -333,16 +374,16 @@ export default function ShippingCart() {
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="px-6 py-6 bg-orange-50 border-t-2 border-orange-100 flex gap-4">
+                                <div className="px-5 py-4 bg-gradient-to-r from-[#fff8f1] to-[#fff3e6] border-t border-[#f2e5d8] flex flex-col sm:flex-row gap-3">
                                     <button
                                         onClick={clearHistory}
-                                        className="px-6 py-3 rounded-xl border-2 border-orange-500 text-orange-500 hover:bg-orange-100 font-bold transition-colors"
+                                        className="px-6 py-2.5 rounded-[8px] border border-[#e8791c] text-[#e8791c] hover:bg-[#fff3e6] text-sm font-bold transition-colors"
                                     >
                                         Trở về lịch trình
                                     </button>
                                     <button
                                         onClick={updateLatest}
-                                        className="px-6 py-3 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 hover:from-orange-200 hover:to-orange-300 text-orange-700 font-bold transition-colors"
+                                        className="px-6 py-2.5 rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] hover:from-[#f8af4f] hover:to-[#ef8a31] text-white text-sm font-bold shadow-[0_10px_20px_-10px_rgba(216,113,28,0.7)] transition duration-200"
                                     >
                                         Cập nhật đơn
                                     </button>
@@ -350,42 +391,42 @@ export default function ShippingCart() {
                             </div>
 
                             {/* Promo Code Section */}
-                            <div className="mt-6 bg-white rounded-3xl shadow-xl border-2 border-orange-100/50 p-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex-1 flex items-center gap-3 bg-orange-50 rounded-xl px-4 py-3 border-2 border-orange-200">
-                                        <Tag className="text-orange-500" size={20} />
+                            <div className="rounded-[14px] border border-[#f2e5d8] bg-white/95 shadow-[0_8px_30px_-12px_rgba(251,146,60,0.15)] backdrop-blur p-5">
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                    <div className="flex-1 flex items-center gap-3 bg-[#fff8f1] rounded-[8px] px-4 py-3 border border-[#f2e5d8]">
+                                        <Tag className="text-[#c89463] flex-shrink-0" size={18} />
                                         <input
                                             type="text"
                                             placeholder="Nhập mã khuyến mãi"
                                             value={promoCode}
                                             onChange={(e) => setPromoCode(e.target.value)}
-                                            className="flex-1 bg-transparent outline-none text-slate-700 placeholder-slate-400"
+                                            className="flex-1 bg-transparent outline-none text-[14px] font-semibold text-[#253042] placeholder:text-[#c89463]"
                                         />
                                     </div>
                                     <button
                                         onClick={applyPromoCode}
-                                        className="px-8 py-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold transition-colors shadow-lg hover:shadow-xl"
+                                        className="px-7 py-3 rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] hover:from-[#f8af4f] hover:to-[#ef8a31] text-white text-sm font-bold shadow-[0_10px_20px_-10px_rgba(216,113,28,0.7)] transition duration-200"
                                     >
                                         Áp dụng
                                     </button>
                                 </div>
 
                                 {appliedPromo && (
-                                    <div className="mt-4 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
-                                        <p className="text-green-700 font-semibold">
-                                            ✓ Đã áp dụng mã: <span className="font-black">{appliedPromo.code}</span> - Giảm {appliedPromo.discount}%
+                                    <div className="mt-4 p-3.5 bg-green-50 border border-green-200 rounded-[8px]">
+                                        <p className="text-green-700 text-sm font-semibold">
+                                            Đã áp dụng mã: <span className="font-black">{appliedPromo.code}</span> - Giảm {appliedPromo.discount}%
                                         </p>
                                     </div>
                                 )}
 
                                 {/* Promo Tips */}
-                                <div className="mt-4 p-4 bg-orange-50 border-2 border-orange-200 rounded-xl">
-                                    <p className="text-orange-700 font-bold mb-2 flex items-center gap-2">
-                                        <Tag size={16} />
-                                        Mã khuyến mãi
+                                <div className="mt-3 p-3.5 bg-[#fff8f1] border border-[#f2e5d8] rounded-[8px]">
+                                    <p className="text-[#c89463] text-xs font-bold mb-1 flex items-center gap-1.5">
+                                        <Tag size={13} />
+                                        Mã khuyến mãi khả dụng
                                     </p>
-                                    <p className="text-sm text-orange-600">
-                                        Thử các mã: <span className="font-bold">GIAM10</span>, <span className="font-bold">GIAM20</span>
+                                    <p className="text-[13px] text-[#8c6a4f]">
+                                        Thử các mã: <span className="font-bold text-[#e8791c]">GIAM10</span>, <span className="font-bold text-[#e8791c]">GIAM20</span>
                                     </p>
                                 </div>
                             </div>
@@ -393,38 +434,38 @@ export default function ShippingCart() {
 
                         {/* Order Summary Section */}
                         <div className="lg:col-span-1">
-                            <div className="bg-white rounded-3xl shadow-xl border-2 border-orange-100/50 p-8 sticky top-8">
-                                <h2 className="text-2xl font-black text-slate-800 mb-6">
+                            <div className="rounded-[14px] border border-[#f2e5d8] bg-white/95 shadow-[0_8px_30px_-12px_rgba(251,146,60,0.25)] backdrop-blur p-6 sticky top-8">
+                                <h2 className="text-xl font-black text-[#0d142a] mb-5">
                                     Tổng tiền
                                 </h2>
 
-                                <div className="space-y-4 mb-6">
+                                <div className="space-y-3.5 mb-6">
                                     {/* Subtotal */}
-                                    <div className="flex items-center justify-between pb-3 border-b border-orange-200">
-                                        <span className="text-slate-600">Chi phí</span>
-                                        <span className="font-bold text-slate-800">
+                                    <div className="flex items-center justify-between pb-3 border-b border-[#f2e5d8]">
+                                        <span className="text-sm text-[#8c6a4f]">Chi phí</span>
+                                        <span className="text-sm font-bold text-[#253042]">
                                             {formatCurrency(calculateSubtotal())}
                                         </span>
                                     </div>
 
                                     {/* Discount */}
                                     {appliedPromo && (
-                                        <div className="flex items-center justify-between pb-3 border-b border-orange-200">
-                                            <span className="text-green-600">
+                                        <div className="flex items-center justify-between pb-3 border-b border-[#f2e5d8]">
+                                            <span className="text-sm text-green-600">
                                                 Khuyến mãi ({appliedPromo.discount}%)
                                             </span>
-                                            <span className="font-bold text-green-600">
+                                            <span className="text-sm font-bold text-green-600">
                                                 -{formatCurrency(calculateDiscount())}
                                             </span>
                                         </div>
                                     )}
 
                                     {/* Total */}
-                                    <div className="flex items-center justify-between pt-2">
-                                        <span className="text-lg font-bold text-slate-800">
+                                    <div className="flex items-center justify-between pt-1">
+                                        <span className="text-base font-bold text-[#0d142a]">
                                             Tổng tiền:
                                         </span>
-                                        <span className="text-2xl font-black text-orange-600">
+                                        <span className="text-xl font-black text-[#e8791c]">
                                             {formatCurrency(calculateTotal())}
                                         </span>
                                     </div>
@@ -434,16 +475,15 @@ export default function ShippingCart() {
                                 <Link to="/chitietdathang" className="block w-full">
                                     <button
                                         type="button"
-                                        className="w-full py-4 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                                        className="w-full min-h-[52px] rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] hover:from-[#f8af4f] hover:to-[#ef8a31] text-white font-black text-base shadow-[0_18px_30px_-14px_rgba(216,113,28,0.95)] transition duration-200"
                                     >
                                         Thanh toán
                                     </button>
                                 </Link>
 
-
                                 {/* Additional Info */}
-                                <div className="mt-6 p-4 bg-orange-50 rounded-xl border border-orange-200">
-                                    <p className="text-sm text-orange-700 text-center font-semibold">
+                                <div className="mt-5 p-3.5 bg-[#fff8f1] rounded-[8px] border border-[#f2e5d8]">
+                                    <p className="text-xs text-[#c89463] text-center font-semibold">
                                         Miễn phí vận chuyển cho đơn hàng trên 200.000đ
                                     </p>
                                 </div>
@@ -455,37 +495,30 @@ export default function ShippingCart() {
 
             {/* Modal for adding new item */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white border-b-2 border-orange-100 px-6 py-4 flex items-center justify-between rounded-t-3xl">
-                            <h3 className="text-2xl font-black text-slate-800">Cập nhật hàng hóa</h3>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 rounded-xl border-2 border-orange-200 text-orange-600 hover:bg-orange-50 font-bold transition-colors"
-                                >
-                                    Thoát
-                                </button>
-                                <button
-                                    onClick={handleSaveNewItem}
-                                    className="px-6 py-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold transition-colors shadow-lg"
-                                >
-                                    Lưu
-                                </button>
-                            </div>
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-[16px] shadow-[0_24px_60px_-16px_rgba(15,23,42,0.3)] max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[#f2e5d8]">
+                        {/* Modal header */}
+                        <div className="sticky top-0 bg-white border-b border-[#f2e5d8] px-6 py-4 flex items-center justify-between rounded-t-[16px] z-10">
+                            <h3 className="text-xl font-black text-[#0d142a]">Cập nhật hàng hóa</h3>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="w-9 h-9 rounded-lg bg-[#fff3e6] hover:bg-[#ffe8cc] text-[#c89463] flex items-center justify-center transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
                         </div>
 
-                        <div className="p-6 space-y-6">
+                        <div className="p-6 space-y-5">
                             {/* Tên hàng hóa */}
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">
-                                    Tên hàng hóa <span className="text-red-500">(*)</span>
+                                <label className="block text-[11px] font-bold text-[#c89463] uppercase tracking-wider mb-1.5">
+                                    Tên hàng hóa <span className="text-red-400">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={newItem.name}
                                     onChange={(e) => setNewItem(prev => ({ ...prev, name: e.target.value }))}
-                                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-orange-500 focus:outline-none transition-colors"
+                                    className="w-full px-4 py-3 rounded-[8px] border border-[#f2e5d8] bg-[#fff8f1] focus:border-[#e8791c] focus:bg-white focus:outline-none transition-colors text-[14px] font-semibold text-[#253042] placeholder:text-[#c89463]"
                                     placeholder="Nhập tên hàng hóa"
                                 />
                             </div>
@@ -493,26 +526,26 @@ export default function ShippingCart() {
                             {/* Cân nặng và Số lượng */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                                        Cân nặng <span className="text-red-500">(*)</span>
+                                    <label className="block text-[11px] font-bold text-[#c89463] uppercase tracking-wider mb-1.5">
+                                        Cân nặng <span className="text-red-400">*</span>
                                     </label>
                                     <input
                                         type="text"
                                         value={newItem.weight}
                                         onChange={(e) => setNewItem(prev => ({ ...prev, weight: e.target.value }))}
-                                        className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-orange-500 focus:outline-none transition-colors"
+                                        className="w-full px-4 py-3 rounded-[8px] border border-[#f2e5d8] bg-[#fff8f1] focus:border-[#e8791c] focus:bg-white focus:outline-none transition-colors text-[14px] font-semibold text-[#253042] placeholder:text-[#c89463]"
                                         placeholder="Nhập cân nặng"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                                        Số lượng <span className="text-red-500">(*)</span>
+                                    <label className="block text-[11px] font-bold text-[#c89463] uppercase tracking-wider mb-1.5">
+                                        Số lượng <span className="text-red-400">*</span>
                                     </label>
                                     <input
                                         type="number"
                                         value={newItem.quantity}
                                         onChange={(e) => setNewItem(prev => ({ ...prev, quantity: e.target.value }))}
-                                        className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-orange-500 focus:outline-none transition-colors"
+                                        className="w-full px-4 py-3 rounded-[8px] border border-[#f2e5d8] bg-[#fff8f1] focus:border-[#e8791c] focus:bg-white focus:outline-none transition-colors text-[14px] font-semibold text-[#253042] placeholder:text-[#c89463]"
                                         placeholder="Nhập số lượng"
                                         min="1"
                                     />
@@ -521,11 +554,10 @@ export default function ShippingCart() {
 
                             {/* Thêm hình ảnh */}
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">
-                                    Thêm hình ảnh <span className="text-red-500">(*)</span>
+                                <label className="block text-[11px] font-bold text-[#c89463] uppercase tracking-wider mb-1.5">
+                                    Hình ảnh <span className="text-red-400">*</span>
                                 </label>
                                 <div className="space-y-3">
-                                    {/* Image preview grid */}
                                     {newItem.images.length > 0 && (
                                         <div className="flex flex-wrap gap-3">
                                             {newItem.images.map((img, index) => (
@@ -533,21 +565,20 @@ export default function ShippingCart() {
                                                     <img
                                                         src={img}
                                                         alt={`Preview ${index + 1}`}
-                                                        className="w-24 h-24 object-cover rounded-xl border-2 border-orange-200"
+                                                        className="w-20 h-20 object-cover rounded-[10px] border border-[#f2e5d8] shadow-sm"
                                                     />
                                                     <button
                                                         onClick={() => removeImage(index)}
-                                                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                                                     >
-                                                        <X size={14} />
+                                                        <X size={12} />
                                                     </button>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
-
-                                    {/* Upload button */}
-                                    <label className="inline-block px-6 py-3 rounded-xl border-2 border-orange-500 text-orange-600 hover:bg-orange-50 font-bold transition-colors cursor-pointer">
+                                    <label className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[8px] border border-[#e8791c] text-[#e8791c] hover:bg-[#fff3e6] text-sm font-bold transition-colors cursor-pointer">
+                                        <Plus size={16} />
                                         Thêm ảnh
                                         <input
                                             type="file"
@@ -562,30 +593,30 @@ export default function ShippingCart() {
 
                             {/* Chú thích */}
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">
-                                    Chú thích (tùy chọn):
+                                <label className="block text-[11px] font-bold text-[#c89463] uppercase tracking-wider mb-1.5">
+                                    Chú thích (tùy chọn)
                                 </label>
                                 <textarea
                                     value={newItem.note}
                                     onChange={(e) => setNewItem(prev => ({ ...prev, note: e.target.value }))}
-                                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-orange-500 focus:outline-none transition-colors resize-none"
-                                    rows={4}
+                                    className="w-full px-4 py-3 rounded-[8px] border border-[#f2e5d8] bg-[#fff8f1] focus:border-[#e8791c] focus:bg-white focus:outline-none transition-colors resize-none text-[14px] text-[#253042] placeholder:text-[#c89463]"
+                                    rows={3}
                                     placeholder="Nhập ghi chú về hàng hóa..."
                                 />
                             </div>
                         </div>
 
                         {/* Modal footer */}
-                        <div className="sticky bottom-0 bg-orange-50 border-t-2 border-orange-100 px-6 py-4 flex justify-end gap-3 rounded-b-3xl">
+                        <div className="sticky bottom-0 bg-gradient-to-r from-[#fff8f1] to-[#fff3e6] border-t border-[#f2e5d8] px-6 py-4 flex justify-end gap-3 rounded-b-[16px]">
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="px-6 py-3 rounded-xl border-2 border-orange-500 text-orange-600 hover:bg-orange-100 font-bold transition-colors"
+                                className="px-6 py-2.5 rounded-[8px] border border-[#e8791c] text-[#e8791c] hover:bg-[#fff3e6] text-sm font-bold transition-colors"
                             >
                                 Hủy
                             </button>
                             <button
                                 onClick={handleSaveNewItem}
-                                className="px-8 py-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold transition-colors shadow-lg hover:shadow-xl"
+                                className="px-7 py-2.5 rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] hover:from-[#f8af4f] hover:to-[#ef8a31] text-white text-sm font-bold shadow-[0_10px_20px_-10px_rgba(216,113,28,0.7)] transition duration-200"
                             >
                                 Cập nhật đơn
                             </button>

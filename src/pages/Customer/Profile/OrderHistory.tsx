@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
-import { Clock, Bus, CreditCard, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Clock, Bus, CreditCard, Loader2, AlertCircle, RefreshCw, MapPin } from "lucide-react";
 
 /* ================= TYPES ================= */
+interface LocationInfo {
+    city: string | null;
+    specific_location: string | null;
+}
+
 interface OrderItem {
     _id: string;
     order_status: "CREATED" | "PAID" | "CANCELLED";
@@ -9,7 +14,10 @@ interface OrderItem {
     seat_labels: string[];
     passenger_name: string;
     passenger_phone: string;
+    passenger_email?: string | null;
     created_at: string;
+    start_info: LocationInfo | null;
+    end_info: LocationInfo | null;
     trip: {
         _id: string;
         departure_time: string;
@@ -37,8 +45,6 @@ interface Pagination {
 }
 
 /* ================= HELPERS ================= */
-
-
 const formatTime = (d?: string | null) => {
     if (!d) return "--:--";
     return new Date(d).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
@@ -51,8 +57,20 @@ const formatDate = (d?: string | null) => {
 
 const calcDuration = (s?: string | null, e?: string | null) => {
     if (!s || !e) return null;
-    const h = Math.floor((new Date(e).getTime() - new Date(s).getTime()) / 3600000);
-    return h > 0 ? `${h} giờ` : null;
+    const diffMs = new Date(e).getTime() - new Date(s).getTime();
+    if (diffMs <= 0) return null;
+
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const days = Math.floor(totalMinutes / 1440);   // 1440 = 60 * 24
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    const parts: string[] = [];
+    if (days > 0) parts.push(`${days} ngày`);
+    if (hours > 0) parts.push(`${hours} giờ`);
+    if (minutes > 0 && days === 0) parts.push(`${minutes} phút`); // chỉ hiện phút nếu < 1 ngày
+
+    return parts.length > 0 ? parts.join(" ") : null;
 };
 
 /* ================= STATUS CONFIG ================= */
@@ -113,7 +131,6 @@ export default function OrderHistory() {
         fetchOrders(currentPage);
     }, [currentPage]);
 
-    /* ── Pagination pages array ── */
     const pageNumbers = () => {
         const total = pagination.totalPages;
         if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
@@ -122,7 +139,6 @@ export default function OrderHistory() {
         return [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
     };
 
-    /* ── RENDER ── */
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 p-4 md:p-8">
             <div className="max-w-4xl mx-auto">
@@ -184,6 +200,10 @@ export default function OrderHistory() {
                             const statusCfg = ORDER_STATUS[order.order_status] ?? ORDER_STATUS.CREATED;
                             const duration = calcDuration(trip?.departure_time, trip?.arrival_time);
 
+                            // Resolve city names with fallback
+                            const fromCity = order.start_info?.city || trip?.route?.from?.province || "---";
+                            const toCity = order.end_info?.city || trip?.route?.to?.province || "---";
+
                             return (
                                 <div key={order._id}
                                     className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-orange-100/60">
@@ -202,7 +222,7 @@ export default function OrderHistory() {
                                             <div className="text-center min-w-[56px]">
                                                 <div className="text-xl font-black text-slate-800">{formatTime(trip?.departure_time)}</div>
                                                 <div className="text-[11px] text-slate-500 leading-tight mt-0.5 max-w-[80px]">
-                                                    {trip?.route?.from?.province || "---"}
+                                                    {fromCity}
                                                 </div>
                                             </div>
 
@@ -223,7 +243,7 @@ export default function OrderHistory() {
                                             <div className="text-center min-w-[56px]">
                                                 <div className="text-xl font-black text-slate-800">{formatTime(trip?.arrival_time)}</div>
                                                 <div className="text-[11px] text-slate-500 leading-tight mt-0.5 max-w-[80px]">
-                                                    {trip?.route?.to?.province || "---"}
+                                                    {toCity}
                                                 </div>
                                             </div>
 
@@ -232,6 +252,44 @@ export default function OrderHistory() {
                                                 <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${statusCfg.className}`}>
                                                     {statusCfg.label}
                                                 </span>
+                                            </div>
+                                        </div>
+
+                                        {/* ── Pickup / Dropoff location detail ── */}
+                                        <div className="flex gap-3 mb-4 bg-slate-50 rounded-xl p-3">
+                                            {/* Điểm đón */}
+                                            <div className="flex-1 flex gap-2 items-start">
+                                                <div className="mt-1 flex-shrink-0">
+                                                    <MapPin size={13} className="text-green-500" />
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] font-bold text-green-600 uppercase tracking-wide">Điểm đón</div>
+                                                    <div className="text-xs font-semibold text-slate-700 mt-0.5">{fromCity}</div>
+                                                    {order.start_info?.specific_location && (
+                                                        <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                                                            {order.start_info.specific_location}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Divider dọc */}
+                                            <div className="w-px bg-slate-200 self-stretch mx-1" />
+
+                                            {/* Điểm trả */}
+                                            <div className="flex-1 flex gap-2 items-start">
+                                                <div className="mt-1 flex-shrink-0">
+                                                    <MapPin size={13} className="text-orange-500" />
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] font-bold text-orange-600 uppercase tracking-wide">Điểm trả</div>
+                                                    <div className="text-xs font-semibold text-slate-700 mt-0.5">{toCity}</div>
+                                                    {order.end_info?.specific_location && (
+                                                        <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                                                            {order.end_info.specific_location}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
 

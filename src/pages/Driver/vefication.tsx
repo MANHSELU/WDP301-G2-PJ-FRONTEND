@@ -17,12 +17,16 @@ export default function FaceVerification() {
     const isVerifyingRef = useRef(false);
     const lastStatusRef = useRef("");
 
+    // Responsive mobile state
+    const [isMobile, setIsMobile] = useState(false);
+
     const [status, setStatus] = useState("Sẵn sàng đăng nhập bằng khuôn mặt");
     const [cameraOn, setCameraOn] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const [modelsLoaded, setModelsLoaded] = useState(false);
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+
     const safeSetStatus = (text: string) => {
         if (lastStatusRef.current !== text) {
             lastStatusRef.current = text;
@@ -67,6 +71,8 @@ export default function FaceVerification() {
             setStatus("❌ Không thể mở camera");
         }
     };
+
+    // Desktop + Mobile responsive
     useEffect(() => {
         let isMounted = true;
         const loadModels = async () => {
@@ -93,7 +99,15 @@ export default function FaceVerification() {
         };
     }, []);
 
-
+    // Mobile detection (like native app)
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        handleResize(); // initial check
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     const startDetectLoop = () => {
         if (intervalRef.current) return;
@@ -268,23 +282,76 @@ export default function FaceVerification() {
         setStatus('Đã hủy xác thực');
     };
 
+    // ========== RESPONSIVE STYLES (desktop giữ nguyên 100%, mobile như app native) ==========
+    const containerStyle = isMobile
+        ? { ...styles.container, padding: "10px" }
+        : styles.container;
+
+    const wrapperStyle = isMobile
+        ? { ...styles.wrapper, gridTemplateColumns: "1fr", gap: "20px" }
+        : styles.wrapper;
+
+    const leftSectionStyle = isMobile
+        ? { ...styles.leftSection, padding: "10px" }
+        : styles.leftSection;
+
+    const logoTextStyle = isMobile
+        ? { ...styles.logoText, fontSize: "16px", marginBottom: "20px" }
+        : styles.logoText;
+
+    const titleStyle = isMobile
+        ? { ...styles.title, fontSize: "32px" }
+        : styles.title;
+
+    const statusMessageStyle = isMobile
+        ? { ...styles.statusMessage, fontSize: "14px", minHeight: "40px", padding: "12px" }
+        : styles.statusMessage;
+
+    const buttonsStyle = isMobile
+        ? { ...styles.buttons, flexDirection: "column" as const, gap: "12px" }
+        : styles.buttons;
+
+    const baseBtnStyle = isMobile
+        ? { ...styles.btn, padding: "11px 24px", fontSize: "15px" }
+        : styles.btn;
+
+    const cameraContainerStyle = isMobile
+        ? { ...styles.cameraContainer, maxWidth: "100%", margin: "0 auto" }
+        : styles.cameraContainer;
+
+    const faceFrameStyle = isMobile
+        ? { ...styles.faceFrame, width: "260px", height: "320px" }
+        : styles.faceFrame;
+
+    const faceOvalStyle = isMobile
+        ? { ...styles.faceOval, width: "200px", height: "260px" }
+        : styles.faceOval;
+
+    const instructionStyle = isMobile
+        ? { ...styles.instruction, fontSize: "13px", padding: "10px 20px" }
+        : styles.instruction;
+
+    const statusIndicatorStyle = isMobile
+        ? { ...styles.statusIndicator, fontSize: "12px", padding: "6px 12px" }
+        : styles.statusIndicator;
+
     return (
-        <div style={styles.container}>
+        <div style={containerStyle}>
             <style>{cssString}</style>
-            <div style={styles.wrapper}>
-                <div style={styles.leftSection}>
-                    <div style={styles.logoText}>
+            <div style={wrapperStyle}>
+                <div style={leftSectionStyle}>
+                    <div style={logoTextStyle}>
                         Trở lại với <span style={styles.brandName}>Bustrip</span>
                     </div>
-                    <h1 style={styles.title}>
+                    <h1 style={titleStyle}>
                         XÁC THỰC<br />GƯƠNG MẶT
                     </h1>
-                    <div style={styles.statusMessage}>
+                    <div style={statusMessageStyle}>
                         {status}
                     </div>
-                    <div style={styles.buttons}>
+                    <div style={buttonsStyle}>
                         <button
-                            style={{ ...styles.btn, ...styles.btnBack }}
+                            style={{ ...baseBtnStyle, ...styles.btnBack }}
                             onClick={handleGoBack}
                             disabled={!cameraOn}
                         >
@@ -292,7 +359,7 @@ export default function FaceVerification() {
                         </button>
                         {!cameraOn && !isCompleted && (
                             <button
-                                style={{ ...styles.btn, ...styles.btnVerify }}
+                                style={{ ...baseBtnStyle, ...styles.btnVerify }}
                                 onClick={startCamera}
                                 disabled={!modelsLoaded}
                             >
@@ -301,7 +368,7 @@ export default function FaceVerification() {
                         )}
                         {isCompleted && loggedIn && (
                             <button
-                                style={{ ...styles.btn, ...styles.btnSuccess }}
+                                style={{ ...baseBtnStyle, ...styles.btnSuccess }}
                                 disabled
                             >
                                 ✓ Đã xác thực
@@ -311,7 +378,7 @@ export default function FaceVerification() {
                 </div>
 
                 <div style={styles.rightSection}>
-                    <div style={styles.cameraContainer}>
+                    <div style={cameraContainerStyle}>
                         <video
                             ref={videoRef}
                             autoPlay
@@ -327,24 +394,24 @@ export default function FaceVerification() {
                         />
 
                         <div style={styles.overlay}>
-                            <div style={styles.faceFrame}>
+                            <div style={faceFrameStyle}>
                                 <div style={{ ...styles.corner, ...styles.cornerTL }}></div>
                                 <div style={{ ...styles.corner, ...styles.cornerTR }}></div>
                                 <div style={{ ...styles.corner, ...styles.cornerBL }}></div>
                                 <div style={{ ...styles.corner, ...styles.cornerBR }}></div>
-                                <div style={styles.faceOval}></div>
+                                <div style={faceOvalStyle}></div>
                                 {cameraOn && !isCompleted && <div className="scan-line" style={styles.scanLine}></div>}
                             </div>
                         </div>
 
                         {cameraOn && (
-                            <div style={styles.statusIndicator}>
+                            <div style={statusIndicatorStyle}>
                                 <div className={isCompleted ? 'status-dot success' : 'status-dot'} style={{ ...styles.statusDot, ...(isCompleted ? styles.statusDotSuccess : {}) }}></div>
                                 <span>{isCompleted ? 'Xác thực thành công' : 'Camera đang hoạt động'}</span>
                             </div>
                         )}
 
-                        <div style={styles.instruction}>
+                        <div style={instructionStyle}>
                             {!cameraOn && !isCompleted && 'Nhấn "Bắt đầu quét" để bắt đầu'}
                             {cameraOn && !isCompleted && 'Làm theo hướng dẫn trên màn hình'}
                             {isCompleted && '✓ Hoàn thành xác thực'}
@@ -356,7 +423,7 @@ export default function FaceVerification() {
     );
 }
 
-// CSS as string for animations
+// CSS as string for animations (giữ nguyên + không thay đổi logic)
 const cssString = `
 @keyframes scan {
   0%, 100% { top: 20%; }
@@ -389,7 +456,7 @@ const cssString = `
 }
 `;
 
-// Inline styles object
+// Inline styles object (desktop giữ nguyên 100%)
 const styles = {
     container: {
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -489,9 +556,9 @@ const styles = {
         overflow: "hidden",
         boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
         aspectRatio: "4/3",
-        width: "100%",        // chiếm hết cột bên phải
-        maxWidth: "900px",    // ⬅ tăng kích thước form
-        margin: "0 auto",     // căn giữa
+        width: "100%",
+        maxWidth: "900px",
+        margin: "0 auto",
     } as React.CSSProperties,
 
     video: {

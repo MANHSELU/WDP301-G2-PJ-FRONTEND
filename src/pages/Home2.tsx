@@ -1,9 +1,4 @@
-import {
-  ArrowRight,
-  CalendarDays,
-  MapPin,
-  Users,
-} from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Users, Menu, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 // import Footer from "../layouts/Footer";
 
@@ -71,12 +66,48 @@ const routeCards: RouteCard[] = [
 ];
 
 const promoCards: PromoCard[] = [
-  { id: 1, image: "/images/km1.png", alt: "Khuyen mai 1", zoomY: 1.56, position: "50% 46%" },
-  { id: 2, image: "/images/km2.png", alt: "Khuyen mai 2", zoomY: 1.46, position: "50% 46%" },
-  { id: 3, image: "/images/km3.png", alt: "Khuyen mai 3", zoomY: 1.44, position: "50% 47%" },
-  { id: 4, image: "/images/km4.png", alt: "Khuyen mai 4", zoomY: 1.52, position: "50% 46%" },
-  { id: 5, image: "/images/km5.png", alt: "Khuyen mai 5", zoomY: 1.62, position: "50% 44%" },
-  { id: 6, image: "/images/km6.png", alt: "Khuyen mai 6", zoomY: 1.45, position: "50% 47%" },
+  {
+    id: 1,
+    image: "/images/km1.png",
+    alt: "Khuyen mai 1",
+    zoomY: 1.56,
+    position: "50% 46%",
+  },
+  {
+    id: 2,
+    image: "/images/km2.png",
+    alt: "Khuyen mai 2",
+    zoomY: 1.46,
+    position: "50% 46%",
+  },
+  {
+    id: 3,
+    image: "/images/km3.png",
+    alt: "Khuyen mai 3",
+    zoomY: 1.44,
+    position: "50% 47%",
+  },
+  {
+    id: 4,
+    image: "/images/km4.png",
+    alt: "Khuyen mai 4",
+    zoomY: 1.52,
+    position: "50% 46%",
+  },
+  {
+    id: 5,
+    image: "/images/km5.png",
+    alt: "Khuyen mai 5",
+    zoomY: 1.62,
+    position: "50% 44%",
+  },
+  {
+    id: 6,
+    image: "/images/km6.png",
+    alt: "Khuyen mai 6",
+    zoomY: 1.45,
+    position: "50% 47%",
+  },
 ];
 
 const promoPageSize = 4;
@@ -91,6 +122,7 @@ const promoPages = Array.from(
 
 export default function Home2() {
   const [promoPage, setPromoPage] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -128,20 +160,26 @@ export default function Home2() {
             </div>
 
             <nav className="hidden items-center gap-8 md:flex">
-              {["Trang chủ", "Lịch trình", "Tra cứu vé", "Hóa đơn", "Tin tức", "Thêm"].map(
-                (item, idx) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className={`page-enter-nav-item relative py-7 text-[13px] font-semibold ${idx === 0
+              {[
+                "Trang chủ",
+                "Lịch trình",
+                "Tra cứu vé",
+                "Hóa đơn",
+                "Tin tức",
+                "Thêm",
+              ].map((item, idx) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={`page-enter-nav-item relative py-7 text-[13px] font-semibold ${
+                    idx === 0
                       ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
                       : "text-[#7c5f4a]"
-                      }`}
-                  >
-                    {item}
-                  </button>
-                )
-              )}
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
             </nav>
 
             <div className="hidden items-center gap-4 md:flex md:translate-x-3 lg:translate-x-14">
@@ -158,8 +196,86 @@ export default function Home2() {
                 Đăng nhập
               </button>
             </div>
+
+            {/* Mobile hamburger button */}
+            <div className="md:hidden flex items-center gap-3">
+              <button
+                onClick={() => setMobileOpen(true)}
+                aria-label="Mở menu"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-white/60 shadow-sm hover:bg-white"
+              >
+                <Menu size={20} />
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile menu overlay */}
+        {mobileOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-50 bg-black/40 md:hidden"
+              onClick={() => setMobileOpen(false)}
+              aria-hidden
+            />
+            <aside className="fixed inset-y-0 left-0 z-50 w-72 overflow-y-auto bg-white shadow-lg md:hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[#ece7e2]">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/images/logo1.png"
+                    alt="CoachTrip logo"
+                    className="h-8 w-8 object-contain opacity-85"
+                  />
+                  <span className="text-[18px] font-black uppercase tracking-[-0.01em] text-[#f28320]">
+                    COACHTRIP
+                  </span>
+                </div>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-md p-1.5 hover:bg-[#f3f4f6]"
+                  aria-label="Đóng menu"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <nav className="px-4 py-4">
+                <div className="flex flex-col gap-1">
+                  {[
+                    "Trang chủ",
+                    "Lịch trình",
+                    "Tra cứu vé",
+                    "Hóa đơn",
+                    "Tin tức",
+                    "Thêm",
+                  ].map((item, idx) => (
+                    <button
+                      key={item}
+                      onClick={() => setMobileOpen(false)}
+                      className={`text-left rounded-md px-3 py-3 text-[15px] font-medium ${
+                        idx === 0
+                          ? "bg-[#fff4e8] text-[#2f2118]"
+                          : "text-[#5c4635] hover:bg-[#fff7f0]"
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-4 border-t border-[#f0e3d7] pt-4">
+                  <button className="w-full rounded-lg border border-[#e6bc93] bg-[#fff4e8] px-4 py-2 text-sm font-semibold text-[#5f3e28] mb-2">
+                    Đăng kí
+                  </button>
+                  <button className="w-full rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white">
+                    Đăng nhập
+                  </button>
+                </div>
+              </nav>
+            </aside>
+          </>
+        )}
+
         <div className="absolute inset-0 bg-[linear-gradient(96deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.93)_34%,rgba(255,255,255,0.64)_56%,rgba(255,255,255,0.16)_78%,rgba(255,255,255,0)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#f3ece5] to-[#ece7e2]" />
         <div className="absolute inset-x-0 bottom-0 h-px bg-[#ece7e2]" />
@@ -180,7 +296,7 @@ export default function Home2() {
             <span className="bus-tail-cloud bus-tail-cloud-4 absolute right-[38%] top-[20%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.32)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
             <span className="bus-tail-cloud bus-tail-cloud-5 absolute right-[44%] top-[42%] h-[24%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.3)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
             <span className="bus-tail-cloud bus-tail-cloud-6 absolute right-[24%] top-[44%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.38)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
-            <span className="bus-tail-cloud bus-tail-cloud-7 absolute right-[18%] top-[64%] h-[22%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.76)_0%,rgba(255,255,255,0.34)_54%,rgba(255,255,255,0)_100%)] blur-[9px]" />
+            <span className="bus-tail-cloud bus-tail-cloud-7 absolute right-[18%] top-[64%] h-[22%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.76)_0%,rgba(255,255,255,0.34_,0.54%),rgba(255,255,255,0)_100%)] blur-[9px]" />
           </div>
 
           <div className="bus-bob relative z-10">
@@ -214,14 +330,17 @@ export default function Home2() {
           </div>
         </div>
 
-
         <div className="relative z-20 mx-auto flex min-h-[680px] w-full max-w-[1240px] items-center px-4 pb-24 pt-24 lg:min-h-[780px] lg:pt-20">
           <div className="page-enter-copy relative isolate -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
             <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[360px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.46)_34%,rgba(255,255,255,0.18)_56%,rgba(255,255,255,0)_78%)] blur-[26px]" />
             <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[300px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(248,250,252,0.46)_0%,rgba(248,250,252,0.14)_58%,rgba(248,250,252,0)_84%)] blur-[18px]" />
             <h1 className="hero-title relative z-10 py-1 text-[48px] font-black leading-[1.05] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
-              <span className="hero-title-line block whitespace-nowrap">Tìm và đặt ngay</span>
-              <span className="hero-title-line mt-2 block whitespace-nowrap">những chuyến xe</span>
+              <span className="hero-title-line block whitespace-nowrap">
+                Tìm và đặt ngay
+              </span>
+              <span className="hero-title-line mt-2 block whitespace-nowrap">
+                những chuyến xe
+              </span>
               <span className="hero-title-line mt-2 block whitespace-nowrap font-extrabold italic">
                 <span className="text-[#0d142a]">thật</span>{" "}
                 <span className="hero-title-shimmer">Dễ Dàng</span>
@@ -295,8 +414,11 @@ export default function Home2() {
                 style={{ transform: `translateX(-${promoPage * 100}%)` }}
               >
                 {promoPages.map((page, pageIndex) => (
-                  <div key={`promo-page-${pageIndex}`} className="w-full shrink-0">
-                    <div className="grid gap-6 lg:grid-cols-4">
+                  <div
+                    key={`promo-page-${pageIndex}`}
+                    className="w-full shrink-0"
+                  >
+                    <div className="grid gap-6 lg:grid-cols-4 sm:grid-cols-2 grid-cols-1">
                       {page.map((promo, slotIndex) => (
                         <article
                           key={`promo-card-${pageIndex}-${slotIndex}-${promo.id}`}
@@ -332,10 +454,11 @@ export default function Home2() {
                     type="button"
                     onClick={() => setPromoPage(dotIndex)}
                     aria-label={`Xem khuyến mãi ${dotIndex + 1}`}
-                    className={`h-2.5 rounded-full transition-all duration-300 ${promoPage === dotIndex
-                      ? "w-6 bg-[#f08d2c]"
-                      : "w-2.5 bg-[#d8c5b5] hover:bg-[#e7b98f]"
-                      }`}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      promoPage === dotIndex
+                        ? "w-6 bg-[#f08d2c]"
+                        : "w-2.5 bg-[#d8c5b5] hover:bg-[#e7b98f]"
+                    }`}
                   />
                 ))}
               </div>
@@ -351,7 +474,7 @@ export default function Home2() {
             </h2>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-4">
+          <div className="grid gap-6 lg:grid-cols-4 sm:grid-cols-2 grid-cols-1">
             {routeCards.map((route) => (
               <article
                 key={route.id}
@@ -898,10 +1021,11 @@ function FieldInput({
 }) {
   return (
     <div
-      className={`relative min-h-[62px] px-4 py-1.5 ${divider
-        ? "md:after:absolute md:after:right-0 md:after:top-1/2 md:after:h-[70%] md:after:w-px md:after:-translate-y-1/2 md:after:bg-[#d9b38f]"
-        : ""
-        }`}
+      className={`relative min-h-[62px] px-4 py-1.5 ${
+        divider
+          ? "md:after:absolute md:after:right-0 md:after:top-1/2 md:after:h-[70%] md:after:w-px md:after:-translate-y-1/2 md:after:bg-[#d9b38f]"
+          : ""
+      }`}
     >
       <label
         htmlFor={name}

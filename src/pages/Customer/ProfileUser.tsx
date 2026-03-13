@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  User,
-  Ticket,
-  Settings,
-  MapPin,
-} from "lucide-react";
+import { User, Ticket, Settings, MapPin } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 
 /* ================= CONFIG ================= */
@@ -25,8 +20,6 @@ type UserProfile = {
 /* ================= COMPONENT ================= */
 
 export default function BusTripProfile() {
-
-
   const [loading, setLoading] = useState(true);
 
   const [profile, setProfile] = useState<UserProfile>({
@@ -38,10 +31,8 @@ export default function BusTripProfile() {
   });
 
   const token = localStorage.getItem("accessToken");
-  const location = useLocation()
+  const location = useLocation();
   /* ================= HELPERS ================= */
-
-
 
   /* ================= FETCH PROFILE ================= */
 
@@ -82,8 +73,6 @@ export default function BusTripProfile() {
 
   /* ================= AVATAR HANDLERS ================= */
 
-
-
   if (loading) return <div className="p-10">Loading...</div>;
 
   /* ================= UI ================= */
@@ -98,9 +87,17 @@ export default function BusTripProfile() {
           <nav className="divide-y">
             {[
               { label: "Thông tin cá nhân", icon: User, path: "/user/profile" },
-              { label: "Lịch sử đặt vé", icon: Ticket, path: "/user/orderhistory" },
+              {
+                label: "Lịch sử đặt vé",
+                icon: Ticket,
+                path: "/user/orderhistory",
+              },
               { label: "Địa chỉ", icon: MapPin, path: "/user/address" },
-              { label: "Đổi mật khẩu", icon: Settings, path: "/user/changpassword" },
+              {
+                label: "Đổi mật khẩu",
+                icon: Settings,
+                path: "/user/changpassword",
+              },
             ].map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -110,10 +107,11 @@ export default function BusTripProfile() {
                   key={item.label}
                   to={item.path}
                   className={`flex items-center gap-3 px-6 py-4 transition-all duration-200
-          ${isActive
-                      ? "bg-orange-50 text-orange-500 font-bold border-r-4 border-orange-500"
-                      : "text-slate-600 hover:bg-slate-50"
-                    }`}
+          ${
+            isActive
+              ? "bg-orange-50 text-orange-500 font-bold border-r-4 border-orange-500"
+              : "text-slate-600 hover:bg-slate-50"
+          }`}
                 >
                   <Icon size={18} />
                   {item.label}
