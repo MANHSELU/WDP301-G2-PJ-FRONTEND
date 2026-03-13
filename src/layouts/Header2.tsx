@@ -39,11 +39,11 @@ export default function Header2() {
     { name: "Trang chủ", path: "/" },
     { name: "Lịch trình", path: "/lichtrinh" },
     { name: "Tra cứu vé", path: "/user/orderhistory" },
-    { name: "Tin tức", path: "/tin-tuc" },
+    { name: "Tin tức", path: "/news" },
     { name: "Gửi hàng", path: "/dathang" },
   ];
   const location = useLocation();
-  const noBgExact = ["/loginCamera", "/registerCamera", "/changePass", "/verifi"];
+  const noBgExact = ["/loginCamera", "/registerCamera", "/changePass", "/verifi", "/news"];
 
   const showBackground =
     !noBgExact.includes(location.pathname) &&

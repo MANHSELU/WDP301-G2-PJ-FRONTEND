@@ -43,7 +43,7 @@ function FormatMessage({ text }: { text: string }) {
 
         // Dòng bullet: "• Tìm chuyến..."
         if (trimmed.startsWith("•") || trimmed.startsWith("-")) {
-          const content = trimmed.replace(/^[•\-]\s*/, "");
+          const content = trimmed.replace(/^[•-]\s*/, "");
           return (
             <div key={i} className="flex items-start gap-1.5 pl-1">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#f7a53a]" />
@@ -166,8 +166,8 @@ function buildSeatMap(
           const state = bookedSeats.includes(code)
             ? "SOLD"
             : selectedSeats.includes(code)
-            ? "SELECTED"
-            : "EMPTY";
+              ? "SELECTED"
+              : "EMPTY";
           colSeats.push({ code, floor: f, state });
         }
         rowColumns.push({ columnName: col.name, seats: colSeats });
@@ -265,11 +265,10 @@ function SeatLayoutDiagram({ context }: { context: ChatContext }) {
               <button
                 key={f.floor}
                 onClick={() => setActiveFloor(f.floor)}
-                className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition ${
-                  activeFloor === f.floor
+                className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition ${activeFloor === f.floor
                     ? "bg-gradient-to-br from-[#f7a53a] to-[#e8791c] text-white"
                     : "bg-[#f3f4f6] text-[#6b7280] hover:bg-[#e5e7eb]"
-                }`}
+                  }`}
               >
                 Tầng {f.floor}
               </button>
@@ -294,7 +293,7 @@ function SeatLayoutDiagram({ context }: { context: ChatContext }) {
               cells.push(
                 <div key="driver" className="flex h-[28px] w-[44px] items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+                    <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
                   </svg>
                 </div>
               );
@@ -303,7 +302,7 @@ function SeatLayoutDiagram({ context }: { context: ChatContext }) {
               cells.push(
                 <div key="door" className="flex h-[28px] w-[44px] items-center justify-center">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" />
                   </svg>
                 </div>
               );
@@ -509,17 +508,16 @@ export default function ChatBoxV2() {
                 <p className="text-sm font-black text-white">Trợ lý đặt vé</p>
                 <p className="text-[11px] text-white/70">
                   {context.step
-                    ? `Bước: ${
-                        context.step === "select_route"
-                          ? "Chọn tuyến"
-                          : context.step === "select_trip"
-                          ? "Chọn chuyến"
-                          : context.step === "select_seat"
+                    ? `Bước: ${context.step === "select_route"
+                      ? "Chọn tuyến"
+                      : context.step === "select_trip"
+                        ? "Chọn chuyến"
+                        : context.step === "select_seat"
                           ? "Chọn ghế"
                           : context.step === "confirm_booking"
-                          ? "Xác nhận đặt vé"
-                          : "Hỗ trợ"
-                      }`
+                            ? "Xác nhận đặt vé"
+                            : "Hỗ trợ"
+                    }`
                     : "Luôn sẵn sàng hỗ trợ"}
                 </p>
               </div>
@@ -546,17 +544,15 @@ export default function ChatBoxV2() {
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`flex items-end gap-2 ${
-                  msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                }`}
+                className={`flex items-end gap-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"
+                  }`}
               >
                 {/* AVATAR */}
                 <div
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-                    msg.role === "assistant"
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${msg.role === "assistant"
                       ? "bg-gradient-to-br from-[#f7a53a] to-[#e8791c]"
                       : "bg-[#e5e7eb]"
-                  }`}
+                    }`}
                 >
                   {msg.role === "assistant" ? (
                     <Bot size={14} className="text-white" />
@@ -567,11 +563,10 @@ export default function ChatBoxV2() {
 
                 {/* BUBBLE */}
                 <div
-                  className={`max-w-[75%] rounded-[14px] px-3 py-2 text-sm leading-relaxed ${
-                    msg.role === "user"
+                  className={`max-w-[75%] rounded-[14px] px-3 py-2 text-sm leading-relaxed ${msg.role === "user"
                       ? "rounded-br-[4px] bg-gradient-to-br from-[#f7a53a] to-[#e8791c] text-white whitespace-pre-line"
                       : "rounded-bl-[4px] bg-[#f3f4f6] text-[#1f2937]"
-                  }`}
+                    }`}
                 >
                   {msg.role === "assistant" ? (
                     <FormatMessage text={msg.content} />

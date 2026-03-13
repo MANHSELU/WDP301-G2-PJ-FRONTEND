@@ -185,6 +185,7 @@ export default function BusBookingUI() {
             setBookedLabels(seatList);
             setConfirmedOrderId(data?.data?._id || data?.order?._id || null);
             setBookingConfirmed(true);
+            navigate("/user/orderhistory")
         } catch (err) {
             console.error("[handleBooking]", err);
             setErrorMsg("Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.");

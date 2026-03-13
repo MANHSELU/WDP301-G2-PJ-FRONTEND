@@ -42,6 +42,7 @@ import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageTrip from "./pages/Admin/ManageTrip";
 import FaceVerificationPhuXe from "./pages/Phuxe/VerifileCam";
 import ChatBox from "./pages/Customer/ChatBoxV2";
+import News from "./pages/Customer/News";
 export default function App() {
   const location = useLocation();
   const isCustomerPage = !location.pathname.startsWith("/admin") &&
@@ -78,7 +79,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/lichtrinh" element={<LichTrinh />} />
           <Route path="/lichtrinhdetail" element={<BusTripSearch />} />
-
+          <Route path="/news" element={<News />} />
           <Route path="/datve" element={<BusSeatSelection />} />
           <Route path="/dathang" element={<ShippingCart />} />
           <Route path="/chitietdathang" element={<CheckoutPage />} />
