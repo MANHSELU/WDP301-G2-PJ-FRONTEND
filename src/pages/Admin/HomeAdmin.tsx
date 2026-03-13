@@ -148,9 +148,9 @@ export default function HomeAdmin() {
           </span>
           <div>
             <p className="text-[14px] font-black leading-none text-[#111827]">
-              {users.name}
+              {users?.name}
             </p>
-            <p className="mt-1 text-[11px] text-[#9ca3af]">{users.phone}</p>
+            <p className="mt-1 text-[11px] text-[#9ca3af]">{users?.phone}</p>
           </div>
         </div>
 
