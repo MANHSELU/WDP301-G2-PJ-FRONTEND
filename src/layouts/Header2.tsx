@@ -43,7 +43,7 @@ export default function Header2() {
     { name: "Gửi hàng", path: "/dathang" },
   ];
   const location = useLocation();
-  const noBgExact = ["/loginCamera", "/registerCamera", "/changePass"];
+  const noBgExact = ["/loginCamera", "/registerCamera", "/changePass", "/verifi"];
 
   const showBackground =
     !noBgExact.includes(location.pathname) &&
