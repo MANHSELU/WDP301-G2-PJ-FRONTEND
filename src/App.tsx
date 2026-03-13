@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { HomePage } from "./pages/Customer/HomePage";
 import BustripLogin from "./pages/Customer/LoginPage";
 import BustripRegister from "./pages/Customer/RegisterPage";
@@ -39,7 +39,14 @@ import CreateTrip from "./pages/Admin/CreateTrips";
 import AssistantShiftsPage from "./pages/Phuxe/DanhSachCalai";
 import DriverShiftsPage from "./pages/Driver/DanhSachCaLai"
 import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
+import ChatBox from "./pages/Customer/ChatBox";
+
 export default function App() {
+  const location = useLocation(); 
+    const isCustomerPage = !location.pathname.startsWith("/admin") &&
+    !location.pathname.startsWith("/driverBooking") &&
+    !location.pathname.startsWith("/assistant") &&
+    !location.pathname.startsWith("/letan");
   return (
     <>
       <Routes>
@@ -104,8 +111,10 @@ export default function App() {
             <Route path="ticketBooking" element={<TicketBooking />} />
             <Route path="cargoBooking" element={<CargoBooking />} />
           </Route>
+         
         </Route>
       </Routes>
+     {isCustomerPage && <ChatBox />}
     </>
   );
 }
