@@ -38,8 +38,7 @@ export default function Header2() {
   const navItems = [
     { name: "Trang chủ", path: "/" },
     { name: "Lịch trình", path: "/lichtrinh" },
-    { name: "Tra cứu vé", path: "/tra-cuu" },
-    { name: "Hóa đơn", path: "/hoa-don" },
+    { name: "Tra cứu vé", path: "/user/orderhistory" },
     { name: "Tin tức", path: "/tin-tuc" },
     { name: "Gửi hàng", path: "/dathang" },
   ];

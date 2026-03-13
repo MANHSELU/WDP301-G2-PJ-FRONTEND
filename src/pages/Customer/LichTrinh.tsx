@@ -93,6 +93,22 @@ export default function LichTrinh() {
     navigate("/lichtrinhdetail", { state: { id } });
   };
 
+  useEffect(() => {
+    const fetchRoutesToday = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/customer/notcheck/view-route");
+        const data = await response.json();
+
+        if (data.success) {
+          setTrips(data.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy routes hôm nay:", error);
+      }
+    };
+
+    fetchRoutesToday();
+  }, []);
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
       {/* Background */}
@@ -302,7 +318,7 @@ export default function LichTrinh() {
                       </div>
                       <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">
                         {trip?.estimated_duration
-                          ? `${Math.floor(trip.estimated_duration / 60)}h${trip.estimated_duration % 60 > 0 ? trip.estimated_duration % 60 + "m" : ""}`
+                          ? `${Math.ceil(trip.estimated_duration)}h`
                           : "---"}
                       </div>
                       <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">---</div>
