@@ -103,19 +103,17 @@ function StationCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick?.()}
-      className={`flex w-full cursor-grab items-start justify-between gap-2 rounded-[8px] border px-3 py-2.5 text-left transition active:cursor-grabbing ${
-        selected
-          ? "border-[#e8791c] bg-[#F7E6D6]"
-          : "border-[#d9e0ea] bg-white hover:border-[#cfd6e2]"
-      } ${isDragging ? "opacity-50" : ""}`}
+      className={`flex w-full cursor-grab items-start justify-between gap-2 rounded-[8px] border px-3 py-2.5 text-left transition active:cursor-grabbing ${selected
+        ? "border-[#e8791c] bg-[#F7E6D6]"
+        : "border-[#d9e0ea] bg-white hover:border-[#cfd6e2]"
+        } ${isDragging ? "opacity-50" : ""}`}
     >
       <div className="flex min-w-0 items-start gap-3">
         <span
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[11px] font-black ${
-            selected
-              ? "bg-[#e8791c]/20 text-[#c55a14]"
-              : "bg-[#e8ecf1] text-[#6b7280]"
-          }`}
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[11px] font-black ${selected
+            ? "bg-[#e8791c]/20 text-[#c55a14]"
+            : "bg-[#e8ecf1] text-[#6b7280]"
+            }`}
         >
           {order}
         </span>
@@ -128,9 +126,8 @@ function StationCard({
             {name}
           </h3>
           <p
-            className={`mt-1 truncate text-[9px] font-black uppercase tracking-[0.08em] ${
-              selected ? "text-[#6b7280]" : "text-[#9ca6b7]"
-            }`}
+            className={`mt-1 truncate text-[9px] font-black uppercase tracking-[0.08em] ${selected ? "text-[#6b7280]" : "text-[#9ca6b7]"
+              }`}
           >
             Cách khoảng {distance.toFixed(2)} km và khoảng{" "}
             {formatHourMinute(duration_from_start)} bắt đầu từ điểm xuất
@@ -139,11 +136,10 @@ function StationCard({
         </div>
       </div>
       <span
-        className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
-          selected
-            ? "border-2 border-[#e8791c] bg-white"
-            : "border border-[#bcc6d5] bg-white"
-        }`}
+        className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${selected
+          ? "border-2 border-[#e8791c] bg-white"
+          : "border border-[#bcc6d5] bg-white"
+          }`}
       >
         {selected ? (
           <Check size={10} className="text-[#e8791c]" strokeWidth={3} />
@@ -386,7 +382,7 @@ export default function CreateRoute() {
                       <option value="">Chọn điểm xuất phát</option>
                       {stops.map((stop) => (
                         <option key={stop._id} value={stop._id}>
-                          {stop.name} - {stop.province}
+                          {stop.province}
                         </option>
                       ))}
                     </select>
@@ -416,7 +412,7 @@ export default function CreateRoute() {
                       <option value="">Chọn điểm xuất phát</option>
                       {stops.map((stop) => (
                         <option key={stop._id} value={stop._id}>
-                          {stop.name} - {stop.province}
+                          {stop.province}
                         </option>
                       ))}
                     </select>
@@ -679,11 +675,10 @@ export default function CreateRoute() {
             >
               <div className="flex items-start gap-3">
                 <span
-                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${
-                    notice.type === "success"
-                      ? "bg-[#ecfdf3] text-[#16a34a]"
-                      : "bg-[#fff7ed] text-[#ea580c]"
-                  }`}
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
+                    ? "bg-[#ecfdf3] text-[#16a34a]"
+                    : "bg-[#fff7ed] text-[#ea580c]"
+                    }`}
                   style={{
                     animation:
                       notice.type === "success"

@@ -170,7 +170,6 @@ export default function BusTripSearch() {
   const [trips, setTrip] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [openSchedule, setOpenSchedule] = useState<string | null>(null);
-  // ===== Mobile filter drawer =====
   const [filterOpen, setFilterOpen] = useState(false);
 
   const timeSlots = ["Sáng sớm: 0h - 6h", "Buổi Sáng: 6h - 12h", "Buổi Chiều: 12h - 18h", "Buổi Tối: 18h - 24h"];
@@ -256,7 +255,7 @@ export default function BusTripSearch() {
         </div>
       </div>
 
-      {/* ===== Hero - compact mobile ===== */}
+      {/* ===== Hero ===== */}
       <div className="relative z-20 mx-auto flex w-full max-w-[1240px] items-center px-4
                       min-h-[200px] pt-20 pb-4
                       md:min-h-[520px] md:pt-24 md:pb-16
@@ -271,7 +270,6 @@ export default function BusTripSearch() {
               <span className="hero-title-shimmer">Dễ Dàng</span>
             </span>
           </h1>
-          {/* Subtitle ẩn mobile */}
           <p className="hidden sm:block relative z-10 max-w-[510px] text-base leading-relaxed text-[#475569] lg:text-lg">
             Đặt vé mọi lúc mọi nơi, đi vững ngàn hành trình đa dạng và dịch vụ chất lượng cao nhất.
           </p>
@@ -282,7 +280,7 @@ export default function BusTripSearch() {
       <div className="relative z-20 py-4 md:py-8 pb-20">
         <div className="max-w-7xl mx-auto px-4">
 
-          {/* ===== Mobile: Filter button bar ===== */}
+          {/* Mobile filter button */}
           <div className="flex items-center justify-between mb-4 md:hidden">
             <p className="text-sm font-bold text-slate-600">{trips.length} chuyến xe</p>
             <button
@@ -299,12 +297,10 @@ export default function BusTripSearch() {
             </button>
           </div>
 
-          {/* ===== Mobile Filter Drawer ===== */}
+          {/* Mobile Filter Drawer */}
           {filterOpen && (
             <div className="fixed inset-0 z-[999] md:hidden">
-              {/* Backdrop */}
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setFilterOpen(false)} />
-              {/* Drawer */}
               <div className="absolute bottom-0 left-0 right-0 bg-[#fdf8f4] rounded-t-3xl p-5 max-h-[85vh] overflow-y-auto shadow-2xl"
                 style={{ animation: "slideUp 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
                 <div className="w-12 h-1 bg-slate-300 rounded-full mx-auto mb-5" />
@@ -321,10 +317,9 @@ export default function BusTripSearch() {
             </div>
           )}
 
-          {/* ===== Desktop: sidebar + main / Mobile: chỉ main ===== */}
           <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
 
-            {/* SIDEBAR - chỉ hiện desktop */}
+            {/* SIDEBAR desktop */}
             <aside className="hidden lg:block space-y-6">
               <FilterContent
                 selectedFilters={selectedFilters} toggleFilter={toggleFilter}
@@ -350,7 +345,7 @@ export default function BusTripSearch() {
 
                       <div className="p-4 md:p-7">
 
-                        {/* ===== DESKTOP Time row ===== */}
+                        {/* DESKTOP Time row */}
                         <div className="hidden md:flex flex-col md:flex-row items-start md:items-center mb-6 gap-6">
                           <div className="flex-1 flex items-center gap-6">
                             <div>
@@ -380,9 +375,8 @@ export default function BusTripSearch() {
                           </div>
                         </div>
 
-                        {/* ===== MOBILE Time row ===== */}
+                        {/* MOBILE Time row */}
                         <div className="md:hidden mb-4">
-                          {/* Route tên */}
                           <div className="flex items-center gap-2 mb-3">
                             <span className="font-extrabold text-orange-600 text-sm">{trip?.route_id?.start_id.province}</span>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-orange-500 flex-shrink-0">
@@ -390,7 +384,6 @@ export default function BusTripSearch() {
                             </svg>
                             <span className="font-extrabold text-orange-600 text-sm">{trip.route_id.stop_id.province}</span>
                           </div>
-                          {/* Times */}
                           <div className="flex items-center justify-between bg-orange-50/60 rounded-xl px-3 py-2.5 mb-3">
                             <div>
                               <p className="text-[10px] text-slate-400 font-semibold uppercase">Khởi hành</p>
@@ -405,7 +398,6 @@ export default function BusTripSearch() {
                               <p className="font-black text-slate-800 text-sm">{formatDateTime(trip.arrival_time)}</p>
                             </div>
                           </div>
-                          {/* Tags */}
                           <div className="flex flex-wrap gap-2">
                             <span className="bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold px-3 py-1 rounded-lg">
                               {trip?.bus_id.bus_type_id.name}
@@ -422,7 +414,7 @@ export default function BusTripSearch() {
                           </div>
                         </div>
 
-                        {/* ===== Bottom row (desktop) ===== */}
+                        {/* Bottom row desktop */}
                         <div className="hidden md:flex items-center justify-between pt-5 border-t-2 border-orange-100 gap-4">
                           <div className="flex items-center gap-3 flex-wrap">
                             <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl">
@@ -449,15 +441,20 @@ export default function BusTripSearch() {
                           </button>
                         </div>
 
-                        {/* ===== Button mobile full width ===== */}
+                        {/* Button mobile */}
                         <button onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
                           className="md:hidden w-full mt-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-bold text-sm shadow-lg transition-all duration-300">
                           Chọn chuyến →
                         </button>
                       </div>
 
-                      {/* Accordion */}
-                      <div style={{ maxHeight: isOpen ? "600px" : "0px", overflow: "hidden", transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)" }}>
+                      {/* ===== ACCORDION - FIX: scroll khi nhiều điểm dừng ===== */}
+                      <div style={{
+                        maxHeight: isOpen ? "420px" : "0px",
+                        overflowY: isOpen ? "auto" : "hidden",
+                        overflowX: "hidden",
+                        transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)",
+                      }}>
                         {isOpen && <ScheduleAccordion trip={trip} />}
                       </div>
                     </div>
