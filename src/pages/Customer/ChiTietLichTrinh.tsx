@@ -15,11 +15,15 @@ type Trip = { _id: string; route_id: RouteId; bus_id: BusId; departure_time: str
 /* ================= SCHEDULE ACCORDION ================= */
 function ScheduleAccordion({ trip }: { trip: Trip }) {
   const sortedStops = [...trip.time].sort((a, b) => a.stop_order - b.stop_order);
-  const cumulativeHours = sortedStops.reduce<number[]>((acc, stop, idx) => {
+  const firstHour =
+    sortedStops[0]?.estimated_time ??
+    (sortedStops[0] as any)?.[" estimated_time"] ??
+    0;
+
+  const cumulativeHours = sortedStops.map((stop, idx) => {
     const h = stop.estimated_time ?? (stop as any)[" estimated_time"] ?? 0;
-    acc.push(idx === 0 ? h : acc[idx - 1] + h);
-    return acc;
-  }, []);
+    return idx === 0 ? h : firstHour + h;
+  });
 
   const calcArrival = (departureTime: string, totalHours: number) => {
     const base = new Date(new Date(departureTime).getTime() + totalHours * 60 * 60 * 1000);

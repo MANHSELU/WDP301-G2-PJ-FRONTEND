@@ -302,7 +302,7 @@ export default function LichTrinh() {
                       </div>
                       <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">
                         {trip?.estimated_duration
-                          ? `${Math.floor(trip.estimated_duration / 60)}h${trip.estimated_duration % 60 > 0 ? trip.estimated_duration % 60 + "m" : ""}`
+                          ? `${Math.ceil(trip.estimated_duration)}h`
                           : "---"}
                       </div>
                       <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">---</div>
