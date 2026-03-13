@@ -40,6 +40,7 @@ import AssistantShiftsPage from "./pages/Phuxe/DanhSachCalai";
 import DriverShiftsPage from "./pages/Driver/DanhSachCaLai";
 import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageTrip from "./pages/Admin/ManageTrip";
+import News from "./pages/Customer/News";
 export default function App() {
   return (
     <>
@@ -70,6 +71,7 @@ export default function App() {
         <Route path="/" element={<Header2 />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/lichtrinh" element={<LichTrinh />} />
+          <Route path="/news" element={<News />} />
           <Route path="/lichtrinhdetail" element={<BusTripSearch />} />
 
           <Route path="/datve" element={<BusSeatSelection />} />
