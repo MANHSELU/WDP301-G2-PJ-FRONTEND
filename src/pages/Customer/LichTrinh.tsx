@@ -93,6 +93,22 @@ export default function LichTrinh() {
     navigate("/lichtrinhdetail", { state: { id } });
   };
 
+  useEffect(() => {
+    const fetchRoutesToday = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/customer/notcheck/view-route");
+        const data = await response.json();
+
+        if (data.success) {
+          setTrips(data.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy routes hôm nay:", error);
+      }
+    };
+
+    fetchRoutesToday();
+  }, []);
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
       {/* Background */}
