@@ -173,18 +173,17 @@ export default function LichTrinh() {
       </div>
 
       {/* ===== Search + Trips ===== */}
-      <div className="relative z-[100] pb-20 -mt-4 md:-mt-20">
+      <div className="relative z-[100] pb-20 -mt-4 md:-mt-36">
         <div className="max-w-7xl mx-auto px-4 py-4 md:py-8">
 
           {/* SEARCH BAR - dọc mobile / ngang desktop */}
           <div className="page-enter-search relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 via-orange-500/30 to-orange-400/20 blur-3xl -z-10 rounded-3xl" />
-            <div className="w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-orange-100 p-4 md:px-6 md:py-3
+            <div className="w-full rounded-[10px] border border-[#f2e5d8] bg-white/95 p-2.5 md:py-4 md:px-6 shadow-[0_24px_35px_-24px_rgba(251,146,60,0.9)] backdrop-blur
                             flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
 
               {/* ĐIỂM ĐI */}
-              <div className="relative" style={{ zIndex: 200 }} ref={departureRef} onClick={updateDepartureRect}>
-                <div className="flex flex-col justify-center md:border-r md:border-[#c89463] md:pr-6 md:h-[46px]">
+              <div className="relative md:pl-4" style={{ zIndex: 200 }} ref={departureRef} onClick={updateDepartureRect}>
+                <div className="flex flex-col justify-center md:border-r md:border-[#c89463] md:pr-6 md:h-[56px]">
                   <p className="text-[11px] font-bold text-[#c89463] uppercase mb-1">Điểm đi</p>
                   <div className="flex items-center gap-2 bg-orange-50/60 md:bg-transparent rounded-xl px-3 py-2 md:p-0">
                     <MapPin size={16} className="text-orange-500 flex-shrink-0" />
@@ -213,7 +212,7 @@ export default function LichTrinh() {
 
               {/* ĐIỂM ĐẾN */}
               <div className="relative" style={{ zIndex: 200 }} ref={destinationRef} onClick={updateDestinationRect}>
-                <div className="flex flex-col justify-center md:border-r md:border-[#c89463] md:pr-6 md:h-[46px]">
+                <div className="flex flex-col justify-center md:border-r md:border-[#c89463] md:pr-6 md:h-[56px]">
                   <p className="text-[11px] font-bold text-[#c89463] uppercase mb-1">Điểm đến</p>
                   <div className="flex items-center gap-2 bg-orange-50/60 md:bg-transparent rounded-xl px-3 py-2 md:p-0">
                     <MapPin size={16} className="text-orange-500 flex-shrink-0" />
@@ -241,7 +240,7 @@ export default function LichTrinh() {
               </div>
 
               {/* NGÀY ĐI */}
-              <div className="flex flex-col justify-center md:flex-1 md:h-[56px]">
+              <div className="flex flex-col justify-center md:flex-1 md:h-[56px] md:pl-2">
                 <p className="text-[11px] font-bold text-[#c89463] uppercase mb-1">Ngày đặt vé</p>
                 <div className="flex items-center gap-2 bg-orange-50/60 md:bg-transparent rounded-xl px-3 py-2 md:p-0">
                   <CalendarDays size={16} className="text-orange-500 flex-shrink-0" />
@@ -253,12 +252,11 @@ export default function LichTrinh() {
 
               {/* Search Button */}
               <button
-                className="w-full md:w-auto h-[48px] md:h-[56px] px-7 flex items-center justify-center
-                           bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-bold
-                           rounded-xl shadow-md hover:shadow-lg transition relative overflow-hidden group"
+                className="w-full md:w-auto min-h-[48px] md:min-h-[60px] px-8 flex items-center justify-center
+                           bg-gradient-to-r from-[#f7a53a] to-[#e8791c] text-white text-sm font-bold
+                           rounded-[8px] shadow-[0_18px_30px_-14px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
                 onClick={() => reSearch()}>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <span className="relative z-10">Tìm kiếm</span>
+                Tìm kiếm
               </button>
             </div>
           </div>
@@ -323,9 +321,9 @@ export default function LichTrinh() {
                       </div>
                       <div className="text-slate-800 font-semibold px-5 text-base min-w-[90px] text-center bg-slate-50 py-2 rounded-xl">---</div>
                       <button
-                        className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-8 py-3.5 rounded-xl font-bold text-base whitespace-nowrap transition-all hover:shadow-2xl hover:shadow-orange-500/40 hover:scale-105 duration-300 relative overflow-hidden"
+                        className="bg-gradient-to-r from-[#f7a53a] to-[#e8791c] hover:from-[#f8af4f] hover:to-[#ef8a31] text-white px-8 py-3.5 rounded-[8px] font-bold text-base whitespace-nowrap shadow-[0_18px_30px_-14px_rgba(216,113,28,0.95)] transition duration-200 hover:scale-105"
                         onClick={() => { if (trip?._id) lichtrinh(trip._id); }}>
-                        <span className="relative z-10">Tìm xe</span>
+                        Tìm xe
                       </button>
                     </div>
 
@@ -363,7 +361,7 @@ export default function LichTrinh() {
 
                       {/* Button full width mobile */}
                       <button
-                        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-bold text-sm transition-all hover:shadow-lg duration-300"
+                        className="w-full bg-gradient-to-r from-[#f7a53a] to-[#e8791c] hover:from-[#f8af4f] hover:to-[#ef8a31] text-white py-3 rounded-[8px] font-bold text-sm shadow-[0_18px_30px_-14px_rgba(216,113,28,0.95)] transition duration-200"
                         onClick={() => { if (trip?._id) lichtrinh(trip._id); }}>
                         Tìm xe →
                       </button>

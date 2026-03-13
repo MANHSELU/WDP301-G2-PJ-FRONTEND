@@ -176,7 +176,7 @@ export default function Home2() {
       </div>
 
       {/* ===== Search Box ===== */}
-      <section className="page-enter-search relative z-30 -mt-2 md:-mt-14 bg-gradient-to-b from-transparent via-[#ece7e2]/75 to-[#ece7e2]">
+      <section className="page-enter-search relative z-30 -mt-2 md:-mt-28 bg-gradient-to-b from-transparent via-[#ece7e2]/75 to-[#ece7e2]">
         <div className="mx-auto w-full max-w-[1460px] px-3">
           <div className="w-full rounded-[10px] border border-[#f2e5d8] bg-white/95 p-2.5 shadow-[0_24px_35px_-24px_rgba(251,146,60,0.9)] backdrop-blur">
 
@@ -191,7 +191,7 @@ export default function Home2() {
                 <Link to="/lichtrinhdetail" className="block">
                   <button
                     type="button"
-                    className="w-full md:m-1.5 md:w-auto min-h-[48px] md:min-h-[52px] rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-8 text-sm font-bold text-white shadow-[0_18px_30px_-14px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
+                    className="w-full md:m-1.5 md:w-auto min-h-[48px] md:min-h-[60px] rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-8 text-sm font-bold text-white shadow-[0_18px_30px_-14px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
                   >
                     Tìm kiếm
                   </button>

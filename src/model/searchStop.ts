@@ -9,3 +9,4 @@ export interface searchStops{
     distance : number,
     selected: boolean
 }
+

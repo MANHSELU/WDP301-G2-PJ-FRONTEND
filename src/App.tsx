@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { HomePage } from "./pages/Customer/HomePage";
 import BustripLogin from "./pages/Customer/LoginPage";
 import BustripRegister from "./pages/Customer/RegisterPage";
@@ -41,7 +41,13 @@ import DriverShiftsPage from "./pages/Driver/DanhSachCaLai";
 import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageTrip from "./pages/Admin/ManageTrip";
 import FaceVerificationPhuXe from "./pages/Phuxe/VerifileCam";
+import ChatBox from "./pages/Customer/ChatBoxV2";
 export default function App() {
+  const location = useLocation();
+  const isCustomerPage = !location.pathname.startsWith("/admin") &&
+    !location.pathname.startsWith("/driverBooking") &&
+    !location.pathname.startsWith("/assistant") &&
+    !location.pathname.startsWith("/letan");
   return (
     <>
       <Routes>
@@ -112,6 +118,7 @@ export default function App() {
           </Route>
         </Route>
       </Routes>
+      {isCustomerPage && <ChatBox />}
     </>
   );
 }
