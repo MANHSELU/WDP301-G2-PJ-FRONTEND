@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Armchair, MapPin, Navigation, Loader2, ArrowRight, X, Copy, CheckCircle, Clock } from "lucide-react";
 
@@ -15,8 +15,6 @@ type LocationPoint = {
 };
 
 /* ================= CONFIG ================= */
-// ⚠️ Set trong .env: VITE_BANK_ACCOUNT=xxx VITE_BANK_NAME=MBBank
-// Hoặc thay thẳng vào string bên dưới
 const BANK_ACCOUNT: string = (import.meta as any).env?.VITE_BANK_ACCOUNT ?? "SO_TAI_KHOAN";
 const BANK_NAME: string = (import.meta as any).env?.VITE_BANK_NAME ?? "MBBank";
 
@@ -29,7 +27,6 @@ function decodeJwt(token: string): Record<string, any> | null {
 }
 
 function makeTransferContent(orderId: string): string {
-    // Nội dung chuyển khoản — SePay sẽ match với field `transaction_content`
     return `DATVE ${orderId}`;
 }
 
@@ -69,6 +66,10 @@ function QRModal({
     const [elapsed, setElapsed] = useState(0);
     const TIMEOUT = 10 * 60;
 
+    // ✅ FIX: Giữ ref đến onPaid mới nhất, tránh stale closure
+    const onPaidRef = useRef(onPaid);
+    useEffect(() => { onPaidRef.current = onPaid; }, [onPaid]);
+
     const qrUrl = `https://qr.sepay.vn/img?acc=${BANK_ACCOUNT}&bank=${BANK_NAME}&amount=${amount}&des=${encodeURIComponent(transferContent)}&template=compact&download=false`;
     const fallbackQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`BankName:${BANK_NAME}|Account:${BANK_ACCOUNT}|Amount:${amount}|Content:${transferContent}`)}&color=1a1a2e&bgcolor=ffffff&margin=10`;
 
@@ -76,6 +77,7 @@ function QRModal({
         navigator.clipboard.writeText(text).then(() => { setCopied(key); setTimeout(() => setCopied(null), 2000); });
     };
 
+    // ✅ FIX: Polling — dùng ref gọi callback, không phụ thuộc vào onPaid prop
     useEffect(() => {
         if (status !== "waiting") return;
         const interval = setInterval(async () => {
@@ -86,17 +88,25 @@ function QRModal({
                 });
                 const data = await res.json();
                 if (data?.data?.payment_status === "PAID" || data?.data?.order_status === "PAID") {
-                    setStatus("paid"); clearInterval(interval); setTimeout(onPaid, 1400);
+                    setStatus("paid");
+                    clearInterval(interval);
+                    // ✅ Dùng ref để gọi callback mới nhất, tránh stale closure
+                    setTimeout(() => onPaidRef.current(), 1400);
                 }
             } catch { /* ignore */ }
         }, 3000);
         return () => clearInterval(interval);
-    }, [orderId, status, onPaid]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [orderId, status]); // ✅ Không có onPaid trong deps nữa
 
+    // Đếm ngược timeout
     useEffect(() => {
         if (status !== "waiting") return;
         const t = setInterval(() => {
-            setElapsed(e => { if (e + 1 >= TIMEOUT) { setStatus("timeout"); clearInterval(t); } return e + 1; });
+            setElapsed(e => {
+                if (e + 1 >= TIMEOUT) { setStatus("timeout"); clearInterval(t); }
+                return e + 1;
+            });
         }, 1000);
         return () => clearInterval(t);
     }, [status]);
@@ -171,9 +181,7 @@ function QRModal({
 
                     {/* LEFT — QR square */}
                     <div className="flex-shrink-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-orange-50/40 p-6 sm:w-[260px] border-b sm:border-b-0 sm:border-r border-slate-100">
-                        {/* QR container */}
                         <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-white" style={{ width: 200, height: 200 }}>
-                            {/* Paid overlay */}
                             {status === "paid" && (
                                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-green-500/95 rounded-2xl gap-2">
                                     <CheckCircle size={48} className="text-white" />
@@ -183,7 +191,6 @@ function QRModal({
                             <QRImage qrUrl={qrUrl} fallbackUrl={fallbackQrUrl} transferContent={transferContent} />
                         </div>
 
-                        {/* Bank logo + name badge */}
                         <div className="mt-3 flex items-center gap-2 bg-white rounded-full px-3 py-1.5 shadow-sm border border-slate-100">
                             <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-[10px] text-white font-black flex-shrink-0">🏦</div>
                             <span className="text-xs font-black text-slate-700">{BANK_NAME}</span>
@@ -191,7 +198,6 @@ function QRModal({
                             <span className="text-xs font-mono font-bold text-slate-600">{BANK_ACCOUNT}</span>
                         </div>
 
-                        {/* Polling dot */}
                         {status === "waiting" && (
                             <div className="mt-3 flex items-center gap-1.5 text-slate-400 text-[11px]">
                                 <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
@@ -266,13 +272,14 @@ export default function BusBookingUI() {
     const [paymentMethod, setPaymentMethod] = useState<"CASH_ON_BOARD" | "ONLINE">("CASH_ON_BOARD");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [showSuccess, setShowSuccess] = useState(false);
     const [bookingConfirmed, setBookingConfirmed] = useState(false);
     const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null);
     const [bookedLabels, setBookedLabels] = useState<string[]>([]);
-    // QR modal state
     const [showQR, setShowQR] = useState(false);
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+
+    // ✅ Toast state cho thanh toán online
+    const [showPaymentSuccessToast, setShowPaymentSuccessToast] = useState(false);
 
     const seatList: string[] = selectedSeatLabels.length > 0 ? selectedSeatLabels : selectedSeats;
     const selectedCount = seatList.length;
@@ -370,11 +377,9 @@ export default function BusBookingUI() {
             setConfirmedOrderId(orderId);
 
             if (paymentMethod === "ONLINE") {
-                // Hiện QR modal — polling sẽ tự xử lý
                 setPendingOrderId(orderId);
                 setShowQR(true);
             } else {
-                // Tiền mặt trên xe → thành công luôn
                 setBookingConfirmed(true);
             }
         } catch (err) {
@@ -385,11 +390,16 @@ export default function BusBookingUI() {
         }
     };
 
-    /* ─── Khi webhook xác nhận payment → polling trả về PAID ─── */
-    const handlePaymentConfirmed = () => {
+    /* ─── ✅ FIX: Khi polling xác nhận PAID ─── */
+    const handlePaymentConfirmed = useCallback(() => {
         setShowQR(false);
-        setBookingConfirmed(true);
-    };
+        setShowPaymentSuccessToast(true);
+        // Hiện toast 2.2s rồi chuyển sang màn xác nhận, sau đó navigate về home
+        setTimeout(() => {
+            setShowPaymentSuccessToast(false);
+            setBookingConfirmed(true);
+        }, 2200);
+    }, []);
 
     const tripInfoRows = [
         { label: "Tuyến xe", value: routeLabel },
@@ -465,6 +475,14 @@ export default function BusBookingUI() {
     /* ════════════ MAIN BOOKING VIEW ════════════ */
     return (
         <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100">
+
+            {/* ✅ Toast thanh toán thành công */}
+            {showPaymentSuccessToast && (
+                <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3 bg-green-500 text-white px-6 py-3.5 rounded-2xl shadow-2xl animate-bounce">
+                    <CheckCircle size={22} />
+                    <span className="font-black text-base">Thanh toán thành công! 🎉 Đang chuyển hướng...</span>
+                </div>
+            )}
 
             {/* QR Modal */}
             {showQR && pendingOrderId && (
@@ -722,7 +740,6 @@ export default function BusBookingUI() {
                                         </button>
                                     ))}
                                 </div>
-                                {/* ONLINE hint */}
                                 {paymentMethod === "ONLINE" && (
                                     <div className="mt-3 flex items-start gap-2 px-3 py-2.5 bg-blue-50 border border-blue-200 rounded-xl">
                                         <span className="text-blue-500 mt-0.5 flex-shrink-0">ℹ️</span>
