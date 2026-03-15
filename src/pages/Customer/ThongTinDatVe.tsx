@@ -380,7 +380,7 @@ export default function BusBookingUI() {
                 setPendingOrderId(orderId);
                 setShowQR(true);
             } else {
-                setBookingConfirmed(true);
+                navigate("/user/orderhistory");
             }
         } catch (err) {
             console.error(err);
@@ -397,7 +397,7 @@ export default function BusBookingUI() {
         // Hiện toast 2.2s rồi chuyển sang màn xác nhận, sau đó navigate về home
         setTimeout(() => {
             setShowPaymentSuccessToast(false);
-            setBookingConfirmed(true);
+            navigate("/user/orderhistory");
         }, 2200);
     }, []);
 
