@@ -43,6 +43,8 @@ import ManageTrip from "./pages/Admin/ManageTrip";
 import FaceVerificationPhuXe from "./pages/Phuxe/VerifileCam";
 import ChatBox from "./pages/Customer/ChatBoxV2";
 import News from "./pages/Customer/News";
+import ReceptionistPage from "./pages/LeTan/DanhSachChuyenDi";
+import StaffBookingAll from "./pages/LeTan/DatVeChoKhach";
 export default function App() {
   const location = useLocation();
   const isCustomerPage = !location.pathname.startsWith("/admin") &&
@@ -110,11 +112,11 @@ export default function App() {
             <Route path="chitietchuyendi" element={<ChiTietChuyenDi />} />
           </Route>
           <Route path="letan" element={<TripListPageLeTan />}>
-            <Route path="chuyendi" element={<DanhSachChuyenDi />} />
+            <Route path="chuyendi" element={<ReceptionistPage />} />
             {/* <Route path="chitietchuyendi" element={<TripDetailPage />} /> */}
 
             <Route path="CargoOrderList" element={<CargoOrderList />} />
-            <Route path="ticketBooking" element={<TicketBooking />} />
+            <Route path="ticketBooking" element={<StaffBookingAll />} />
             <Route path="cargoBooking" element={<CargoBooking />} />
           </Route>
         </Route>

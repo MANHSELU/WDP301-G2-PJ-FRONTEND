@@ -84,7 +84,7 @@ const BustripLogin = () => {
       const roleName = dataProfile.data.role?.name;
 
       if (roleName === "RECEPTIONIST") {
-        navigate("/admin");
+        navigate("/letan");
       }
       else if (roleName === "ADMIN") {
         navigate("/admin");
