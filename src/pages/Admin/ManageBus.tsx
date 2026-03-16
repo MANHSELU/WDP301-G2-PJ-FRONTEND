@@ -192,7 +192,7 @@ const ManageBus: React.FC = () => {
     try {
       const token = localStorage.getItem("accessToken") ?? "";
       const url =
-        "http://localhost:3000/api/admin/check/buses?page=1&limit=200";
+        "http://localhost:3000/api/admin/check/viewBuses?page=1&limit=200";
       const res = await fetch(url, {
         method: "GET",
         headers: {
