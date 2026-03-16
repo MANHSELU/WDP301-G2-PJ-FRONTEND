@@ -192,7 +192,7 @@ const ManageBus: React.FC = () => {
     try {
       const token = localStorage.getItem("accessToken") ?? "";
       const url =
-        "http://localhost:3000/api/admin/check/buses?page=1&limit=200";
+        "http://localhost:3000/api/admin/check/viewBuses?page=1&limit=200";
       const res = await fetch(url, {
         method: "GET",
         headers: {
@@ -217,15 +217,15 @@ const ManageBus: React.FC = () => {
           typeof typeObj === "object" && typeObj !== null
             ? (typeObj as BusTypeModel).name ?? "N/A"
             : typeof typeObj === "string"
-            ? typeObj
-            : "N/A";
+              ? typeObj
+              : "N/A";
 
         const typeId =
           typeof typeObj === "object" && typeObj !== null
             ? (typeObj as BusTypeModel)._id
             : typeof typeObj === "string"
-            ? typeObj
-            : undefined;
+              ? typeObj
+              : undefined;
 
         const seats =
           Number(
@@ -564,11 +564,10 @@ const ManageBus: React.FC = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === tab
-                    ? "bg-orange-500 text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab
+                  ? "bg-orange-500 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                  }`}
               >
                 {tab}
                 {tab !== "Tất cả" && (
