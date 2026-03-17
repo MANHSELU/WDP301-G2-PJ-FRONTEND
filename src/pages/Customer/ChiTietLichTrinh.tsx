@@ -19,12 +19,10 @@ function ScheduleAccordion({ trip }: { trip: Trip }) {
     sortedStops[0]?.estimated_time ??
     (sortedStops[0] as any)?.[" estimated_time"] ??
     0;
-
   const cumulativeHours = sortedStops.map((stop, idx) => {
     const h = stop.estimated_time ?? (stop as any)[" estimated_time"] ?? 0;
     return idx === 0 ? h : firstHour + h;
   });
-
   const calcArrival = (departureTime: string, totalHours: number) => {
     const base = new Date(new Date(departureTime).getTime() + totalHours * 60 * 60 * 1000);
     const time = base.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
@@ -32,7 +30,6 @@ function ScheduleAccordion({ trip }: { trip: Trip }) {
     const month = String(base.getMonth() + 1).padStart(2, "0");
     return { time, date: `${day}-${month}` };
   };
-
   return (
     <div className="schedule-expand border-t-2 border-orange-100">
       <div className="px-4 md:px-7 pt-5 pb-6 bg-gradient-to-b from-orange-50/40 to-white">
@@ -103,7 +100,6 @@ function FilterContent({
           </button>
         </div>
       )}
-
       {/* Giờ đi */}
       <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-4 md:p-6">
         <h3 className="font-bold text-base text-slate-800 mb-3 flex items-center gap-2">
@@ -119,7 +115,6 @@ function FilterContent({
           ))}
         </div>
       </div>
-
       {/* Loại xe */}
       <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-4 md:p-6">
         <h3 className="font-bold text-base text-slate-800 mb-3 flex items-center gap-2">
@@ -135,7 +130,6 @@ function FilterContent({
           ))}
         </div>
       </div>
-
       {/* Tầng */}
       <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-4 md:p-6">
         <h3 className="font-bold text-base text-slate-800 mb-3 flex items-center gap-2">
@@ -151,7 +145,6 @@ function FilterContent({
           ))}
         </div>
       </div>
-
       <button onClick={onReset}
         className="w-full bg-gradient-to-br from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md">
         Đặt lại
@@ -165,7 +158,6 @@ export default function BusTripSearch() {
   const location = useLocation();
   const id = location.state?.id;
   const navigate = useNavigate();
-
   const [selectedFilters, setSelectedFilters] = useState({ timeSlots: [] as string[], busTypes: [] as string[], tiers: [] as string[] });
   const [trips, setTrip] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -182,7 +174,6 @@ export default function BusTripSearch() {
       [category]: prev[category].includes(value) ? prev[category].filter((item) => item !== value) : [...prev[category], value],
     }));
   };
-
   const resetFilters = () => setSelectedFilters({ timeSlots: [], busTypes: [], tiers: [] });
 
   useEffect(() => {
@@ -200,7 +191,7 @@ export default function BusTripSearch() {
       finally { setLoading(false); }
     };
     fetchTrips();
-  }, []);
+  }, [id]);
 
   const calculateDuration = (departure: string | Date | null | undefined, arrival: string | Date | null | undefined): string => {
     if (!departure || !arrival) return "N/A";
@@ -220,6 +211,7 @@ export default function BusTripSearch() {
   };
 
   const DatVe = (type_bus_id: string) => { navigate("/datve", { state: { tripId: id, bus_type_id: type_bus_id } }); };
+  const DatHang = (type_bus_id: string) => { navigate("/dathang", { state: { tripId: id, bus_type_id: type_bus_id } }); };
   const toggleSchedule = (tripId: string) => { setOpenSchedule((prev) => (prev === tripId ? null : tripId)); };
 
   if (loading) return <p className="p-6 text-center">Loading...</p>;
@@ -229,57 +221,64 @@ export default function BusTripSearch() {
       {/* Background */}
       <div className="absolute inset-0 bg-[linear-gradient(96deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.93)_34%,rgba(255,255,255,0.64)_56%,rgba(255,255,255,0.16)_78%,rgba(255,255,255,0)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#f3ece5] to-[#ece7e2]" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-[#ece7e2]" />
 
-      {/* ===== Bus - ẨN mobile ===== */}
-      <div className="hidden md:block pointer-events-none absolute top-[9%] right-0 z-10 w-[62%] max-w-[860px]">
+      {/* Bus Animation - Enhanced (merged from Ngan branch) */}
+      <div className="pointer-events-none absolute top-[18%] right-[0%] z-10 w-[66%] max-w-[860px] md:top-[9%] md:w-[62%]">
         <div className="bus-aero-overlay absolute inset-[-16%] z-0">
           <span className="bus-cloud bus-cloud-1 absolute left-[-10%] top-[-10%] h-[28%] w-[68%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.25)_54%,rgba(255,255,255,0)_100%)] blur-[30px]" />
           <span className="bus-cloud bus-cloud-2 absolute left-[-20%] top-[28%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.66)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
           <span className="bus-cloud bus-cloud-3 absolute right-[-16%] top-[34%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.18)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
           <span className="bus-cloud bus-cloud-4 absolute left-[-16%] top-[66%] h-[30%] w-[58%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.24)_54%,rgba(255,255,255,0)_100%)] blur-[28px]" />
           <span className="bus-cloud bus-cloud-5 absolute right-[-4%] top-[70%] h-[28%] w-[54%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[26px]" />
+          <span className="bus-cloud bus-cloud-6 absolute left-[4%] top-[90%] h-[16%] w-[72%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.56)_0%,rgba(255,255,255,0.14)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
         </div>
         <div className="bus-aero-trail absolute right-[-14%] top-[30%] z-0 h-[54%] w-[46%]">
           <span className="bus-tail-cloud bus-tail-cloud-1 absolute right-[10%] top-[14%] h-[42%] w-[34%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.48)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
           <span className="bus-tail-cloud bus-tail-cloud-2 absolute right-[28%] top-[28%] h-[38%] w-[32%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.84)_0%,rgba(255,255,255,0.4)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
           <span className="bus-tail-cloud bus-tail-cloud-3 absolute right-[12%] top-[50%] h-[34%] w-[30%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,rgba(255,255,255,0.36)_54%,rgba(255,255,255,0)_100%)] blur-[10px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-4 absolute right-[38%] top-[20%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.32)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-5 absolute right-[44%] top-[42%] h-[24%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.3)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
           <span className="bus-tail-cloud bus-tail-cloud-6 absolute right-[24%] top-[44%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.38)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-7 absolute right-[18%] top-[64%] h-[22%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.76)_0%,rgba(255,255,255,0.34)_54%,rgba(255,255,255,0)_100%)] blur-[9px]" />
         </div>
         <div className="bus-bob relative z-10">
           <img src="/images/bus7.png" alt="Bus overlay" className="w-full object-contain block relative"
-            style={{ imageRendering: "auto", filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))" }} />
+            style={{ imageRendering: "auto", filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))" }}
+          />
           <div className="pointer-events-none absolute inset-0">
-            <div className="bus-front-left-passenger"><img src="/images/loxe1.png" alt="Front passenger" className="bus-front-left-passenger-img" /></div>
-            <div className="bus-driver-fit"><img src="/images/1me1.png" alt="Driver" className="bus-driver-fit-img" /></div>
+            <div className="bus-front-left-passenger">
+              <img src="/images/loxe1.png" alt="Front passenger" className="bus-front-left-passenger-img" />
+            </div>
+            <div className="bus-driver-fit">
+              <img src="/images/1me1.png" alt="Driver" className="bus-driver-fit-img" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ===== Hero ===== */}
-      <div className="relative z-20 mx-auto flex w-full max-w-[1240px] items-center px-4
-                      min-h-[200px] pt-20 pb-4
-                      md:min-h-[520px] md:pt-24 md:pb-16
-                      lg:min-h-[580px] lg:pt-20">
-        <div className="page-enter-copy relative isolate w-full max-w-[760px] space-y-3 md:space-y-6 md:-ml-14 lg:-ml-24">
-          <h1 className="hero-title relative z-10 py-1 font-black leading-[1.05] tracking-[-0.03em] text-[#0d142a]
-                         text-[30px] sm:text-[48px] md:text-[58px] lg:text-[72px]">
+      {/* Hero Section */}
+      <div className="relative z-20 mx-auto flex min-h-[520px] w-full max-w-[1240px] items-center px-4 pb-16 pt-24 lg:min-h-[580px] lg:pt-20">
+        <div className="page-enter-copy relative isolate -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
+          <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[360px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0.46)_34%,rgba(255,255,255,0.18)_56%,rgba(255,255,255,0)_78%)] blur-[26px]" />
+          <div className="pointer-events-none absolute left-[46%] top-[46%] z-0 h-[300px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(248,250,252,0.46)_0%,rgba(248,250,252,0.14)_58%,rgba(248,250,252,0)_84%)] blur-[18px]" />
+          <h1 className="hero-title relative z-10 py-1 text-[48px] font-black leading-[1.05] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
             <span className="hero-title-line block whitespace-nowrap">Tìm và đặt ngay</span>
-            <span className="hero-title-line mt-1 md:mt-2 block whitespace-nowrap">những chuyến xe</span>
-            <span className="hero-title-line mt-1 md:mt-2 block whitespace-nowrap font-extrabold italic">
+            <span className="hero-title-line mt-2 block whitespace-nowrap">những chuyến xe</span>
+            <span className="hero-title-line mt-2 block whitespace-nowrap font-extrabold italic">
               <span className="text-[#0d142a]">thật</span>{" "}
               <span className="hero-title-shimmer">Dễ Dàng</span>
             </span>
           </h1>
-          <p className="hidden sm:block relative z-10 max-w-[510px] text-base leading-relaxed text-[#475569] lg:text-lg">
+          <p className="relative z-10 max-w-[510px] text-base leading-relaxed text-[#475569] lg:text-lg">
             Đặt vé mọi lúc mọi nơi, đi vững ngàn hành trình đa dạng và dịch vụ chất lượng cao nhất.
           </p>
         </div>
       </div>
 
-      {/* ===== Main Content ===== */}
-      <div className="relative z-20 py-4 md:py-8 pb-20">
+      {/* Search Results Section */}
+      <div className="relative z-20 py-8 pb-20">
         <div className="max-w-7xl mx-auto px-4">
-
           {/* Mobile filter button */}
           <div className="flex items-center justify-between mb-4 md:hidden">
             <p className="text-sm font-bold text-slate-600">{trips.length} chuyến xe</p>
@@ -318,8 +317,7 @@ export default function BusTripSearch() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
-
-            {/* SIDEBAR desktop */}
+            {/* SIDEBAR desktop - sử dụng FilterContent để nhất quán (không duplicate code) */}
             <aside className="hidden lg:block space-y-6">
               <FilterContent
                 selectedFilters={selectedFilters} toggleFilter={toggleFilter}
@@ -336,15 +334,11 @@ export default function BusTripSearch() {
                   <div key={trip._id} className="relative group"
                     style={{ animation: "fadeInUp 0.5s ease-out forwards", animationDelay: `${index * 0.1}s`, opacity: 0 }}>
                     <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-500/30 to-orange-400/0 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-
                     <div className={`bg-gradient-to-br from-white via-white to-orange-50/30 rounded-2xl shadow-xl border-2 transition-all duration-300 relative overflow-hidden
                       ${isOpen ? "border-orange-300 shadow-orange-100" : "border-orange-100/50 hover:shadow-2xl hover:border-orange-200 md:hover:-translate-y-1"}`}>
-
                       {/* Top accent */}
                       <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
-
                       <div className="p-4 md:p-7">
-
                         {/* DESKTOP Time row */}
                         <div className="hidden md:flex flex-col md:flex-row items-start md:items-center mb-6 gap-6">
                           <div className="flex-1 flex items-center gap-6">
@@ -414,47 +408,68 @@ export default function BusTripSearch() {
                           </div>
                         </div>
 
-                        {/* Bottom row desktop */}
-                        <div className="hidden md:flex items-center justify-between pt-5 border-t-2 border-orange-100 gap-4">
+                        {/* Bottom row (unified for desktop + mobile) */}
+                        <div className="flex items-center justify-between pt-5 border-t-2 border-orange-100">
                           <div className="flex items-center gap-3 flex-wrap">
                             <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl">
                               <span className="text-xs font-semibold text-slate-600">Chọn Ghế</span>
                             </div>
-                            <button onClick={() => toggleSchedule(trip._id)}
+                            <button
+                              onClick={() => toggleSchedule(trip._id)}
                               className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all duration-200 font-semibold text-xs"
-                              style={{ background: isOpen ? "#fff7ed" : "#f8fafc", borderColor: isOpen ? "#fb923c" : "#e2e8f0", color: isOpen ? "#ea580c" : "#475569" }}>
+                              style={{
+                                background: isOpen ? "#fff7ed" : "#f8fafc",
+                                borderColor: isOpen ? "#fb923c" : "#e2e8f0",
+                                color: isOpen ? "#ea580c" : "#475569",
+                              }}
+                            >
                               <MapPin size={13} className={isOpen ? "text-orange-500" : "text-slate-400"} />
                               Lịch Trình
-                              <ChevronDown size={13} className="transition-transform duration-300" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", color: isOpen ? "#f97316" : "#94a3b8" }} />
+                              <ChevronDown
+                                size={13}
+                                className="transition-transform duration-300"
+                                style={{
+                                  transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                                  color: isOpen ? "#f97316" : "#94a3b8",
+                                }}
+                              />
                             </button>
-                            <div className="bg-purple-50 px-4 py-2 rounded-xl border border-purple-200">
-                              <span className="text-xs font-bold text-purple-700">{trip?.bus_id.bus_type_id.name}</span>
+                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 px-4 py-2 rounded-xl border border-purple-200">
+                              <span className="text-xs font-bold text-purple-700">
+                                {trip?.bus_id.bus_type_id.name}
+                              </span>
                             </div>
-                            <div className="bg-green-50 px-4 py-2 rounded-xl border border-green-200">
+                            <div className="bg-gradient-to-br from-green-50 to-green-100 px-4 py-2 rounded-xl border border-green-200">
                               <span className="text-xs font-bold text-green-700">200.000 VND</span>
                             </div>
                           </div>
-                          <button onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
-                            className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-8 py-3 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn">
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
-                            <span className="relative z-10">Chọn chuyến</span>
-                          </button>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
+                              className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-9 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn"
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                              <span className="relative z-10">Đặt vé</span>
+                            </button>
+                            <button
+                              onClick={() => DatHang(trip?.bus_id?.bus_type_id?._id)}
+                              className="bg-gradient-to-br from-green-500 via-green-600 to-green-700 hover:from-green-600 hover:via-green-700 hover:to-green-800 text-white px-6 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-green-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn"
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+                              <span className="relative z-10">Gửi hàng</span>
+                            </button>
+                          </div>
                         </div>
-
-                        {/* Button mobile */}
-                        <button onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
-                          className="md:hidden w-full mt-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-bold text-sm shadow-lg transition-all duration-300">
-                          Chọn chuyến →
-                        </button>
                       </div>
 
-                      {/* ===== ACCORDION - FIX: scroll khi nhiều điểm dừng ===== */}
-                      <div style={{
-                        maxHeight: isOpen ? "420px" : "0px",
-                        overflowY: isOpen ? "auto" : "hidden",
-                        overflowX: "hidden",
-                        transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)",
-                      }}>
+                      {/* Accordion schedule */}
+                      <div
+                        style={{
+                          maxHeight: isOpen ? "600px" : "0px",
+                          overflow: "hidden",
+                          transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)",
+                        }}
+                      >
                         {isOpen && <ScheduleAccordion trip={trip} />}
                       </div>
                     </div>
@@ -467,35 +482,111 @@ export default function BusTripSearch() {
       </div>
 
       <style>{`
-        .page-enter-copy{opacity:0;will-change:transform,opacity;animation:page-fade-up 1.08s cubic-bezier(0.22,1,0.36,1) forwards;animation-delay:0.2s;}
-        .hero-title-line{opacity:0;transform:translateY(14px);animation:hero-title-reveal 1.12s cubic-bezier(0.2,0.8,0.2,1) forwards;}
-        .hero-title-line:nth-child(1){animation-delay:0.36s}.hero-title-line:nth-child(2){animation-delay:0.54s}.hero-title-line:nth-child(3){animation-delay:0.72s}
-        .hero-title-shimmer{color:#ff7a1b;display:inline-block;line-height:1.12;padding-bottom:0.14em;background-image:repeating-linear-gradient(100deg,#ff7a1b 0px,#ff7a1b 120px,#ff9226 185px,#ffb347 260px,#ff9226 335px,#ff7a1b 400px,#e8791c 520px);background-size:520px 100%;background-position:0 50%;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:hero-title-shimmer-soft 5.8s linear infinite;}
-        .bus-bob{animation:bus-bob 1.9s cubic-bezier(0.36,0.06,0.29,0.97) infinite;transform-origin:56% 74%;}
-        .bus-aero-overlay{transform:rotate(12deg);transform-origin:22% 50%;}
-        .bus-cloud{animation:bus-cloud-drift 1.75s ease-out infinite;}
-        .bus-cloud-1{animation-delay:0.06s;animation-duration:1.95s}.bus-cloud-2{animation-delay:0.26s;animation-duration:1.55s}.bus-cloud-3{animation-delay:0.42s;animation-duration:1.58s}.bus-cloud-4{animation-delay:0.62s;animation-duration:1.84s}.bus-cloud-5{animation-delay:0.78s;animation-duration:1.72s}
-        .bus-aero-trail{transform:rotate(12deg);transform-origin:22% 50%;}
-        .bus-tail-cloud{animation:bus-trail-cloud 1.55s ease-out infinite;}
-        .bus-tail-cloud-1{animation-delay:0.06s}.bus-tail-cloud-2{animation-delay:0.32s}.bus-tail-cloud-3{animation-delay:0.54s}.bus-tail-cloud-6{animation-delay:0.22s;animation-duration:1.45s}
-        .bus-driver-fit{position:absolute;left:26.3%;top:30.7%;width:11.6%;height:15.8%;overflow:hidden;clip-path:polygon(8% 1%,96% 5%,100% 95%,22% 98%,2% 56%);transform:perspective(760px) rotateY(-12deg) rotate(-0.55deg);transform-origin:54% 50%;animation:bus-driver-settle 1.9s cubic-bezier(0.36,0.06,0.29,0.97) infinite;}
-        .bus-front-left-passenger{position:absolute;left:48.4%;top:26.2%;width:11.6%;height:15.6%;overflow:hidden;clip-path:polygon(18% 2%,94% 6%,98% 95%,10% 97%,4% 52%);transform:perspective(760px) rotateY(14deg) rotate(0.7deg);transform-origin:50% 50%;animation:bus-driver-settle 2s cubic-bezier(0.36,0.06,0.29,0.97) infinite;z-index:1;}
-        .bus-front-left-passenger-img{position:absolute;left:2%;top:3%;width:130%;height:166%;object-fit:cover;object-position:center 10%;filter:saturate(0.8) contrast(1.05) brightness(0.88);opacity:0.93;transform:scaleX(-1) rotate(-2deg);animation:bus-passenger-idle 1.8s ease-in-out infinite;}
-        .bus-driver-fit-img{position:absolute;left:-2%;top:3%;width:95%;height:112%;object-fit:cover;object-position:center 8%;filter:saturate(0.82) contrast(1.08) brightness(0.9);opacity:0.95;transform:scaleX(-1) rotate(5deg);animation:bus-driver-idle 1.65s ease-in-out infinite;z-index:1;}
-        .schedule-expand{animation:expandDown 0.35s cubic-bezier(0.4,0,0.2,1);}
-        @keyframes expandDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-        @keyframes bus-bob{0%,100%{transform:translateY(0) rotate(-0.35deg)}32%{transform:translateY(-4px) rotate(0.12deg)}62%{transform:translateY(-8px) rotate(0.24deg)}82%{transform:translateY(2px) rotate(-0.16deg)}}
-        @keyframes bus-cloud-drift{0%{opacity:.2;transform:translateX(-18px) scale(.84)}36%{opacity:.76}100%{opacity:0;transform:translateX(172px) scale(1.3)}}
-        @keyframes bus-trail-cloud{0%{opacity:.62;transform:translateX(-6px) scale(.78)}34%{opacity:.96}100%{opacity:0;transform:translateX(92px) scale(1.22)}}
-        @keyframes bus-driver-settle{0%,100%{transform:perspective(760px) rotateY(-12deg) rotate(-0.55deg) translateY(0)}34%{transform:perspective(760px) rotateY(-12deg) rotate(-0.4deg) translateY(-1px)}68%{transform:perspective(760px) rotateY(-12deg) rotate(-0.75deg) translateY(1px)}}
-        @keyframes bus-driver-idle{0%,100%{transform:scaleX(-1) rotate(5deg) translateY(0)}28%{transform:scaleX(-1) rotate(4.1deg) translateY(-1px)}62%{transform:scaleX(-1) rotate(5.9deg) translateY(1px)}82%{transform:scaleX(-1) rotate(4.6deg) translateY(0)}}
-        @keyframes bus-passenger-idle{0%,100%{transform:scaleX(-1) rotate(-2deg) translateY(0)}34%{transform:scaleX(-1) rotate(-1.3deg) translateY(-1px)}72%{transform:scaleX(-1) rotate(-2.6deg) translateY(1px)}}
-        @keyframes page-fade-up{0%{opacity:0;transform:translateY(24px)}100%{opacity:1;transform:translateY(0)}}
-        @keyframes hero-title-reveal{0%{opacity:0;transform:translateY(14px);filter:blur(3px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
-        @keyframes hero-title-shimmer-soft{0%{background-position:0 50%}100%{background-position:-520px 50%}}
-        @media(prefers-reduced-motion:reduce){*{animation:none!important;opacity:1!important;transform:none!important}}
+        .page-enter-copy {
+          opacity: 0;
+          will-change: transform, opacity;
+          animation: page-fade-up 1.08s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          animation-delay: 0.2s;
+        }
+        .hero-title-line {
+          opacity: 0;
+          transform: translateY(14px);
+          animation: hero-title-reveal 1.12s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        .hero-title-line:nth-child(1) { animation-delay: 0.36s; }
+        .hero-title-line:nth-child(2) { animation-delay: 0.54s; }
+        .hero-title-line:nth-child(3) { animation-delay: 0.72s; }
+        .hero-title-shimmer {
+          color: #ff7a1b;
+          display: inline-block;
+          line-height: 1.12;
+          padding-bottom: 0.14em;
+          background-image: repeating-linear-gradient(
+            100deg, #ff7a1b 0px, #ff7a1b 120px, #ff9226 185px,
+            #ffb347 260px, #ff9226 335px, #ff7a1b 400px, #e8791c 520px
+          );
+          background-size: 520px 100%;
+          background-position: 0 50%;
+          background-repeat: repeat;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-shadow: 0 1px 0 rgba(255,181,88,0.36), 0 2px 0 rgba(234,121,27,0.38), 0 4px 0 rgba(178,76,16,0.3), 0 10px 16px rgba(94,40,9,0.22);
+          -webkit-text-stroke: 0.26px rgba(136,57,12,0.26);
+          filter: saturate(1.16) contrast(1.12) brightness(1.06);
+          animation: hero-title-shimmer-soft 5.8s linear infinite;
+          will-change: background-position;
+        }
+        .bus-bob { animation: bus-bob 1.9s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite; transform-origin: 56% 74%; will-change: transform; }
+        .bus-aero-overlay { transform: rotate(12deg); transform-origin: 22% 50%; }
+        .bus-cloud { animation: bus-cloud-drift 1.75s ease-out infinite; will-change: transform, opacity; }
+        .bus-cloud-1 { animation-delay: 0.06s; animation-duration: 1.95s; }
+        .bus-cloud-2 { animation-delay: 0.26s; animation-duration: 1.55s; }
+        .bus-cloud-3 { animation-delay: 0.42s; animation-duration: 1.58s; }
+        .bus-cloud-4 { animation-delay: 0.62s; animation-duration: 1.84s; }
+        .bus-cloud-5 { animation-delay: 0.78s; animation-duration: 1.72s; }
+        .bus-cloud-6 { animation-delay: 0.94s; animation-duration: 1.6s; }
+        .bus-aero-trail { transform: rotate(12deg); transform-origin: 22% 50%; }
+        .bus-tail-cloud { animation: bus-trail-cloud 1.55s ease-out infinite; will-change: transform, opacity; }
+        .bus-tail-cloud-1 { animation-delay: 0.06s; } .bus-tail-cloud-2 { animation-delay: 0.32s; }
+        .bus-tail-cloud-3 { animation-delay: 0.54s; } .bus-tail-cloud-4 { animation-delay: 0.76s; }
+        .bus-tail-cloud-5 { animation-delay: 0.9s; animation-duration: 1.7s; }
+        .bus-tail-cloud-6 { animation-delay: 0.22s; animation-duration: 1.45s; }
+        .bus-tail-cloud-7 { animation-delay: 0.48s; animation-duration: 1.55s; }
+        .bus-driver-fit {
+          position: absolute; left: 26.3%; top: 30.7%; width: 11.6%; height: 15.8%;
+          overflow: hidden; clip-path: polygon(8% 1%, 96% 5%, 100% 95%, 22% 98%, 2% 56%);
+          transform: perspective(760px) rotateY(-12deg) rotate(-0.55deg); transform-origin: 54% 50%;
+          box-shadow: inset 0 -14px 16px rgba(2,6,23,0.28);
+          animation: bus-driver-settle 1.9s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite;
+        }
+        .bus-front-left-passenger {
+          position: absolute; left: 48.4%; top: 26.2%; width: 11.6%; height: 15.6%;
+          overflow: hidden; clip-path: polygon(18% 2%, 94% 6%, 98% 95%, 10% 97%, 4% 52%);
+          transform: perspective(760px) rotateY(14deg) rotate(0.7deg); transform-origin: 50% 50%;
+          box-shadow: inset 0 -14px 16px rgba(2,6,23,0.34);
+          animation: bus-driver-settle 2s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite; z-index: 1;
+        }
+        .bus-front-left-passenger-img {
+          position: absolute; left: 2%; top: 3%; width: 130%; height: 166%;
+          object-fit: cover; object-position: center 10%;
+          filter: saturate(0.8) contrast(1.05) brightness(0.88); opacity: 0.93;
+          transform: scaleX(-1) rotate(-2deg); animation: bus-passenger-idle 1.8s ease-in-out infinite;
+        }
+        .bus-driver-fit-img {
+          position: absolute; left: -2%; top: 3%; width: 95%; height: 112%;
+          object-fit: cover; object-position: center 8%;
+          filter: saturate(0.82) contrast(1.08) brightness(0.9); opacity: 0.95;
+          transform: scaleX(-1) rotate(5deg); animation: bus-driver-idle 1.65s ease-in-out infinite; z-index: 1;
+        }
+        .schedule-expand { animation: expandDown 0.35s cubic-bezier(0.4,0,0.2,1); }
+        @keyframes expandDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes bus-bob {
+          0%, 100% { transform: translateY(0) rotate(-0.35deg); } 32% { transform: translateY(-4px) rotate(0.12deg); }
+          62% { transform: translateY(-8px) rotate(0.24deg); } 82% { transform: translateY(2px) rotate(-0.16deg); }
+        }
+        @keyframes bus-cloud-drift { 0% { opacity: 0.2; transform: translateX(-18px) scale(0.84); } 36% { opacity: 0.76; } 100% { opacity: 0; transform: translateX(172px) scale(1.3); } }
+        @keyframes bus-trail-cloud { 0% { opacity: 0.62; transform: translateX(-6px) scale(0.78); } 34% { opacity: 0.96; } 100% { opacity: 0; transform: translateX(92px) scale(1.22); } }
+        @keyframes bus-driver-settle {
+          0%, 100% { transform: perspective(760px) rotateY(-12deg) rotate(-0.55deg) translateY(0); }
+          34% { transform: perspective(760px) rotateY(-12deg) rotate(-0.4deg) translateY(-1px); }
+          68% { transform: perspective(760px) rotateY(-12deg) rotate(-0.75deg) translateY(1px); }
+        }
+        @keyframes bus-driver-idle {
+          0%, 100% { transform: scaleX(-1) rotate(5deg) translateY(0); } 28% { transform: scaleX(-1) rotate(4.1deg) translateY(-1px); }
+          62% { transform: scaleX(-1) rotate(5.9deg) translateY(1px); } 82% { transform: scaleX(-1) rotate(4.6deg) translateY(0); }
+        }
+        @keyframes bus-passenger-idle {
+          0%, 100% { transform: scaleX(-1) rotate(-2deg) translateY(0); } 34% { transform: scaleX(-1) rotate(-1.3deg) translateY(-1px); }
+          72% { transform: scaleX(-1) rotate(-2.6deg) translateY(1px); }
+        }
+        @keyframes page-fade-up { 0% { opacity: 0; transform: translateY(24px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes hero-title-reveal { 0% { opacity: 0; transform: translateY(14px); filter: blur(3px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
+        @keyframes hero-title-shimmer-soft { 0% { background-position: 0 50%; } 100% { background-position: -520px 50%; } }
+        input[type="checkbox"]:checked { background-color: #f97316; border-color: #f97316; }
+        @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
       `}</style>
     </div>
   );

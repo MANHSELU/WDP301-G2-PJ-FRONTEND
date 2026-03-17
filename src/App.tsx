@@ -17,7 +17,7 @@ import LichTrinh from "./pages/Customer/LichTrinh";
 import BusTripSearch from "./pages/Customer/ChiTietLichTrinh";
 import BusSeatSelection from "./pages/Customer/DatVe";
 import BusBookingUI from "./pages/Customer/ThongTinDatVe";
-import ShippingCart from "./pages/Customer/DatHang";
+import DatHangOrder from "./pages/Customer/DatHangOrder";
 import CheckoutPage from "./pages/Customer/ChiTietDatHang";
 import { InformationUser } from "./pages/Customer/Profile/InformationUser";
 import OrderHistory from "./pages/Customer/Profile/OrderHistory";
@@ -83,7 +83,7 @@ export default function App() {
           <Route path="/lichtrinhdetail" element={<BusTripSearch />} />
           <Route path="/news" element={<News />} />
           <Route path="/datve" element={<BusSeatSelection />} />
-          <Route path="/dathang" element={<ShippingCart />} />
+          <Route path="/dathang" element={<DatHangOrder />} />
           <Route path="/chitietdathang" element={<CheckoutPage />} />
 
           <Route path="/thongtindatve" element={<BusBookingUI />} />
