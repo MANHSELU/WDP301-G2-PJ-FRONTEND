@@ -3,17 +3,25 @@ import PhoneInput from "react-phone-input-2";
 import { Link, useNavigate } from "react-router-dom";
 import { loginSuccess } from "../../store/slices/userSlice";
 import { useDispatch } from "react-redux";
+import {CircleCheck,TriangleAlert  } from "lucide-react";
+
+interface NoticeState {
+  type: "success" | "error";
+  title: string;
+  message: string;
+}
 
 const BustripLogin = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState<NoticeState | null>(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleLogin = async (): Promise<void> => {
     if (!phone || !password) {
-      alert("Vui lòng nhập đầy đủ thông tin");
+    setNotice({ type: "error", title: "Thất bại" ,message: "Đăng nhập thất bại. Vui lòng nhập đầy đủ thông tin" });
       return;
     }
 
@@ -52,7 +60,7 @@ const BustripLogin = () => {
 
       // 💾 LƯU LOCALSTORAGE
       localStorage.setItem("accessToken", token);
-      alert("Đăng nhập thành công");
+setNotice({ type: "success", title: "Thành công", message: "Đăng nhập thành công" });setTimeout(() => {navigate("/");}, 1500);
       const ResponseProfile = await fetch(
         "http://localhost:3000/api/common/check/getprofile",
         {
@@ -83,33 +91,31 @@ const BustripLogin = () => {
       console.log("data profile là : ", dataProfile)
       const roleName = dataProfile.data.role?.name;
 
-      if (roleName === "RECEPTIONIST") {
-        navigate("/admin");
-      }
-
-      else if (roleName === "ADMIN") {
-        navigate("/admin");
-      }
-      else if (roleName === "DRIVER") {
-        navigate("/driverBooking/viewtrip");
-      } else if (roleName === "BUS_ASSISTANT") {
-        navigate("/assistant/chuyendi");
-      } else {
-        navigate("/"); // CUSTOMER
-      }
+      setTimeout(() => {
+        if (roleName === "RECEPTIONIST") {
+          navigate("/admin");
+        } else if (roleName === "ADMIN") {
+          navigate("/admin");
+        } else if (roleName === "DRIVER") {
+          navigate("/driverBooking/viewtrip");
+        } else if (roleName === "BUS_ASSISTANT") {
+          navigate("/assistant/chuyendi");
+        } else {
+          navigate("/"); // CUSTOMER
+        }
+      }, 1500);
 
       // navigate("/home");
 
       // // 🔁 CHUYỂN TRANG
       // navigate("/");
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error(error);
-
-      if (error instanceof Error) {
-        alert(error.message);
-      } else {
-        alert("Sai số điện thoại hoặc mật khẩu");
-      }
+        setNotice({ 
+      type: "error", 
+      title: "Đăng nhập thất bại", 
+      message: error.response?.data?.message || "Sai số điện thoại hoặc mật khẩu" 
+    });
     } finally {
       setLoading(false);
     }
@@ -379,6 +385,112 @@ const BustripLogin = () => {
           </p>
         </div>
       </div>
+       {notice ? (
+        <>
+          <style>{`
+          @keyframes routeNoticeIn {
+            0% {
+              opacity: 0;
+              transform: translateY(10px) scale(0.95);
+            }
+            70% {
+              transform: translateY(-2px) scale(1.02);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+
+          @keyframes routeNoticeIcon {
+            0% {
+              transform: scale(0.4) rotate(-25deg);
+              opacity: 0;
+            }
+            55% {
+              transform: scale(1.18) rotate(8deg);
+              opacity: 1;
+            }
+            80% {
+              transform: scale(0.95) rotate(-4deg);
+            }
+            100% {
+              transform: scale(1) rotate(0);
+            }
+          }
+
+          @keyframes routeNoticePulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.32);
+            }
+            100% {
+              box-shadow: 0 0 0 16px rgba(16, 185, 129, 0);
+            }
+          }
+        `}</style>
+          <div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
+            onClick={() => setNotice(null)}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
+              onClick={(event) => event.stopPropagation()}
+              style={{
+                animation:
+                  notice.type === "success"
+                    ? "routeNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+                    : "routeNoticeIn 0.35s ease",
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
+                    ? "bg-[#ecfdf3] text-[#16a34a]"
+                    : "bg-[#fff7ed] text-[#ea580c]"
+                    }`}
+                  style={{
+                    animation:
+                      notice.type === "success"
+                        ? "routeNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                        : undefined,
+                  }}
+                >
+                  {notice.type === "success" ? (
+                    <CircleCheck
+                      size={20}
+                      style={{
+                        animation:
+                          notice.type === "success"
+                            ? "routeNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
+                            : undefined,
+                      }}
+                    />
+                  ) : (
+                    <TriangleAlert size={20} />
+                  )}
+                </span>
+                <div className="flex-1">
+                  <h3 className="text-base font-black text-[#111827]">
+                    {notice.title}
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-[#4b5563]">
+                    {notice.message}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  className="rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

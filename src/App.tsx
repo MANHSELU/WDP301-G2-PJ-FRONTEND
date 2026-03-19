@@ -41,6 +41,9 @@ import DriverShiftsPage from "./pages/Driver/DanhSachCaLai";
 import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageTrip from "./pages/Admin/ManageTrip";
 import ChatBox from "./pages/Customer/ChatBoxV2";
+import TripReview from "./pages/Customer/Profile/TripReview";
+import TripReviewHistory from "./pages/Customer/Profile/TripReviewHistory";
+
 export default function App() {
     const location = useLocation(); 
     const isCustomerPage = !location.pathname.startsWith("/admin") &&
@@ -85,8 +88,9 @@ export default function App() {
           <Route path="/thongtindatve" element={<BusBookingUI />} />
           <Route path="/login" element={<BustripLogin />} />
           <Route path="/register" element={<BustripRegister />} />
-
           <Route path="user" element={<BusTripProfile />}>
+            <Route path="tripReview" element={<TripReview/>}/>
+            <Route path="tripReviewHistory" element={<TripReviewHistory/>}/>
             <Route path="profile" element={<InformationUser />} />
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="address" element={<AddressForm />} />

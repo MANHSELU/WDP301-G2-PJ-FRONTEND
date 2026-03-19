@@ -82,7 +82,7 @@ export default function BusTripProfile() {
       {/* ================= MAIN ================= */}
       <main className="pt-28 max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
         {/* -------- Sidebar -------- */}
-        <aside className="bg-white rounded-3xl border sticky top-28 h-fit">
+        <aside className="bg-white rounded-xl border sticky top-28 h-fit">
           <h2 className="p-6 font-extrabold">Tài khoản của tôi</h2>
           <nav className="divide-y">
             {[
@@ -91,6 +91,16 @@ export default function BusTripProfile() {
                 label: "Lịch sử đặt vé",
                 icon: Ticket,
                 path: "/user/orderhistory",
+              },
+                {
+                label: "Lịch sử chuyến đi",
+                icon: Ticket,
+                path: "/user/tripReview",
+              },
+                {
+                label: "Lịch sử chuyến đi",
+                icon: Ticket,
+                path: "/user/tripReviewHistory",
               },
               { label: "Địa chỉ", icon: MapPin, path: "/user/address" },
               {
