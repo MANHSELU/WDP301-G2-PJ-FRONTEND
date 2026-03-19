@@ -19,7 +19,7 @@ export default function LichTrinh() {
   const destinationRef = useRef<HTMLDivElement>(null);
   const [departureRect, setDepartureRect] = useState<DOMRect | null>(null);
   const [destinationRect, setDestinationRect] = useState<DOMRect | null>(null);
-
+  const url = import.meta.env.VITE_API_URL;
   const updateDepartureRect = () => {
     if (departureRef.current) setDepartureRect(departureRef.current.getBoundingClientRect());
   };
@@ -63,7 +63,7 @@ export default function LichTrinh() {
     setError(null);
     try {
       const response = await fetch(
-        "http://localhost:3000/api/customer/notcheck/search",
+        `${url}/api/customer/notcheck/search`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -96,7 +96,7 @@ export default function LichTrinh() {
   useEffect(() => {
     const fetchRoutesToday = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/customer/notcheck/view-route");
+        const response = await fetch(`${url}/api/customer/notcheck/view-route`);
         const data = await response.json();
 
         if (data.success) {

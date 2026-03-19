@@ -5,22 +5,73 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 
 /* ================= TYPES ================= */
-type StopId = { _id: string; name: string; province: string; location?: { type: string; coordinates: [number, number] }; is_active?: boolean; };
-type TimeStop = { _id: string; route_id: string; stop_id: StopId; stop_order: number; is_pickup: boolean; estimated_time: number; " estimated_time"?: number; };
-type BusTypeId = { _id: string; name: string; description: string; category: string; amenities: string[]; isActive: boolean; };
-type BusId = { _id: string; license_plate: string; bus_type_id: BusTypeId; status: string; created_at: string; };
-type RouteId = { _id: string; start_id: { _id: string; name: string; province: string }; stop_id: { _id: string; name: string; province: string }; distance_km: number; is_active: boolean; };
-type Trip = { _id: string; route_id: RouteId; bus_id: BusId; departure_time: string; arrival_time: string; status: string; created_at: string; time: TimeStop[]; };
+type StopId = {
+  _id: string;
+  name: string;
+  province: string;
+  location?: { type: string; coordinates: [number, number] };
+  is_active?: boolean;
+};
+
+type TimeStop = {
+  _id: string;
+  route_id: string;
+  stop_id: StopId;
+  stop_order: number;
+  is_pickup: boolean;
+  estimated_time?: number;
+  " estimated_time"?: number;
+};
+
+type BusTypeId = {
+  _id: string;
+  name: string;
+  description: string;
+  category: string;
+  amenities: string[];
+  isActive: boolean;
+};
+
+type BusId = {
+  _id: string;
+  license_plate: string;
+  bus_type_id: BusTypeId;
+  status: string;
+  created_at: string;
+};
+
+type RouteId = {
+  _id: string;
+  start_id: { _id: string; name: string; province: string };
+  stop_id: { _id: string; name: string; province: string };
+  distance_km: number;
+  is_active: boolean;
+};
+
+type Trip = {
+  _id: string;
+  route_id: RouteId;
+  bus_id: BusId;
+  departure_time: string;
+  arrival_time: string;
+  status: string;
+  created_at: string;
+  time: TimeStop[];
+};
+
+type LocationState = {
+  id?: string;
+};
 
 /* ================= SCHEDULE ACCORDION ================= */
 function ScheduleAccordion({ trip }: { trip: Trip }) {
   const sortedStops = [...trip.time].sort((a, b) => a.stop_order - b.stop_order);
   const firstHour =
     sortedStops[0]?.estimated_time ??
-    (sortedStops[0] as any)?.[" estimated_time"] ??
+    sortedStops[0]?.[" estimated_time"] ??
     0;
   const cumulativeHours = sortedStops.map((stop, idx) => {
-    const h = stop.estimated_time ?? (stop as any)[" estimated_time"] ?? 0;
+    const h = stop.estimated_time ?? stop[" estimated_time"] ?? 0;
     return idx === 0 ? h : firstHour + h;
   });
   const calcArrival = (departureTime: string, totalHours: number) => {
@@ -37,29 +88,64 @@ function ScheduleAccordion({ trip }: { trip: Trip }) {
           Lịch trình · {sortedStops.length} điểm dừng
         </p>
         <div className="relative">
-          <div className="absolute top-4 bottom-4 w-0.5" style={{ left: "15px", background: "linear-gradient(to bottom, #fb923c, #fdba74, #fb923c)" }} />
+          <div
+            className="absolute top-4 bottom-4 w-0.5"
+            style={{ left: "15px", background: "linear-gradient(to bottom, #fb923c, #fdba74, #fb923c)" }}
+          />
           <div className="space-y-1">
             {sortedStops.map((stop, idx) => {
               const isFirst = idx === 0;
               const isLast = idx === sortedStops.length - 1;
-              const estHours = stop.estimated_time ?? (stop as any)[" estimated_time"] ?? 0;
+              const estHours = stop.estimated_time ?? stop[" estimated_time"] ?? 0;
               const { time, date } = calcArrival(trip.departure_time, cumulativeHours[idx]);
               return (
                 <div key={stop._id} className="flex items-start gap-4 pb-4 last:pb-0">
                   <div className="relative z-10 flex-shrink-0 mt-0.5">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${isFirst ? "bg-orange-500 ring-4 ring-orange-100" : isLast ? "bg-orange-700 ring-4 ring-orange-100" : "bg-white ring-2 ring-orange-300"}`}>
-                      <MapPin size={14} className={isFirst || isLast ? "text-white" : "text-orange-500"} fill={isFirst || isLast ? "currentColor" : "none"} />
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${isFirst
+                          ? "bg-orange-500 ring-4 ring-orange-100"
+                          : isLast
+                            ? "bg-orange-700 ring-4 ring-orange-100"
+                            : "bg-white ring-2 ring-orange-300"
+                        }`}
+                    >
+                      <MapPin
+                        size={14}
+                        className={isFirst || isLast ? "text-white" : "text-orange-500"}
+                        fill={isFirst || isLast ? "currentColor" : "none"}
+                      />
                     </div>
                   </div>
-                  <div className={`flex-1 flex items-start justify-between min-w-0 pb-4 last:pb-0 ${!isLast ? "border-b border-orange-50" : ""}`}>
+                  <div
+                    className={`flex-1 flex items-start justify-between min-w-0 pb-4 last:pb-0 ${!isLast ? "border-b border-orange-50" : ""
+                      }`}
+                  >
                     <div>
-                      <p className={`font-bold text-sm ${isFirst ? "text-orange-600" : isLast ? "text-orange-700" : "text-slate-700"}`}>{stop.stop_id.province}</p>
+                      <p className={`font-bold text-sm ${isFirst ? "text-orange-600" : isLast ? "text-orange-700" : "text-slate-700"}`}>
+                        {stop.stop_id.province}
+                      </p>
                       <p className="text-xs text-slate-400 mt-0.5">{stop.stop_id.name}</p>
                       <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-                        {isFirst && <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-600 border border-orange-200">Xuất phát</span>}
-                        {isLast && <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">Điểm đến</span>}
-                        {!isFirst && !isLast && <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">Điểm dừng</span>}
-                        {estHours > 0 && <span className="text-[10px] text-orange-400 flex items-center gap-1 font-medium"><ClockIcon size={10} /> +{estHours}h</span>}
+                        {isFirst && (
+                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-600 border border-orange-200">
+                            Xuất phát
+                          </span>
+                        )}
+                        {isLast && (
+                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                            Điểm đến
+                          </span>
+                        )}
+                        {!isFirst && !isLast && (
+                          <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                            Điểm dừng
+                          </span>
+                        )}
+                        {estHours > 0 && (
+                          <span className="text-[10px] text-orange-400 flex items-center gap-1 font-medium">
+                            <ClockIcon size={10} /> +{estHours}h
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-4">
@@ -79,13 +165,21 @@ function ScheduleAccordion({ trip }: { trip: Trip }) {
 
 /* ================= FILTER SIDEBAR CONTENT ================= */
 function FilterContent({
-  selectedFilters, toggleFilter, timeSlots, busTypes, tiers,
-  onReset, onClose,
+  selectedFilters,
+  toggleFilter,
+  timeSlots,
+  busTypes,
+  tiers,
+  onReset,
+  onClose,
 }: {
   selectedFilters: { timeSlots: string[]; busTypes: string[]; tiers: string[] };
   toggleFilter: (cat: "timeSlots" | "busTypes" | "tiers", val: string) => void;
-  timeSlots: string[]; busTypes: string[]; tiers: string[];
-  onReset: () => void; onClose?: () => void;
+  timeSlots: string[];
+  busTypes: string[];
+  tiers: string[];
+  onReset: () => void;
+  onClose?: () => void;
 }) {
   return (
     <div className="space-y-5">
@@ -108,8 +202,12 @@ function FilterContent({
         <div className="space-y-2">
           {timeSlots.map((slot) => (
             <label key={slot} className="flex items-center gap-3 cursor-pointer hover:bg-orange-50 p-2 rounded-lg transition-all">
-              <input type="checkbox" checked={selectedFilters.timeSlots.includes(slot)} onChange={() => toggleFilter("timeSlots", slot)}
-                className="w-5 h-5 rounded border-2 border-slate-300 accent-orange-500 cursor-pointer" />
+              <input
+                type="checkbox"
+                checked={selectedFilters.timeSlots.includes(slot)}
+                onChange={() => toggleFilter("timeSlots", slot)}
+                className="w-5 h-5 rounded border-2 border-slate-300 accent-orange-500 cursor-pointer"
+              />
               <span className="text-sm text-slate-700 font-medium">{slot}</span>
             </label>
           ))}
@@ -123,8 +221,12 @@ function FilterContent({
         <div className="space-y-2">
           {busTypes.map((type) => (
             <label key={type} className="flex items-center gap-3 cursor-pointer hover:bg-orange-50 p-2 rounded-lg transition-all">
-              <input type="checkbox" checked={selectedFilters.busTypes.includes(type)} onChange={() => toggleFilter("busTypes", type)}
-                className="w-5 h-5 rounded border-2 border-slate-300 accent-orange-500 cursor-pointer" />
+              <input
+                type="checkbox"
+                checked={selectedFilters.busTypes.includes(type)}
+                onChange={() => toggleFilter("busTypes", type)}
+                className="w-5 h-5 rounded border-2 border-slate-300 accent-orange-500 cursor-pointer"
+              />
               <span className="text-sm text-slate-700 font-medium">{type}</span>
             </label>
           ))}
@@ -138,15 +240,21 @@ function FilterContent({
         <div className="space-y-2">
           {tiers.map((tier) => (
             <label key={tier} className="flex items-center gap-3 cursor-pointer hover:bg-orange-50 p-2 rounded-lg transition-all">
-              <input type="checkbox" checked={selectedFilters.tiers.includes(tier)} onChange={() => toggleFilter("tiers", tier)}
-                className="w-5 h-5 rounded border-2 border-slate-300 accent-orange-500 cursor-pointer" />
+              <input
+                type="checkbox"
+                checked={selectedFilters.tiers.includes(tier)}
+                onChange={() => toggleFilter("tiers", tier)}
+                className="w-5 h-5 rounded border-2 border-slate-300 accent-orange-500 cursor-pointer"
+              />
               <span className="text-sm text-slate-700 font-medium">{tier}</span>
             </label>
           ))}
         </div>
       </div>
-      <button onClick={onReset}
-        className="w-full bg-gradient-to-br from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md">
+      <button
+        onClick={onReset}
+        className="w-full bg-gradient-to-br from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-md"
+      >
         Đặt lại
       </button>
     </div>
@@ -156,9 +264,14 @@ function FilterContent({
 /* ================= MAIN COMPONENT ================= */
 export default function BusTripSearch() {
   const location = useLocation();
-  const id = location.state?.id;
+  const locationState = location.state as LocationState | null;
+  const id = locationState?.id;
   const navigate = useNavigate();
-  const [selectedFilters, setSelectedFilters] = useState({ timeSlots: [] as string[], busTypes: [] as string[], tiers: [] as string[] });
+  const [selectedFilters, setSelectedFilters] = useState({
+    timeSlots: [] as string[],
+    busTypes: [] as string[],
+    tiers: [] as string[],
+  });
   const [trips, setTrip] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [openSchedule, setOpenSchedule] = useState<string | null>(null);
@@ -171,7 +284,9 @@ export default function BusTripSearch() {
   const toggleFilter = (category: keyof typeof selectedFilters, value: string) => {
     setSelectedFilters((prev) => ({
       ...prev,
-      [category]: prev[category].includes(value) ? prev[category].filter((item) => item !== value) : [...prev[category], value],
+      [category]: prev[category].includes(value)
+        ? prev[category].filter((item) => item !== value)
+        : [...prev[category], value],
     }));
   };
   const resetFilters = () => setSelectedFilters({ timeSlots: [], busTypes: [], tiers: [] });
@@ -185,17 +300,24 @@ export default function BusTripSearch() {
           body: JSON.stringify({ route_id: id }),
         });
         if (!response.ok) throw new Error("Failed to fetch trips");
-        const data = await response.json();
+        const data: { data: Trip[] } = await response.json();
         setTrip(data.data);
-      } catch (err) { console.error(err); }
-      finally { setLoading(false); }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchTrips();
   }, [id]);
 
-  const calculateDuration = (departure: string | Date | null | undefined, arrival: string | Date | null | undefined): string => {
+  const calculateDuration = (
+    departure: string | Date | null | undefined,
+    arrival: string | Date | null | undefined
+  ): string => {
     if (!departure || !arrival) return "N/A";
-    const start = new Date(departure); const end = new Date(arrival);
+    const start = new Date(departure);
+    const end = new Date(arrival);
     if (isNaN(start.getTime()) || isNaN(end.getTime())) return "Invalid time";
     const diffMs = end.getTime() - start.getTime();
     if (diffMs <= 0) return "Invalid range";
@@ -207,12 +329,24 @@ export default function BusTripSearch() {
     if (!value) return "N/A";
     const date = new Date(value);
     if (isNaN(date.getTime())) return "Invalid date";
-    return date.toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" });
+    return date.toLocaleString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
-  const DatVe = (type_bus_id: string) => { navigate("/datve", { state: { tripId: id, bus_type_id: type_bus_id } }); };
-  const DatHang = (type_bus_id: string) => { navigate("/dathang", { state: { tripId: id, bus_type_id: type_bus_id } }); };
-  const toggleSchedule = (tripId: string) => { setOpenSchedule((prev) => (prev === tripId ? null : tripId)); };
+  const DatVe = (type_bus_id: string) => {
+    navigate("/datve", { state: { tripId: id, bus_type_id: type_bus_id } });
+  };
+  const DatHang = (type_bus_id: string) => {
+    navigate("/dathang", { state: { tripId: id, bus_type_id: type_bus_id } });
+  };
+  const toggleSchedule = (tripId: string) => {
+    setOpenSchedule((prev) => (prev === tripId ? null : tripId));
+  };
 
   if (loading) return <p className="p-6 text-center">Loading...</p>;
 
@@ -223,7 +357,7 @@ export default function BusTripSearch() {
       <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#f3ece5] to-[#ece7e2]" />
       <div className="absolute inset-x-0 bottom-0 h-px bg-[#ece7e2]" />
 
-      {/* Bus Animation - Enhanced (merged from Ngan branch) */}
+      {/* Bus Animation */}
       <div className="pointer-events-none absolute top-[18%] right-[0%] z-10 w-[66%] max-w-[860px] md:top-[9%] md:w-[62%]">
         <div className="bus-aero-overlay absolute inset-[-16%] z-0">
           <span className="bus-cloud bus-cloud-1 absolute left-[-10%] top-[-10%] h-[28%] w-[68%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.25)_54%,rgba(255,255,255,0)_100%)] blur-[30px]" />
@@ -243,8 +377,14 @@ export default function BusTripSearch() {
           <span className="bus-tail-cloud bus-tail-cloud-7 absolute right-[18%] top-[64%] h-[22%] w-[22%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.76)_0%,rgba(255,255,255,0.34)_54%,rgba(255,255,255,0)_100%)] blur-[9px]" />
         </div>
         <div className="bus-bob relative z-10">
-          <img src="/images/bus7.png" alt="Bus overlay" className="w-full object-contain block relative"
-            style={{ imageRendering: "auto", filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))" }}
+          <img
+            src="/images/bus7.png"
+            alt="Bus overlay"
+            className="w-full object-contain block relative"
+            style={{
+              imageRendering: "auto",
+              filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))",
+            }}
           />
           <div className="pointer-events-none absolute inset-0">
             <div className="bus-front-left-passenger">
@@ -288,7 +428,7 @@ export default function BusTripSearch() {
             >
               <SlidersHorizontal size={16} />
               Bộ lọc
-              {(selectedFilters.timeSlots.length + selectedFilters.busTypes.length + selectedFilters.tiers.length) > 0 && (
+              {selectedFilters.timeSlots.length + selectedFilters.busTypes.length + selectedFilters.tiers.length > 0 && (
                 <span className="bg-orange-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
                   {selectedFilters.timeSlots.length + selectedFilters.busTypes.length + selectedFilters.tiers.length}
                 </span>
@@ -300,16 +440,24 @@ export default function BusTripSearch() {
           {filterOpen && (
             <div className="fixed inset-0 z-[999] md:hidden">
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setFilterOpen(false)} />
-              <div className="absolute bottom-0 left-0 right-0 bg-[#fdf8f4] rounded-t-3xl p-5 max-h-[85vh] overflow-y-auto shadow-2xl"
-                style={{ animation: "slideUp 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div
+                className="absolute bottom-0 left-0 right-0 bg-[#fdf8f4] rounded-t-3xl p-5 max-h-[85vh] overflow-y-auto shadow-2xl"
+                style={{ animation: "slideUp 0.3s cubic-bezier(0.4,0,0.2,1)" }}
+              >
                 <div className="w-12 h-1 bg-slate-300 rounded-full mx-auto mb-5" />
                 <FilterContent
-                  selectedFilters={selectedFilters} toggleFilter={toggleFilter}
-                  timeSlots={timeSlots} busTypes={busTypes} tiers={tiers}
-                  onReset={resetFilters} onClose={() => setFilterOpen(false)}
+                  selectedFilters={selectedFilters}
+                  toggleFilter={toggleFilter}
+                  timeSlots={timeSlots}
+                  busTypes={busTypes}
+                  tiers={tiers}
+                  onReset={resetFilters}
+                  onClose={() => setFilterOpen(false)}
                 />
-                <button onClick={() => setFilterOpen(false)}
-                  className="w-full mt-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">
+                <button
+                  onClick={() => setFilterOpen(false)}
+                  className="w-full mt-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-3.5 rounded-2xl shadow-lg"
+                >
                   Áp dụng ({trips.length} chuyến)
                 </button>
               </div>
@@ -317,11 +465,14 @@ export default function BusTripSearch() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
-            {/* SIDEBAR desktop - sử dụng FilterContent để nhất quán (không duplicate code) */}
+            {/* SIDEBAR desktop */}
             <aside className="hidden lg:block space-y-6">
               <FilterContent
-                selectedFilters={selectedFilters} toggleFilter={toggleFilter}
-                timeSlots={timeSlots} busTypes={busTypes} tiers={tiers}
+                selectedFilters={selectedFilters}
+                toggleFilter={toggleFilter}
+                timeSlots={timeSlots}
+                busTypes={busTypes}
+                tiers={tiers}
                 onReset={resetFilters}
               />
             </aside>
@@ -331,20 +482,39 @@ export default function BusTripSearch() {
               {trips.map((trip, index) => {
                 const isOpen = openSchedule === trip._id;
                 return (
-                  <div key={trip._id} className="relative group"
-                    style={{ animation: "fadeInUp 0.5s ease-out forwards", animationDelay: `${index * 0.1}s`, opacity: 0 }}>
+                  <div
+                    key={trip._id}
+                    className="relative group"
+                    style={{
+                      animation: "fadeInUp 0.5s ease-out forwards",
+                      animationDelay: `${index * 0.1}s`,
+                      opacity: 0,
+                    }}
+                  >
                     <div className="absolute inset-0 bg-gradient-to-r from-orange-400/0 via-orange-500/30 to-orange-400/0 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-                    <div className={`bg-gradient-to-br from-white via-white to-orange-50/30 rounded-2xl shadow-xl border-2 transition-all duration-300 relative overflow-hidden
-                      ${isOpen ? "border-orange-300 shadow-orange-100" : "border-orange-100/50 hover:shadow-2xl hover:border-orange-200 md:hover:-translate-y-1"}`}>
+                    <div
+                      className={`bg-gradient-to-br from-white via-white to-orange-50/30 rounded-2xl shadow-xl border-2 transition-all duration-300 relative overflow-hidden
+                        ${isOpen
+                          ? "border-orange-300 shadow-orange-100"
+                          : "border-orange-100/50 hover:shadow-2xl hover:border-orange-200 md:hover:-translate-y-1"
+                        }`}
+                    >
                       {/* Top accent */}
-                      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
+                      <div
+                        className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                          }`}
+                      />
                       <div className="p-4 md:p-7">
                         {/* DESKTOP Time row */}
                         <div className="hidden md:flex flex-col md:flex-row items-start md:items-center mb-6 gap-6">
                           <div className="flex-1 flex items-center gap-6">
                             <div>
-                              <div className="text-2xl md:text-3xl font-black text-slate-800 mb-1">{formatDateTime(trip.departure_time)}</div>
-                              <div className="text-sm text-slate-500 font-medium">{trip?.route_id?.start_id.province} ({trip?.route_id?.start_id.name})</div>
+                              <div className="text-2xl md:text-3xl font-black text-slate-800 mb-1">
+                                {formatDateTime(trip.departure_time)}
+                              </div>
+                              <div className="text-sm text-slate-500 font-medium">
+                                {trip.route_id.start_id.province} ({trip.route_id.start_id.name})
+                              </div>
                             </div>
                             <div className="flex flex-col items-center px-4 md:px-8">
                               <div className="flex items-center gap-3 mb-2">
@@ -363,8 +533,12 @@ export default function BusTripSearch() {
                               </div>
                             </div>
                             <div>
-                              <div className="text-2xl md:text-3xl font-black text-slate-800 mb-1">{formatDateTime(trip.arrival_time)}</div>
-                              <div className="text-sm text-slate-500 font-medium">{trip.route_id.stop_id.province} ({trip.route_id.stop_id.name})</div>
+                              <div className="text-2xl md:text-3xl font-black text-slate-800 mb-1">
+                                {formatDateTime(trip.arrival_time)}
+                              </div>
+                              <div className="text-sm text-slate-500 font-medium">
+                                {trip.route_id.stop_id.province} ({trip.route_id.stop_id.name})
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -372,11 +546,21 @@ export default function BusTripSearch() {
                         {/* MOBILE Time row */}
                         <div className="md:hidden mb-4">
                           <div className="flex items-center gap-2 mb-3">
-                            <span className="font-extrabold text-orange-600 text-sm">{trip?.route_id?.start_id.province}</span>
+                            <span className="font-extrabold text-orange-600 text-sm">
+                              {trip.route_id.start_id.province}
+                            </span>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-orange-500 flex-shrink-0">
-                              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                              <path
+                                d="M5 12H19M19 12L12 5M19 12L12 19"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
                             </svg>
-                            <span className="font-extrabold text-orange-600 text-sm">{trip.route_id.stop_id.province}</span>
+                            <span className="font-extrabold text-orange-600 text-sm">
+                              {trip.route_id.stop_id.province}
+                            </span>
                           </div>
                           <div className="flex items-center justify-between bg-orange-50/60 rounded-xl px-3 py-2.5 mb-3">
                             <div>
@@ -384,7 +568,9 @@ export default function BusTripSearch() {
                               <p className="font-black text-slate-800 text-sm">{formatDateTime(trip.departure_time)}</p>
                             </div>
                             <div className="text-center px-2">
-                              <p className="text-[10px] text-orange-500 font-bold">{calculateDuration(trip.departure_time, trip.arrival_time)}</p>
+                              <p className="text-[10px] text-orange-500 font-bold">
+                                {calculateDuration(trip.departure_time, trip.arrival_time)}
+                              </p>
                               <p className="text-[10px] text-slate-400">{trip.route_id.distance_km} km</p>
                             </div>
                             <div className="text-right">
@@ -394,21 +580,30 @@ export default function BusTripSearch() {
                           </div>
                           <div className="flex flex-wrap gap-2">
                             <span className="bg-purple-50 border border-purple-200 text-purple-700 text-xs font-bold px-3 py-1 rounded-lg">
-                              {trip?.bus_id.bus_type_id.name}
+                              {trip.bus_id.bus_type_id.name}
                             </span>
                             <span className="bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-3 py-1 rounded-lg">
                               200.000 VND
                             </span>
-                            <button onClick={() => toggleSchedule(trip._id)}
-                              className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg border-2 transition-all ${isOpen ? "bg-orange-50 border-orange-300 text-orange-600" : "bg-slate-50 border-slate-200 text-slate-500"}`}>
+                            <button
+                              onClick={() => toggleSchedule(trip._id)}
+                              className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg border-2 transition-all ${isOpen
+                                  ? "bg-orange-50 border-orange-300 text-orange-600"
+                                  : "bg-slate-50 border-slate-200 text-slate-500"
+                                }`}
+                            >
                               <MapPin size={11} />
                               Lịch trình
-                              <ChevronDown size={11} className="transition-transform duration-300" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }} />
+                              <ChevronDown
+                                size={11}
+                                className="transition-transform duration-300"
+                                style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                              />
                             </button>
                           </div>
                         </div>
 
-                        {/* Bottom row (unified for desktop + mobile) */}
+                        {/* Bottom row */}
                         <div className="flex items-center justify-between pt-5 border-t-2 border-orange-100">
                           <div className="flex items-center gap-3 flex-wrap">
                             <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl">
@@ -436,7 +631,7 @@ export default function BusTripSearch() {
                             </button>
                             <div className="bg-gradient-to-br from-purple-50 to-purple-100 px-4 py-2 rounded-xl border border-purple-200">
                               <span className="text-xs font-bold text-purple-700">
-                                {trip?.bus_id.bus_type_id.name}
+                                {trip.bus_id.bus_type_id.name}
                               </span>
                             </div>
                             <div className="bg-gradient-to-br from-green-50 to-green-100 px-4 py-2 rounded-xl border border-green-200">
@@ -445,14 +640,14 @@ export default function BusTripSearch() {
                           </div>
                           <div className="flex flex-wrap gap-3">
                             <button
-                              onClick={() => DatVe(trip?.bus_id?.bus_type_id?._id)}
+                              onClick={() => DatVe(trip.bus_id.bus_type_id._id)}
                               className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-9 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn"
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
                               <span className="relative z-10">Đặt vé</span>
                             </button>
                             <button
-                              onClick={() => DatHang(trip?.bus_id?.bus_type_id?._id)}
+                              onClick={() => DatHang(trip.bus_id.bus_type_id._id)}
                               className="bg-gradient-to-br from-green-500 via-green-600 to-green-700 hover:from-green-600 hover:via-green-700 hover:to-green-800 text-white px-6 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-green-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn"
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />

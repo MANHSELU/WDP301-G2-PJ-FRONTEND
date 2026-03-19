@@ -60,6 +60,8 @@ interface Seat {
     status: "available" | "booked"; label: string;
 }
 
+//
+const API_BASE = import.meta.env.VITE_API_URL;
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmtTime = (d?: string) =>
     d ? new Date(d).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }) : "--:--";
@@ -160,7 +162,7 @@ const StaffBookingAll: React.FC = () => {
         const t = setTimeout(async () => {
             if (!departure.trim()) { setDepSuggestions([]); return; }
             try {
-                const res = await fetch(`http://localhost:3000/api/admin/notcheck/searchStop?keyword=${encodeURIComponent(departure)}`);
+                const res = await fetch(`${API_BASE}/api/admin/notcheck/searchStop?keyword=${encodeURIComponent(departure)}`);
                 setDepSuggestions(await res.json().then(d => Array.isArray(d) ? d : []));
             } catch { setDepSuggestions([]); }
         }, 300);
@@ -171,7 +173,7 @@ const StaffBookingAll: React.FC = () => {
         const t = setTimeout(async () => {
             if (!destination.trim()) { setDestSuggestions([]); return; }
             try {
-                const res = await fetch(`http://localhost:3000/api/admin/notcheck/searchStop?keyword=${encodeURIComponent(destination)}`);
+                const res = await fetch(`${API_BASE}/api/admin/notcheck/searchStop?keyword=${encodeURIComponent(destination)}`);
                 setDestSuggestions(await res.json().then(d => Array.isArray(d) ? d : []));
             } catch { setDestSuggestions([]); }
         }, 300);
@@ -190,7 +192,7 @@ const StaffBookingAll: React.FC = () => {
         if (!departure && !departureId) return;
         setLoadingRoutes(true);
         try {
-            const res = await fetch("http://localhost:3000/api/customer/notcheck/search", {
+            const res = await fetch(`${API_BASE}/api/customer/notcheck/search`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     nodeId_start: departureId || null,
@@ -213,7 +215,7 @@ const StaffBookingAll: React.FC = () => {
         setLoadingTrips(true);
         setTrips([]); setOpenSchedule(null);
         try {
-            const res = await fetch("http://localhost:3000/api/customer/notcheck/viewTrip", {
+            const res = await fetch(`${API_BASE}/api/customer/notcheck/viewTrip`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ route_id: route._id }),
             });
@@ -277,7 +279,7 @@ const StaffBookingAll: React.FC = () => {
 
         try {
             // ✅ diagram-bus: route_id = trip._id
-            const res = await fetch("http://localhost:3000/api/customer/notcheck/diagram-bus", {
+            const res = await fetch(`${API_BASE}/api/customer/notcheck/diagram-bus`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ route_id: trip.route_id }),
             });
@@ -291,7 +293,7 @@ const StaffBookingAll: React.FC = () => {
     // ✅ start-point: route_id = trip._id
     useEffect(() => {
         if (!tripId) return;
-        fetch("http://localhost:3000/api/customer/notcheck/start-point", {
+        fetch(`${API_BASE}/api/customer/notcheck/start-point`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ route_id: tripId }),
         }).then(r => r.json()).then(res => {
@@ -311,7 +313,7 @@ const StaffBookingAll: React.FC = () => {
 
         if (!selectedPickupStopId) return; // chờ chọn điểm đón trước
 
-        fetch("http://localhost:3000/api/customer/notcheck/end-point", {
+        fetch(`${API_BASE}/api/customer/notcheck/end-point`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 route_id: tripId,              // ✅ trip._id
@@ -330,7 +332,7 @@ const StaffBookingAll: React.FC = () => {
         }
         setLoadingPickupLocations(true);
         setSelectedPickupLocId("");
-        fetch("http://localhost:3000/api/customer/notcheck/location-point", {
+        fetch(`${API_BASE}/api/customer/notcheck/location-point`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 stop_id: selectedPickupStopId, // ✅ Stop._id
@@ -351,7 +353,7 @@ const StaffBookingAll: React.FC = () => {
         }
         setLoadingDropoffLocations(true);
         setSelectedDropoffLocId("");
-        fetch("http://localhost:3000/api/customer/notcheck/location-point", {
+        fetch(`${API_BASE}/api/customer/notcheck/location-point`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 stop_id: selectedDropoffStopId, // ✅ Stop._id
@@ -370,7 +372,7 @@ const StaffBookingAll: React.FC = () => {
         if (!tripDetail?._id || !selectedPickupId || !selectedDropoffId) {
             setBookedSeatLabels([]); return;
         }
-        fetch("http://localhost:3000/api/customer/notcheck/booked-seats", {
+        fetch(`${API_BASE}/api/customer/notcheck/booked-seats`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 trip_id: tripDetail._id,     // ✅ Trip._id
@@ -388,7 +390,7 @@ const StaffBookingAll: React.FC = () => {
             setTicketPrice(null); return;
         }
         setLoadingPrice(true);
-        fetch("http://localhost:3000/api/customer/notcheck/getPrice", {
+        fetch(`${API_BASE}/api/customer/notcheck/getPrice`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 route_id: tripId,              // ✅ trip._id
@@ -504,7 +506,7 @@ const StaffBookingAll: React.FC = () => {
         if (!selectedSeatLabels.length) { setSubmitError("Vui lòng chọn ghế"); return; }
         setSubmitting(true); setSubmitError(null);
         try {
-            const res = await fetch("http://localhost:3000/api/receptionist/check/create-booking", {
+            const res = await fetch(`${API_BASE}/api/receptionist/check/create-booking`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({

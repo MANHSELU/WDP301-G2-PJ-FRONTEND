@@ -159,15 +159,8 @@ export default function CreateRoute() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [notice, setNotice] = useState<NoticeState | null>(null);
   const [stops, setStops] = useState<allStops[]>([]);
-  const [durationHandicraft, setDurationHandicraft] = useState("");
   const [showManualStopDropdown, setShowManualStopDropdown] = useState(false);
   const [manualStopSearch, setManualStopSearch] = useState("");
-
-  // UseEffect hàm getAllStops
-  useEffect(() => {
-    getAllStops();
-  }, []);
-
   // Hàm lấy tất cả stops
   const getAllStops = async () => {
     try {
@@ -179,6 +172,13 @@ export default function CreateRoute() {
       console.error(error);
     }
   };
+
+  // UseEffect hàm getAllStops
+  useEffect(() => {
+    getAllStops();
+  }, []);
+
+
 
   // Hàm lấy ra thông tin stops được gợi ý
   const getRecommendStops = async () => {

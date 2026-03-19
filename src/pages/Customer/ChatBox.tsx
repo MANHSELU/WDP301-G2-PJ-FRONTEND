@@ -6,7 +6,7 @@ interface Message {
   content: string;
 }
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function ChatBox() {
   const [open, setOpen] = useState(false);
@@ -125,11 +125,10 @@ export default function ChatBox() {
               >
                 {/* AVATAR */}
                 <div
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-                    msg.role === "assistant"
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${msg.role === "assistant"
                       ? "bg-gradient-to-br from-[#f7a53a] to-[#e8791c]"
                       : "bg-[#e5e7eb]"
-                  }`}
+                    }`}
                 >
                   {msg.role === "assistant" ? (
                     <Bot size={14} className="text-white" />
@@ -140,11 +139,10 @@ export default function ChatBox() {
 
                 {/* BUBBLE */}
                 <div
-                  className={`max-w-[75%] rounded-[14px] px-3 py-2 text-sm leading-relaxed ${
-                    msg.role === "user"
+                  className={`max-w-[75%] rounded-[14px] px-3 py-2 text-sm leading-relaxed ${msg.role === "user"
                       ? "rounded-br-[4px] bg-gradient-to-br from-[#f7a53a] to-[#e8791c] text-white"
                       : "rounded-bl-[4px] bg-[#f3f4f6] text-[#1f2937]"
-                  }`}
+                    }`}
                 >
                   {msg.content}
                 </div>

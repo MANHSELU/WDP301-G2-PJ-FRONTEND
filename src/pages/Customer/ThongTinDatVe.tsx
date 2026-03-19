@@ -17,7 +17,7 @@ type LocationPoint = {
 /* ================= CONFIG ================= */
 const BANK_ACCOUNT: string = (import.meta as any).env?.VITE_BANK_ACCOUNT ?? "SO_TAI_KHOAN";
 const BANK_NAME: string = (import.meta as any).env?.VITE_BANK_NAME ?? "MBBank";
-
+const API_BASE = import.meta.env.VITE_API_URL;
 /* ================= HELPERS ================= */
 function decodeJwt(token: string): Record<string, any> | null {
     try {
@@ -83,7 +83,7 @@ function QRModal({
         const interval = setInterval(async () => {
             try {
                 const token = localStorage.getItem("accessToken");
-                const res = await fetch(`http://localhost:3000/api/customer/check/payment-status/${orderId}`, {
+                const res = await fetch(`${API_BASE}/api/customer/check/payment-status/${orderId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();
@@ -358,7 +358,7 @@ export default function BusBookingUI() {
             seat_labels: seatList, ticket_price: ticketPrice, payment_method: paymentMethod,
             passenger_name: customerInfo.name.trim(), passenger_phone: customerInfo.phone.trim(),
         };
-        const res = await fetch("http://localhost:3000/api/customer/check/create", {
+        const res = await fetch(`${API_BASE}/api/customer/check/create`, {
             method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
             body: JSON.stringify(body),
         });

@@ -27,7 +27,7 @@ const STATUS_CFG: Record<string, { label: string; color: string }> = {
     FINISHED: { label: "Hoàn thành", color: "text-green-600 bg-green-50 border-green-200" },
     CANCELLED: { label: "Đã hủy", color: "text-red-500 bg-red-50 border-red-200" },
 };
-
+const API_BASE = import.meta.env.VITE_API_URL;
 export function DanhSachChuyenDi() {
     const navigate = useNavigate();
 
@@ -49,7 +49,7 @@ export function DanhSachChuyenDi() {
             const params = new URLSearchParams({ page: page.toString(), limit: ITEMS_PER_PAGE.toString() });
             if (status !== "all") params.append("status", status);
 
-            const res = await fetch(`http://localhost:3000/api/assistant/check/trips?${params}`,
+            const res = await fetch(`${API_BASE}/api/assistant/check/trips?${params}`,
                 { headers: { Authorization: `Bearer ${token}` } });
             const json = await res.json();
             if (!res.ok || !json.success) throw new Error(json.message || "Lỗi tải dữ liệu");

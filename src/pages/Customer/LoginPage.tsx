@@ -10,6 +10,7 @@ const BustripLogin = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const url = import.meta.env.VITE_API_URL;
 
   const handleLogin = async (): Promise<void> => {
     if (!phone || !password) {
@@ -27,7 +28,7 @@ const BustripLogin = () => {
       };
 
       const response = await fetch(
-        "http://localhost:3000/api/customer/notcheck/login",
+        `${url}/api/customer/notcheck/login`,
         {
           method: "POST",
           headers: {
@@ -49,12 +50,11 @@ const BustripLogin = () => {
       } = await response.json();
 
       const { token } = data;
-
       // 💾 LƯU LOCALSTORAGE
       localStorage.setItem("accessToken", token);
       alert("Đăng nhập thành công");
       const ResponseProfile = await fetch(
-        "http://localhost:3000/api/common/check/getprofile",
+        `${url}/api/common/check/getprofile`,
         {
           method: "GET",
           headers: {

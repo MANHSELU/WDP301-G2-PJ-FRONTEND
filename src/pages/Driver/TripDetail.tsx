@@ -40,7 +40,7 @@ interface TripData {
     drivers: DriverShift[];
     router_stops: RouterStop[];
 }
-
+const API_BASE = import.meta.env.VITE_API_URL;
 const TripDetail: React.FC<TripDetailProps> = ({
     departureTime, departureLocation, arrivalTime, arrivalLocation,
     duration, distance, date, stops, vehicleType, shifts
@@ -205,7 +205,7 @@ export default function TripDetailsDemo() {
 
         const fetchTrip = async () => {
             try {
-                const res = await fetch(`http://localhost:3000/api/driver/check/trip/${id}`, {
+                const res = await fetch(`${API_BASE}/api/driver/check/trip/${id}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
                 });

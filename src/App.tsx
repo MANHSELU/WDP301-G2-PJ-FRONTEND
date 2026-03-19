@@ -28,7 +28,6 @@ import ManageBus from "./pages/Admin/ManageBus";
 import ManageRoute from "./pages/Admin/ManageRoute";
 import ManageUser from "./pages/Admin/ManageUser";
 import CreateRoute from "./pages/Admin/CreateRoute";
-import TicketBooking from "./pages/LeTan/DatVeChoKhach";
 import TripListPageLeTan from "./pages/LeTan/Home";
 import CargoBooking from "./pages/LeTan/GuiHangChoKhach";
 import CargoOrderList from "./pages/LeTan/DanhSachHangHoa";
@@ -45,6 +44,7 @@ import ChatBox from "./pages/Customer/ChatBoxV2";
 import News from "./pages/Customer/News";
 import ReceptionistPage from "./pages/LeTan/DanhSachChuyenDi";
 import StaffBookingAll from "./pages/LeTan/DatVeChoKhach";
+import DatHangParcelOrder from "./pages/Customer/Profile/ParcelHistoryCard";
 export default function App() {
   const location = useLocation();
   const isCustomerPage = !location.pathname.startsWith("/admin") &&
@@ -95,6 +95,8 @@ export default function App() {
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="address" element={<AddressForm />} />
             <Route path="changpassword" element={<BustripChangePassword />} />
+
+            <Route path="parcel-history" element={<DatHangParcelOrder />} />
           </Route>
           <Route path="/forgot" element={<ForgotPassword />} />
 
