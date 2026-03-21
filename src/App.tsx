@@ -45,6 +45,7 @@ import News from "./pages/Customer/News";
 import ReceptionistPage from "./pages/LeTan/DanhSachChuyenDi";
 import StaffBookingAll from "./pages/LeTan/DatVeChoKhach";
 import DatHangParcelOrder from "./pages/Customer/Profile/ParcelHistoryCard";
+import LeTanRefundPage from "./pages/LeTan/DanhSachHoanTien";
 export default function App() {
   const location = useLocation();
   const isCustomerPage = !location.pathname.startsWith("/admin") &&
@@ -117,6 +118,7 @@ export default function App() {
             <Route path="chuyendi" element={<ReceptionistPage />} />
             {/* <Route path="chitietchuyendi" element={<TripDetailPage />} /> */}
 
+            <Route path="hoan-tien" element={<LeTanRefundPage />} />
             <Route path="CargoOrderList" element={<CargoOrderList />} />
             <Route path="ticketBooking" element={<StaffBookingAll />} />
             <Route path="cargoBooking" element={<CargoBooking />} />
