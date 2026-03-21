@@ -103,10 +103,10 @@ function ScheduleAccordion({ trip }: { trip: Trip }) {
                   <div className="relative z-10 flex-shrink-0 mt-0.5">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${isFirst
-                          ? "bg-orange-500 ring-4 ring-orange-100"
-                          : isLast
-                            ? "bg-orange-700 ring-4 ring-orange-100"
-                            : "bg-white ring-2 ring-orange-300"
+                        ? "bg-orange-500 ring-4 ring-orange-100"
+                        : isLast
+                          ? "bg-orange-700 ring-4 ring-orange-100"
+                          : "bg-white ring-2 ring-orange-300"
                         }`}
                     >
                       <MapPin
@@ -266,6 +266,7 @@ export default function BusTripSearch() {
   const location = useLocation();
   const locationState = location.state as LocationState | null;
   const id = locationState?.id;
+  console.log("id là: ", id)
   const navigate = useNavigate();
   const [selectedFilters, setSelectedFilters] = useState({
     timeSlots: [] as string[],
@@ -338,8 +339,10 @@ export default function BusTripSearch() {
     });
   };
 
-  const DatVe = (type_bus_id: string) => {
-    navigate("/datve", { state: { tripId: id, bus_type_id: type_bus_id } });
+  const DatVe = (type_bus_id: string, trip_id: string) => {
+    console.log("trip_id là: ", trip_id)
+    // id bên dưới là route id
+    navigate("/datve", { state: { tripId: id, bus_type_id: type_bus_id, trip_id: trip_id } });
   };
   const DatHang = (type_bus_id: string) => {
     navigate("/dathang", { state: { tripId: id, bus_type_id: type_bus_id } });
@@ -588,8 +591,8 @@ export default function BusTripSearch() {
                             <button
                               onClick={() => toggleSchedule(trip._id)}
                               className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg border-2 transition-all ${isOpen
-                                  ? "bg-orange-50 border-orange-300 text-orange-600"
-                                  : "bg-slate-50 border-slate-200 text-slate-500"
+                                ? "bg-orange-50 border-orange-300 text-orange-600"
+                                : "bg-slate-50 border-slate-200 text-slate-500"
                                 }`}
                             >
                               <MapPin size={11} />
@@ -640,7 +643,7 @@ export default function BusTripSearch() {
                           </div>
                           <div className="flex flex-wrap gap-3">
                             <button
-                              onClick={() => DatVe(trip.bus_id.bus_type_id._id)}
+                              onClick={() => DatVe(trip.bus_id.bus_type_id._id, trip._id)}
                               className="bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-9 py-3.5 rounded-xl font-bold text-base shadow-xl hover:shadow-2xl hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn"
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />

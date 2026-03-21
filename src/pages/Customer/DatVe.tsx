@@ -44,6 +44,8 @@ const API_BASE = import.meta.env.VITE_API_URL;
 export default function BusSeatSelection() {
     const location = useLocation();
     const route_id = location.state?.tripId ?? "";
+    const trips_id = location.state?.trip_id ?? "";
+    console.log("trips id ỏe đặt vé là: ", trips_id)
     const bus_type_id = location.state?.bus_type_id ?? "";
     const justBookedLabels: string[] = location.state?.justBookedLabels ?? [];
     const restoredPickupId: string = location.state?.restoredPickupId ?? "";
@@ -124,7 +126,7 @@ export default function BusSeatSelection() {
         fetch(`${API_BASE}/api/customer/notcheck/start-point`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ route_id }),
+            body: JSON.stringify({ route_id, trips_id }),
         })
             .then(r => r.json())
             .then(res => {
