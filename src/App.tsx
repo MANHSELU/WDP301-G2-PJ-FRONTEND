@@ -43,6 +43,8 @@ import ManageTrip from "./pages/Admin/ManageTrip";
 import ChatBox from "./pages/Customer/ChatBoxV2";
 import TripReview from "./pages/Customer/Profile/TripReview";
 import TripReviewHistory from "./pages/Customer/Profile/TripReviewHistory";
+import ManageStop from "./pages/Admin/ManageStop";
+import ManageStopLocation from "./pages/Admin/ManageStopLocation";
 
 export default function App() {
     const location = useLocation(); 
@@ -65,6 +67,9 @@ export default function App() {
           <Route path="create-stop-location" element={<CreateStopLocation />} />
           <Route path="create-trips" element={<CreateTrip />} />
           <Route path="manage-trips" element={<ManageTrip />} />
+          <Route path="manage-stops" element={<ManageStop />} />
+          <Route path="manage-stop-locations" element={<ManageStopLocation />} />
+
         </Route>
         <Route
           path="/admin/create-stop-location"
