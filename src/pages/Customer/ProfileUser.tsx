@@ -98,7 +98,7 @@ export default function BusTripProfile() {
                 path: "/user/tripReview",
               },
                 {
-                label: "Lịch sử chuyến đi",
+                label: "Lịch sử đánh giá",
                 icon: Ticket,
                 path: "/user/tripReviewHistory",
               },

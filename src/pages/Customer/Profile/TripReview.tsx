@@ -84,6 +84,7 @@ export default function TripReview() {
       const res = await baseApiAuth.get(
         "/api/customer/check/getTripFinishedHistory",
       );
+      console.log("data", res.data)
       setTripFinishedHistory(res.data);
     } catch (error) {
       console.error(error);
