@@ -93,7 +93,7 @@ export default function BusTripProfile() {
                 path: "/user/orderhistory",
               },
               {
-                label: "Lịch sử chuyến đi",
+                label: "Đánh giá chuyển đi",
                 icon: Ticket,
                 path: "/user/tripReview",
               },

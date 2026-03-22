@@ -34,7 +34,7 @@ type ParcelItem = {
   dropoff_location_id: { location_name: string } | null;
 };
 type Pagination = { page: number; limit: number; total: number; totalPages: number };
-type LocationState = { tripId?: string; bus_type_id?: string };
+type LocationState = { tripId?: string; bus_type_id?: string, trips_id?: string };
 type ItemCategory = "DOCUMENT" | "PARCEL" | "BICYCLE" | "MOTORCYCLE" | "OTHER";
 type SizeCategory = "SMALL" | "MEDIUM" | "LARGE";
 
@@ -123,7 +123,8 @@ export default function DatHangOrder() {
   const location = useLocation();
   const navigate = useNavigate();
   const { tripId, bus_type_id } = (location.state ?? {}) as LocationState;
-
+  const trips_id = location.state?.trip_id ?? "";
+  console.log("trip_id trong đặt hàng là : ", trips_id)
   const [trip, setTrip] = useState<TripData | null>(null);
   const [pickupPoints, setPickupPoints] = useState<StopPoint[]>([]);
   const [dropoffPoints, setDropoffPoints] = useState<StopPoint[]>([]);
@@ -195,7 +196,7 @@ export default function DatHangOrder() {
     if (!trip?.route_id?._id) return;
     fetch(`${API}/api/customer/notcheck/start-point`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ route_id: trip.route_id._id }),
+      body: JSON.stringify({ route_id: trip.route_id._id, trips_id: trips_id }),
     }).then((r) => r.json()).then((res: { data?: StopPoint[] }) =>
       setPickupPoints((res.data ?? []).sort((a, b) => a.stop_order - b.stop_order))
     ).catch(console.error);
@@ -463,8 +464,8 @@ export default function DatHangOrder() {
                 return (
                   <button key={cat} onClick={() => setItemCategory(cat)}
                     className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 text-xs font-bold transition-all ${itemCategory === cat
-                        ? "border-orange-500 bg-orange-50 text-orange-700"
-                        : "border-slate-200 bg-white text-slate-500 hover:border-orange-300 hover:text-orange-600"
+                      ? "border-orange-500 bg-orange-50 text-orange-700"
+                      : "border-slate-200 bg-white text-slate-500 hover:border-orange-300 hover:text-orange-600"
                       }`}
                   >
                     <span className={itemCategory === cat ? "text-orange-500" : "text-slate-400"}>{m.icon}</span>
