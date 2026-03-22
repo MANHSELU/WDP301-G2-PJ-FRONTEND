@@ -28,7 +28,6 @@ import ManageBus from "./pages/Admin/ManageBus";
 import ManageRoute from "./pages/Admin/ManageRoute";
 import ManageUser from "./pages/Admin/ManageUser";
 import CreateRoute from "./pages/Admin/CreateRoute";
-import TicketBooking from "./pages/LeTan/DatVeChoKhach";
 import TripListPageLeTan from "./pages/LeTan/Home";
 import CargoBooking from "./pages/LeTan/GuiHangChoKhach";
 import CargoOrderList from "./pages/LeTan/DanhSachHangHoa";
@@ -45,6 +44,11 @@ import ChatBox from "./pages/Customer/ChatBoxV2";
 import News from "./pages/Customer/News";
 import ReceptionistPage from "./pages/LeTan/DanhSachChuyenDi";
 import StaffBookingAll from "./pages/LeTan/DatVeChoKhach";
+import TripReview from "./pages/Customer/Profile/TripReview";
+import TripReviewHistory from "./pages/Customer/Profile/TripReviewHistory";
+import ManageStop from "./pages/Admin/ManageStop";
+import ManageStopLocation from "./pages/Admin/ManageStopLocation";
+
 export default function App() {
   const location = useLocation();
   const isCustomerPage = !location.pathname.startsWith("/admin") &&
@@ -66,6 +70,9 @@ export default function App() {
           <Route path="create-stop-location" element={<CreateStopLocation />} />
           <Route path="create-trips" element={<CreateTrip />} />
           <Route path="manage-trips" element={<ManageTrip />} />
+          <Route path="manage-stops" element={<ManageStop />} />
+          <Route path="manage-stop-locations" element={<ManageStopLocation />} />
+
         </Route>
         <Route
           path="/admin/create-stop-location"
@@ -89,8 +96,9 @@ export default function App() {
           <Route path="/thongtindatve" element={<BusBookingUI />} />
           <Route path="/login" element={<BustripLogin />} />
           <Route path="/register" element={<BustripRegister />} />
-
           <Route path="user" element={<BusTripProfile />}>
+            <Route path="tripReview" element={<TripReview />} />
+            <Route path="tripReviewHistory" element={<TripReviewHistory />} />
             <Route path="profile" element={<InformationUser />} />
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="address" element={<AddressForm />} />

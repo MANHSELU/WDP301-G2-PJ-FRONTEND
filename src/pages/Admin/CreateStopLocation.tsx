@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { ChevronLeft, ChevronDown, Plus, UploadCloud, X } from "lucide-react";
+import { ChevronLeft, ChevronDown, Plus, UploadCloud, X, CircleCheck,TriangleAlert  } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import baseAPIAuth from "../../api/auth";
 import type { allStops } from "../../model/allStops";
@@ -11,12 +11,19 @@ interface RouteStopOption {
   _id: string;
   name?: string;
 }
+interface NoticeState {
+  type: "success" | "error";
+  title: string;
+  message: string;
+}
+
 
 export default function CreateStopLocation() {
   const navigate = useNavigate();
 
   const [routeStops, setRouteStops] = useState<RouteStopOption[]>([]);
   const [loadingRouteStops, setLoadingRouteStops] = useState(false);
+  const [notice, setNotice] = useState<NoticeState | null>(null);
   const [location, setLocation] = useState<geoLocation>({
     type: "Point",
     coordinates: [0, 0],
@@ -39,7 +46,7 @@ export default function CreateStopLocation() {
   const [isImporting, setIsImporting] = useState(false);
 
   // Hàm lấy vị trí Stop Location
-  const getGeoLocation = async (locationName: string) => {
+  const getGeoLocation = async () => {
     try {
       const res = await baseAPIAuth.post(
         "/api/admin/check/getGeoStopLocation",
@@ -54,10 +61,11 @@ export default function CreateStopLocation() {
         coordinates: [res.data.coordinates.lng, res.data.coordinates.lat],
       });
       console.log(res.data);
-      alert("Lấy vị trí thành công!");
-    } catch (error) {
+      setNotice({ type: "success", title: "Thành công", message: "Lấy tọa độ vị trí thành công" });
+
+    } catch (error : any) {
       console.error(error);
-      alert("Lấy vị trí thất bại!");
+    setNotice({ type: "error", title: "Thất bại", message: error.response?.data?.message || "Lấy vị trí thất bại, không đúng địa chỉ hoặc địa chỉ ko tồn tại." });
     }
   };
 
@@ -69,17 +77,17 @@ export default function CreateStopLocation() {
         {
           stop_id: stopId,
           location_name: locationName,
-          address,
-          status,
+          address : address,
+          status : status,
           location: location,
           location_type: locationType,
         },
       );
       console.log(res.data);
-      alert("Thêm vị trí thành công!");
-    } catch (error) {
-      console.error(error);
-      alert("Thêm vị trí thất bại!");
+      setNotice({ type: "success", title: "Thành công", message: "Thêm mới vị trí thành công" });
+    } catch (error : any) {
+      console.error(error );
+      setNotice({ type: "error", title: "Thất bại", message: error.response?.data?.message || "Thêm mới vị trí thất bại" });
     }
   };
   // UseEffect hàm getAllStops
@@ -157,24 +165,13 @@ export default function CreateStopLocation() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
-                    Thêm vị trí lên/xuống
+                    Thêm vị trí lên/xuống tỉnh thành
                   </h1>
                   <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
-                    Cấu hình vị trí đón/trả khách cố định cho từng RouteStop
+                    Cấu hình vị trí đón/trả khách cố định cho từng tỉnh thành
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsImportOpen(true);
-                    setImportError("");
-                    setImportSuccess("");
-                  }}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
-                >
-                  <Plus size={14} />
-                  Import Excel
-                </button>
+          
               </div>
             </div>
           </div>
@@ -206,7 +203,7 @@ export default function CreateStopLocation() {
                     <option value="">Chọn điểm xuất phát</option>
                     {stops.map((stop) => (
                       <option key={stop._id} value={stop._id}>
-                        {stop.name} - {stop.province}
+                        {stop.province}
                       </option>
                     ))}    
                   </select>
@@ -221,25 +218,40 @@ export default function CreateStopLocation() {
                   <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
                     Tên vị trí của tỉnh thành
                   </span>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={locationName}
-                      onChange={(event) => setLocationName(event.target.value)}
-                      placeholder="Cây xăng Trường Đại học Bách Khoa"
-                      className="h-11 flex-1 rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => getGeoLocation(locationName)}
-                      className="h-11 whitespace-nowrap rounded-[8px] border border-[#d1d5db] bg-white px-3 text-xs font-semibold text-[#374151] hover:bg-[#f3f4f6]"
-                    >
-                      Lấy vị trí
-                    </button>
-                  </div>
+                  <input
+                    type="text"
+                    value={locationName}
+                    onChange={(event) => setLocationName(event.target.value)}
+                    placeholder="Cây xăng Trường Đại học Bách Khoa"
+                    className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                    required
+                  />
                 </label>
               </div>
+            </section>
+
+            <section className="space-y-2">
+              <label className="space-y-1">
+                <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                  Địa chỉ chi tiết
+                </span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(event) => setAddress(event.target.value)}
+                    placeholder="07 Tây Sơn, KV4, P.Quang Trung, TP.Quy Nhơn, Tỉnh Bình Định"
+                    className="h-11 flex-1 rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => getGeoLocation()}
+                    className="h-11 whitespace-nowrap rounded-[8px] border border-[#d1d5db] bg-white px-4 text-xs font-semibold text-[#374151] hover:bg-[#f3f4f6]"
+                  >
+                    Lấy tọa độ vị trí
+                  </button>
+                </div>
+              </label>
             </section>
 
             <section className="space-y-4">
@@ -295,21 +307,6 @@ export default function CreateStopLocation() {
               </div>
             </section>
 
-            <section className="space-y-2">
-              <label className="space-y-1">
-                <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
-                  Địa chỉ chi tiết
-                </span>
-                <textarea
-                  value={address}
-                  onChange={(event) => setAddress(event.target.value)}
-                  placeholder="07 Tây Sơn, KV4, P.Quang Trung, TP.Quy Nhơn, Tỉnh Bình Định"
-                  rows={3}
-                  className="w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 py-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
-                />
-              </label>
-            </section>
-
             {formError ? (
               <p className="rounded-[8px] border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
                 {formError}
@@ -322,13 +319,15 @@ export default function CreateStopLocation() {
               </p>
             ) : null}
 
-            <button
-              type="submit"
-              onClick={createNewStopLocation}
-              className="w-full rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
-            >
-              Thêm mới vị trí
-            </button>
+            <div className="pt-4">
+              <button
+                type="button"
+                onClick={createNewStopLocation}
+                className="w-full rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+              >
+                Thêm mới vị trí
+              </button>
+            </div>
           </form>
         </div>
       </section>
@@ -415,6 +414,112 @@ export default function CreateStopLocation() {
           </div>
         </div>
       )}
+       {notice ? (
+        <>
+          <style>{`
+          @keyframes routeNoticeIn {
+            0% {
+              opacity: 0;
+              transform: translateY(10px) scale(0.95);
+            }
+            70% {
+              transform: translateY(-2px) scale(1.02);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+
+          @keyframes routeNoticeIcon {
+            0% {
+              transform: scale(0.4) rotate(-25deg);
+              opacity: 0;
+            }
+            55% {
+              transform: scale(1.18) rotate(8deg);
+              opacity: 1;
+            }
+            80% {
+              transform: scale(0.95) rotate(-4deg);
+            }
+            100% {
+              transform: scale(1) rotate(0);
+            }
+          }
+
+          @keyframes routeNoticePulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.32);
+            }
+            100% {
+              box-shadow: 0 0 0 16px rgba(16, 185, 129, 0);
+            }
+          }
+        `}</style>
+          <div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
+            onClick={() => setNotice(null)}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
+              onClick={(event) => event.stopPropagation()}
+              style={{
+                animation:
+                  notice.type === "success"
+                    ? "routeNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+                    : "routeNoticeIn 0.35s ease",
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
+                    ? "bg-[#ecfdf3] text-[#16a34a]"
+                    : "bg-[#fff7ed] text-[#ea580c]"
+                    }`}
+                  style={{
+                    animation:
+                      notice.type === "success"
+                        ? "routeNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                        : undefined,
+                  }}
+                >
+                  {notice.type === "success" ? (
+                    <CircleCheck
+                      size={20}
+                      style={{
+                        animation:
+                          notice.type === "success"
+                            ? "routeNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
+                            : undefined,
+                      }}
+                    />
+                  ) : (
+                    <TriangleAlert size={20} />
+                  )}
+                </span>
+                <div className="flex-1">
+                  <h3 className="text-base font-black text-[#111827]">
+                    {notice.title}
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-[#4b5563]">
+                    {notice.message}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  className="rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }

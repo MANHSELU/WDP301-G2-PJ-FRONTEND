@@ -218,10 +218,8 @@ const getAssistantStatusIcon = (status: string) => {
       );
       console.log("Các tài xế đang rảnh: ", res.data);
       setBuses(res.data);
-      alert("Lấy danh sách xe thành công!");
     } catch (error) {
       console.error(error);
-      alert("Lấy danh sách xe thất bại!");
     }
   };
 
@@ -230,10 +228,8 @@ const getAssistantStatusIcon = (status: string) => {
     try {
       const res = await baseAPIAuth.get("/api/admin/check/getRoutes");
       setRoutes(res.data);
-      alert("Lấy danh sách tuyến thành công!");
     } catch (error) {
       console.error(error);
-      alert("Lấy danh sách tuyến thất bại!");
     }
   };
 
