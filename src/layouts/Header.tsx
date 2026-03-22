@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { user } from "../model/user";
 import { loginSuccess } from "../store/slices/userSlice";
 import { useEffect, useState } from "react";
-
+const API_BASE = import.meta.env.VITE_API_URL;
 export default function Header() {
     const users = useSelector((state: RootState) => state.user.user as user);
     const dispatch = useDispatch();
@@ -26,7 +26,7 @@ export default function Header() {
         const fetchProfile = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:3000/api/customer/check/getuser",
+                    `${API_BASE}/api/customer/check/getuser`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,

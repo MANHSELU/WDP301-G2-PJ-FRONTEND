@@ -9,7 +9,7 @@ const BustripChangePassword: React.FC = () => {
 
     const navigate = useNavigate();
     const token = localStorage.getItem("accessToken");
-
+    const url = import.meta.env.VITE_API_URL
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -23,7 +23,7 @@ const BustripChangePassword: React.FC = () => {
             setLoading(true);
 
             const response = await fetch(
-                "http://localhost:3000/api/customer/check/changPassword",
+                `${url}/api/customer/check/changPassword`,
                 {
                     method: "PUT",
                     headers: {

@@ -65,7 +65,7 @@ const InfoBox: React.FC<{ label: string; value: string }> = ({ label, value }) =
 );
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-
+const API_BASE = import.meta.env.VITE_API_URL;
 const AssistantShiftsPage: React.FC = () => {
     const [shifts, setShifts] = useState<AssistantShift[]>([]);
     const [stats, setStats] = useState<ShiftStats | null>(null);
@@ -86,7 +86,7 @@ const AssistantShiftsPage: React.FC = () => {
 
         const fetchAssistant = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/customer/check/getuser", {
+                const res = await fetch(`${API_BASE}/api/customer/check/getuser`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!res.ok) throw new Error("Failed to fetch profile");
@@ -111,7 +111,7 @@ const AssistantShiftsPage: React.FC = () => {
         if (!token) return;
         const fetchStats = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/assistant/check/shifts/stats", {
+                const res = await fetch(`${API_BASE}/api/assistant/check/shifts/stats`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!res.ok) throw new Error("Failed to fetch stats");
@@ -141,7 +141,7 @@ const AssistantShiftsPage: React.FC = () => {
                 if (statusFilter !== "all") params.append("status", statusFilter);
 
                 const res = await fetch(
-                    `http://localhost:3000/api/assistant/check/getAllTripsForAssistants?${params.toString()}`,
+                    `${API_BASE}/api/assistant/check/getAllTripsForAssistants?${params.toString()}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (!res.ok) throw new Error(`Failed to fetch shifts: ${res.statusText}`);

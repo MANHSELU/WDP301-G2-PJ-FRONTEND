@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { HomePage } from "./pages/Customer/HomePage";
 import BustripLogin from "./pages/Customer/LoginPage";
 import BustripRegister from "./pages/Customer/RegisterPage";
@@ -17,7 +17,7 @@ import LichTrinh from "./pages/Customer/LichTrinh";
 import BusTripSearch from "./pages/Customer/ChiTietLichTrinh";
 import BusSeatSelection from "./pages/Customer/DatVe";
 import BusBookingUI from "./pages/Customer/ThongTinDatVe";
-import ShippingCart from "./pages/Customer/DatHang";
+import DatHangOrder from "./pages/Customer/DatHangOrder";
 import CheckoutPage from "./pages/Customer/ChiTietDatHang";
 import { InformationUser } from "./pages/Customer/Profile/InformationUser";
 import OrderHistory from "./pages/Customer/Profile/OrderHistory";
@@ -28,7 +28,6 @@ import ManageBus from "./pages/Admin/ManageBus";
 import ManageRoute from "./pages/Admin/ManageRoute";
 import ManageUser from "./pages/Admin/ManageUser";
 import CreateRoute from "./pages/Admin/CreateRoute";
-import TicketBooking from "./pages/LeTan/DatVeChoKhach";
 import TripListPageLeTan from "./pages/LeTan/Home";
 import CargoBooking from "./pages/LeTan/GuiHangChoKhach";
 import CargoOrderList from "./pages/LeTan/DanhSachHangHoa";
@@ -40,8 +39,28 @@ import AssistantShiftsPage from "./pages/Phuxe/DanhSachCalai";
 import DriverShiftsPage from "./pages/Driver/DanhSachCaLai";
 import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageTrip from "./pages/Admin/ManageTrip";
+<<<<<<< HEAD
 import News from "./pages/Customer/News";
+=======
+import FaceVerificationPhuXe from "./pages/Phuxe/VerifileCam";
+import ChatBox from "./pages/Customer/ChatBoxV2";
+import News from "./pages/Customer/News";
+import ReceptionistPage from "./pages/LeTan/DanhSachChuyenDi";
+import StaffBookingAll from "./pages/LeTan/DatVeChoKhach";
+import TripReview from "./pages/Customer/Profile/TripReview";
+import TripReviewHistory from "./pages/Customer/Profile/TripReviewHistory";
+import ManageStop from "./pages/Admin/ManageStop";
+import ManageStopLocation from "./pages/Admin/ManageStopLocation";
+
+import DatHangParcelOrder from "./pages/Customer/Profile/ParcelHistoryCard";
+import LeTanRefundPage from "./pages/LeTan/DanhSachHoanTien";
+>>>>>>> bfdc21f63441129f4b822716054b1d9c7790038d
 export default function App() {
+  const location = useLocation();
+  const isCustomerPage = !location.pathname.startsWith("/admin") &&
+    !location.pathname.startsWith("/driverBooking") &&
+    !location.pathname.startsWith("/assistant") &&
+    !location.pathname.startsWith("/letan");
   return (
     <>
       <Routes>
@@ -57,6 +76,9 @@ export default function App() {
           <Route path="create-stop-location" element={<CreateStopLocation />} />
           <Route path="create-trips" element={<CreateTrip />} />
           <Route path="manage-trips" element={<ManageTrip />} />
+          <Route path="manage-stops" element={<ManageStop />} />
+          <Route path="manage-stop-locations" element={<ManageStopLocation />} />
+
         </Route>
         <Route
           path="/admin/create-stop-location"
@@ -73,45 +95,51 @@ export default function App() {
           <Route path="/lichtrinh" element={<LichTrinh />} />
           <Route path="/news" element={<News />} />
           <Route path="/lichtrinhdetail" element={<BusTripSearch />} />
-
+          <Route path="/news" element={<News />} />
           <Route path="/datve" element={<BusSeatSelection />} />
-          <Route path="/dathang" element={<ShippingCart />} />
+          <Route path="/dathang" element={<DatHangOrder />} />
           <Route path="/chitietdathang" element={<CheckoutPage />} />
 
           <Route path="/thongtindatve" element={<BusBookingUI />} />
           <Route path="/login" element={<BustripLogin />} />
           <Route path="/register" element={<BustripRegister />} />
-
           <Route path="user" element={<BusTripProfile />}>
+            <Route path="tripReview" element={<TripReview />} />
+            <Route path="tripReviewHistory" element={<TripReviewHistory />} />
             <Route path="profile" element={<InformationUser />} />
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="address" element={<AddressForm />} />
             <Route path="changpassword" element={<BustripChangePassword />} />
+
+            <Route path="parcel-history" element={<DatHangParcelOrder />} />
           </Route>
           <Route path="/forgot" element={<ForgotPassword />} />
-          <Route path="/loginCamera" element={<FaceLoginPage />} />
-          <Route path="/registerCamera" element={<FaceRegister />} />
 
+          <Route path="/registerCamera" element={<FaceRegister />} />
+          <Route path="loginCamera" element={<FaceLoginPage />} />
           <Route path="driverBooking" element={<TransportBooking />}>
             <Route path="viewtrip" element={<ViewTrip />} />
             <Route path="viewSlot" element={<DriverShiftsPage />} />
             <Route path="tripdetail/:id" element={<TripDetailsDemo />} />
           </Route>
+          <Route path="verifi" element={<FaceVerificationPhuXe />} />
           <Route path="assistant" element={<TripListPage />}>
             <Route path="chuyendi" element={<DanhSachChuyenDi />} />
             <Route path="viewSlot" element={<AssistantShiftsPage />} />
             <Route path="chitietchuyendi" element={<ChiTietChuyenDi />} />
           </Route>
           <Route path="letan" element={<TripListPageLeTan />}>
-            <Route path="chuyendi" element={<DanhSachChuyenDi />} />
+            <Route path="chuyendi" element={<ReceptionistPage />} />
             {/* <Route path="chitietchuyendi" element={<TripDetailPage />} /> */}
 
+            <Route path="hoan-tien" element={<LeTanRefundPage />} />
             <Route path="CargoOrderList" element={<CargoOrderList />} />
-            <Route path="ticketBooking" element={<TicketBooking />} />
+            <Route path="ticketBooking" element={<StaffBookingAll />} />
             <Route path="cargoBooking" element={<CargoBooking />} />
           </Route>
         </Route>
       </Routes>
+      {isCustomerPage && <ChatBox />}
     </>
   );
 }
