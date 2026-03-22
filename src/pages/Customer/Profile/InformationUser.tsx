@@ -15,7 +15,7 @@ type OutletContextType = {
     setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
 };
 export function InformationUser() {
-    const API_BASE_URL = "http://localhost:3000";
+    const API_BASE_URL = import.meta.env.VITE_API_URL;
     const token = localStorage.getItem("accessToken")
     const { profile, setProfile } =
         useOutletContext<OutletContextType>();

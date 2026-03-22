@@ -3,6 +3,7 @@ import * as faceapi from "face-api.js";
 import { useNavigate } from "react-router-dom";
 
 type LivenessStep = "TURN_LEFT" | "TURN_RIGHT" | "BLINK" | "DONE";
+const API_BASE = import.meta.env.VITE_API_URL;
 export default function FaceVerification() {
     const token = localStorage.getItem("accessToken");
     const blinkStateRef = useRef<"OPEN" | "CLOSED">("OPEN");
@@ -249,7 +250,7 @@ export default function FaceVerification() {
             tempCanvas.getContext("2d")?.drawImage(videoRef.current!, 0, 0);
             const image = tempCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
 
-            const res = await fetch("http://localhost:3000/api/common/check/face-login", {
+            const res = await fetch(`${API_BASE}/api/common/check/face-login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

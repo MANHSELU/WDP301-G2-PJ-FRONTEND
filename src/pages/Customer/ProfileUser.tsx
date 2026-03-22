@@ -5,7 +5,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 
 /* ================= CONFIG ================= */
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 /* ================= TYPES ================= */
 
@@ -92,15 +92,20 @@ export default function BusTripProfile() {
                 icon: Ticket,
                 path: "/user/orderhistory",
               },
-                {
+              {
                 label: "Lịch sử chuyến đi",
                 icon: Ticket,
                 path: "/user/tripReview",
               },
-                {
+              {
                 label: "Lịch sử chuyến đi",
                 icon: Ticket,
                 path: "/user/tripReviewHistory",
+              },
+              {
+                label: "Lịch sử đặt hàng",
+                icon: Ticket,
+                path: "/user/parcel-history",
               },
               { label: "Địa chỉ", icon: MapPin, path: "/user/address" },
               {
@@ -117,11 +122,10 @@ export default function BusTripProfile() {
                   key={item.label}
                   to={item.path}
                   className={`flex items-center gap-3 px-6 py-4 transition-all duration-200
-          ${
-            isActive
-              ? "bg-orange-50 text-orange-500 font-bold border-r-4 border-orange-500"
-              : "text-slate-600 hover:bg-slate-50"
-          }`}
+          ${isActive
+                      ? "bg-orange-50 text-orange-500 font-bold border-r-4 border-orange-500"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
                 >
                   <Icon size={18} />
                   {item.label}

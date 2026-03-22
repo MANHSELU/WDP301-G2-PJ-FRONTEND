@@ -49,6 +49,8 @@ import TripReviewHistory from "./pages/Customer/Profile/TripReviewHistory";
 import ManageStop from "./pages/Admin/ManageStop";
 import ManageStopLocation from "./pages/Admin/ManageStopLocation";
 
+import DatHangParcelOrder from "./pages/Customer/Profile/ParcelHistoryCard";
+import LeTanRefundPage from "./pages/LeTan/DanhSachHoanTien";
 export default function App() {
   const location = useLocation();
   const isCustomerPage = !location.pathname.startsWith("/admin") &&
@@ -103,6 +105,8 @@ export default function App() {
             <Route path="orderhistory" element={<OrderHistory />} />
             <Route path="address" element={<AddressForm />} />
             <Route path="changpassword" element={<BustripChangePassword />} />
+
+            <Route path="parcel-history" element={<DatHangParcelOrder />} />
           </Route>
           <Route path="/forgot" element={<ForgotPassword />} />
 
@@ -123,6 +127,7 @@ export default function App() {
             <Route path="chuyendi" element={<ReceptionistPage />} />
             {/* <Route path="chitietchuyendi" element={<TripDetailPage />} /> */}
 
+            <Route path="hoan-tien" element={<LeTanRefundPage />} />
             <Route path="CargoOrderList" element={<CargoOrderList />} />
             <Route path="ticketBooking" element={<StaffBookingAll />} />
             <Route path="cargoBooking" element={<CargoBooking />} />

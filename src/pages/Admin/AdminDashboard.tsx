@@ -21,7 +21,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_URL
 
 const formatVND = (n: number) =>
     new Intl.NumberFormat("vi-VN", { style: "decimal", maximumFractionDigits: 0 }).format(n) + " ₫";

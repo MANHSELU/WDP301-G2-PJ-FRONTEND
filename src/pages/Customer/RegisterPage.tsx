@@ -31,7 +31,7 @@ const BustripRegister = () => {
   const [loading, setLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
-
+  const url = import.meta.env.VITE_API_URL
   /* =====================
        SETUP CAPTCHA
     ===================== */
@@ -51,7 +51,7 @@ const BustripRegister = () => {
   const checkPhoneExists = async (phone: string): Promise<boolean> => {
     try {
       const res = await fetch(
-        "http://localhost:3000/api/customer/notcheck/check-phone",
+        `${url}/api/customer/notcheck/check-phone`,
         {
           method: "POST",
           headers: {
@@ -166,7 +166,7 @@ const BustripRegister = () => {
       console.log("📦 Sending register payload:", payload);
 
       const res = await fetch(
-        "http://localhost:3000/api/customer/notcheck/register",
+        `${url} / api / customer / notcheck / register`,
         {
           method: "POST",
           headers: {
@@ -260,122 +260,126 @@ const BustripRegister = () => {
 
       {/* Bus animations (same as before) */}
       <style>{`
-                .login-bus-bob {
-                    animation: login-bus-bob 1.9s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite;
-                    transform-origin: 56% 74%;
-                    will-change: transform;
-                }
-                .login-bus-aero-overlay {
-                    transform: rotate(12deg);
-                    transform-origin: 22% 50%;
-                }
-                .login-bus-cloud {
-                    animation: login-cloud-drift 1.75s ease-out infinite;
-                    will-change: transform, opacity;
-                }
-                .login-bus-cloud-1 { animation-delay: 0.06s; animation-duration: 1.95s; }
-                .login-bus-cloud-2 { animation-delay: 0.26s; animation-duration: 1.55s; }
-                .login-bus-cloud-3 { animation-delay: 0.42s; animation-duration: 1.58s; }
-                .login-bus-cloud-4 { animation-delay: 0.62s; animation-duration: 1.84s; }
-                .login-bus-cloud-5 { animation-delay: 0.78s; animation-duration: 1.72s; }
-                .login-bus-aero-trail {
-                    transform: rotate(12deg);
-                    transform-origin: 22% 50%;
-                }
-                .login-bus-tail-cloud {
-                    animation: login-trail-drift 1.55s ease-out infinite;
-                    will-change: transform, opacity;
-                }
-                .login-bus-tail-1 { animation-delay: 0.06s; }
-                .login-bus-tail-2 { animation-delay: 0.32s; }
-                .login-bus-tail-3 { animation-delay: 0.54s; }
-                .login-bus-tail-4 { animation-delay: 0.76s; }
-                .login-bus-tail-5 { animation-delay: 0.22s; animation-duration: 1.45s; }
+        .login - bus - bob {
+          animation: login - bus - bob 1.9s cubic- bezier(0.36, 0.06, 0.29, 0.97) infinite;
+      transform - origin: 56 % 74 %;
+      will - change: transform;
+    }
+                .login - bus - aero - overlay {
+  transform: rotate(12deg);
+  transform - origin: 22 % 50 %;
+}
+                .login - bus - cloud {
+  animation: login - cloud - drift 1.75s ease - out infinite;
+  will - change: transform, opacity;
+}
+                .login - bus - cloud - 1 { animation - delay: 0.06s; animation - duration: 1.95s; }
+                .login - bus - cloud - 2 { animation - delay: 0.26s; animation - duration: 1.55s; }
+                .login - bus - cloud - 3 { animation - delay: 0.42s; animation - duration: 1.58s; }
+                .login - bus - cloud - 4 { animation - delay: 0.62s; animation - duration: 1.84s; }
+                .login - bus - cloud - 5 { animation - delay: 0.78s; animation - duration: 1.72s; }
+                .login - bus - aero - trail {
+  transform: rotate(12deg);
+  transform - origin: 22 % 50 %;
+}
+                .login - bus - tail - cloud {
+  animation: login - trail - drift 1.55s ease - out infinite;
+  will - change: transform, opacity;
+}
+                .login - bus - tail - 1 { animation - delay: 0.06s; }
+                .login - bus - tail - 2 { animation - delay: 0.32s; }
+                .login - bus - tail - 3 { animation - delay: 0.54s; }
+                .login - bus - tail - 4 { animation - delay: 0.76s; }
+                .login - bus - tail - 5 { animation - delay: 0.22s; animation - duration: 1.45s; }
 
-                .login-bus-driver {
-                    position: absolute;
-                    left: 26.3%; top: 30.7%; width: 11.6%; height: 15.8%;
-                    overflow: hidden;
-                    clip-path: polygon(8% 1%, 96% 5%, 100% 95%, 22% 98%, 2% 56%);
-                    transform: perspective(760px) rotateY(-12deg) rotate(-0.55deg);
-                    transform-origin: 54% 50%;
-                    animation: login-driver-settle 1.9s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite;
-                    will-change: transform;
+                .login - bus - driver {
+  position: absolute;
+  left: 26.3 %; top: 30.7 %; width: 11.6 %; height: 15.8 %;
+  overflow: hidden;
+  clip - path: polygon(8 % 1 %, 96 % 5 %, 100 % 95 %, 22 % 98 %, 2 % 56 %);
+  transform: perspective(760px) rotateY(-12deg) rotate(-0.55deg);
+  transform - origin: 54 % 50 %;
+  animation: login - driver - settle 1.9s cubic - bezier(0.36, 0.06, 0.29, 0.97) infinite;
+  will - change: transform;
+}
+                .login - bus - driver - img {
+  position: absolute;
+  left: -2 %; top: 3 %; width: 95 %; height: 112 %;
+  object - fit: cover; object - position: center 8 %;
+  filter: saturate(0.82) contrast(1.08) brightness(0.9);
+  opacity: 0.95;
+  transform: scaleX(-1) rotate(5deg);
+  animation: login - driver - idle 1.65s ease -in -out infinite;
+  will - change: transform; z - index: 1;
+}
+                .login - bus - front - passenger {
+  position: absolute;
+  left: 48.4 %; top: 26.2 %; width: 11.6 %; height: 15.6 %;
+  overflow: hidden;
+  clip - path: polygon(18 % 2 %, 94 % 6 %, 98 % 95 %, 10 % 97 %, 4 % 52 %);
+  transform: perspective(760px) rotateY(14deg) rotate(0.7deg);
+  transform - origin: 50 % 50 %;
+  animation: login - driver - settle 2s cubic - bezier(0.36, 0.06, 0.29, 0.97) infinite;
+  will - change: transform; z - index: 1;
+}
+                .login - bus - front - passenger - img {
+  position: absolute;
+  left: 2 %; top: 3 %; width: 130 %; height: 166 %;
+  object - fit: cover; object - position: center 10 %;
+  filter: saturate(0.8) contrast(1.05) brightness(0.88);
+  opacity: 0.93;
+  transform: scaleX(-1) rotate(-2deg);
+  animation: login - passenger - idle 1.8s ease -in -out infinite;
+  will - change: transform;
+}
+
+@keyframes login - bus - bob {
+  0 %, 100 % { transform: translateY(0) rotate(- 0.35deg);
+}
+32 % { transform: translateY(-4px) rotate(0.12deg); }
+62 % { transform: translateY(-8px) rotate(0.24deg); }
+82 % { transform: translateY(2px) rotate(- 0.16deg); }
                 }
-                .login-bus-driver-img {
-                    position: absolute;
-                    left: -2%; top: 3%; width: 95%; height: 112%;
-                    object-fit: cover; object-position: center 8%;
-                    filter: saturate(0.82) contrast(1.08) brightness(0.9);
-                    opacity: 0.95;
-                    transform: scaleX(-1) rotate(5deg);
-                    animation: login-driver-idle 1.65s ease-in-out infinite;
-                    will-change: transform; z-index: 1;
+@keyframes login - cloud - drift {
+  0 % { opacity: 0.2; transform: translateX(-18px) scale(0.84); }
+  36 % { opacity: 0.76; }
+  100 % { opacity: 0; transform: translateX(172px) scale(1.3); }
+}
+@keyframes login - trail - drift {
+  0 % { opacity: 0.62; transform: translateX(-6px) scale(0.78); }
+  34 % { opacity: 0.96; }
+  100 % { opacity: 0; transform: translateX(92px) scale(1.22); }
+}
+@keyframes login - driver - settle {
+  0 %, 100 % { transform: perspective(760px) rotateY(- 12deg) rotate(-0.55deg) translateY(0);
+}
+34 % { transform: perspective(760px) rotateY(- 12deg) rotate(-0.4deg) translateY(-1px); }
+68 % { transform: perspective(760px) rotateY(- 12deg) rotate(-0.75deg) translateY(1px); }
                 }
-                .login-bus-front-passenger {
-                    position: absolute;
-                    left: 48.4%; top: 26.2%; width: 11.6%; height: 15.6%;
-                    overflow: hidden;
-                    clip-path: polygon(18% 2%, 94% 6%, 98% 95%, 10% 97%, 4% 52%);
-                    transform: perspective(760px) rotateY(14deg) rotate(0.7deg);
-                    transform-origin: 50% 50%;
-                    animation: login-driver-settle 2s cubic-bezier(0.36, 0.06, 0.29, 0.97) infinite;
-                    will-change: transform; z-index: 1;
+@keyframes login - driver - idle {
+  0 %, 100 % { transform: scaleX(-1) rotate(5deg) translateY(0); }
+  28 % { transform: scaleX(-1) rotate(4.1deg) translateY(- 1px);
+}
+62 % { transform: scaleX(-1) rotate(5.9deg) translateY(1px); }
+82 % { transform: scaleX(-1) rotate(4.6deg) translateY(0); }
                 }
-                .login-bus-front-passenger-img {
-                    position: absolute;
-                    left: 2%; top: 3%; width: 130%; height: 166%;
-                    object-fit: cover; object-position: center 10%;
-                    filter: saturate(0.8) contrast(1.05) brightness(0.88);
-                    opacity: 0.93;
-                    transform: scaleX(-1) rotate(-2deg);
-                    animation: login-passenger-idle 1.8s ease-in-out infinite;
-                    will-change: transform;
+@keyframes login - passenger - idle {
+  0 %, 100 % { transform: scaleX(-1) rotate(- 2deg) translateY(0);
+}
+34 % { transform: scaleX(-1) rotate(- 1.3deg) translateY(-1px); }
+72 % { transform: scaleX(-1) rotate(- 2.6deg) translateY(1px); }
                 }
 
-                @keyframes login-bus-bob {
-                    0%, 100% { transform: translateY(0) rotate(-0.35deg); }
-                    32% { transform: translateY(-4px) rotate(0.12deg); }
-                    62% { transform: translateY(-8px) rotate(0.24deg); }
-                    82% { transform: translateY(2px) rotate(-0.16deg); }
-                }
-                @keyframes login-cloud-drift {
-                    0% { opacity: 0.2; transform: translateX(-18px) scale(0.84); }
-                    36% { opacity: 0.76; }
-                    100% { opacity: 0; transform: translateX(172px) scale(1.3); }
-                }
-                @keyframes login-trail-drift {
-                    0% { opacity: 0.62; transform: translateX(-6px) scale(0.78); }
-                    34% { opacity: 0.96; }
-                    100% { opacity: 0; transform: translateX(92px) scale(1.22); }
-                }
-                @keyframes login-driver-settle {
-                    0%, 100% { transform: perspective(760px) rotateY(-12deg) rotate(-0.55deg) translateY(0); }
-                    34% { transform: perspective(760px) rotateY(-12deg) rotate(-0.4deg) translateY(-1px); }
-                    68% { transform: perspective(760px) rotateY(-12deg) rotate(-0.75deg) translateY(1px); }
-                }
-                @keyframes login-driver-idle {
-                    0%, 100% { transform: scaleX(-1) rotate(5deg) translateY(0); }
-                    28% { transform: scaleX(-1) rotate(4.1deg) translateY(-1px); }
-                    62% { transform: scaleX(-1) rotate(5.9deg) translateY(1px); }
-                    82% { transform: scaleX(-1) rotate(4.6deg) translateY(0); }
-                }
-                @keyframes login-passenger-idle {
-                    0%, 100% { transform: scaleX(-1) rotate(-2deg) translateY(0); }
-                    34% { transform: scaleX(-1) rotate(-1.3deg) translateY(-1px); }
-                    72% { transform: scaleX(-1) rotate(-2.6deg) translateY(1px); }
-                }
-
-                @media (prefers-reduced-motion: reduce) {
-                    .login-bus-bob, .login-bus-cloud, .login-bus-tail-cloud,
-                    .login-bus-driver, .login-bus-driver-img,
-                    .login-bus-front-passenger, .login-bus-front-passenger-img {
-                        animation: none !important;
-                        opacity: 1 !important;
-                        transform: none !important;
-                    }
-                }
-            `}</style>
+@media(prefers - reduced - motion: reduce) {
+                    .login - bus - bob, .login - bus - cloud, .login - bus - tail - cloud,
+                    .login - bus - driver, .login - bus - driver - img,
+                    .login - bus - front - passenger, .login - bus - front - passenger - img {
+    animation: none!important;
+    opacity: 1!important;
+    transform: none!important;
+  }
+}
+`}</style>
       <Toaster />
       <div id="recaptcha-container" />
 

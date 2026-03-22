@@ -34,7 +34,7 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
-
+  const url = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
 
   /* =====================
@@ -56,7 +56,7 @@ const ForgotPassword = () => {
   const checkPhoneExists = async (phone: string): Promise<boolean> => {
     try {
       const res = await fetch(
-        "http://localhost:3000/api/customer/notcheck/check-phone",
+        `${url}/api/customer/notcheck/check-phone`,
         {
           method: "POST",
           headers: {
@@ -172,7 +172,7 @@ const ForgotPassword = () => {
       console.log("📦 Sending reset password payload:", payload);
 
       const res = await fetch(
-        "http://localhost:3000/api/customer/notcheck/resetPass",
+        `${url}/api/customer/notcheck/resetPass`,
         {
           method: "POST",
           headers: {
@@ -241,11 +241,10 @@ const ForgotPassword = () => {
                     disabled={loading}
                     className={`w-full sm:w-auto px-4 h-[42px] flex items-center justify-center gap-2
                                             text-white text-sm rounded-md whitespace-nowrap
-                                            ${
-                                              loading
-                                                ? "bg-blue-400 cursor-not-allowed"
-                                                : "bg-blue-500 hover:bg-blue-600"
-                                            }
+                                            ${loading
+                        ? "bg-blue-400 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600"
+                      }
                                         `}
                   >
                     {loading ? <Spinner /> : "Gửi OTP"}
@@ -270,11 +269,10 @@ const ForgotPassword = () => {
                   disabled={loading}
                   className={`w-full sm:w-auto px-4 flex items-center justify-center gap-2
                                         text-white text-sm rounded-md
-                                        ${
-                                          loading
-                                            ? "bg-green-400 cursor-not-allowed"
-                                            : "bg-green-500 hover:bg-green-600"
-                                        }
+                                        ${loading
+                      ? "bg-green-400 cursor-not-allowed"
+                      : "bg-green-500 hover:bg-green-600"
+                    }
                                     `}
                 >
                   {loading ? <Spinner /> : "Xác nhận"}
@@ -322,11 +320,10 @@ const ForgotPassword = () => {
                   onClick={handleResetPassword}
                   disabled={loading}
                   className={`w-full py-3 rounded-lg font-semibold text-white
-                                        ${
-                                          loading
-                                            ? "bg-orange-400 cursor-not-allowed"
-                                            : "bg-orange-500 hover:bg-orange-600"
-                                        }
+                                        ${loading
+                      ? "bg-orange-400 cursor-not-allowed"
+                      : "bg-orange-500 hover:bg-orange-600"
+                    }
                                     `}
                 >
                   {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}

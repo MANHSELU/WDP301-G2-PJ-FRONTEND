@@ -1,14 +1,9 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
-    BadgeDollarSign,
-    BusFront,
-    CalendarCheck2,
     ChevronDown,
     ChevronLeft,
-    LayoutDashboard,
     LogIn,
     Plus,
-    Shield,
     Trash2,
 } from "lucide-react";
 import { GiSteeringWheel } from "react-icons/gi";
@@ -86,13 +81,7 @@ const INITIAL_COLUMNS: ColumnFormState = {
     RIGHT: { enabled: true, seatsPerRow: 2 },
 };
 // Set giá trị default cho sidebar trnag admin
-const ADMIN_SIDEBAR_ITEMS = [
-    { id: "overview", label: "Tổng quan", icon: LayoutDashboard },
-    { id: "roles", label: "Quản lý phân quyền", icon: Shield },
-    { id: "routes", label: "Quản lý tuyến xe", icon: CalendarCheck2 },
-    { id: "buses", label: "Quản lý xe", icon: BusFront },
-    { id: "finance", label: "Quản lý thu chi", icon: BadgeDollarSign },
-];
+
 
 const ADMIN_LAYOUT_TUNE = {
     sidebarAndContentCols: "lg:grid-cols-[300px_minmax(0,1fr)]",
@@ -410,9 +399,26 @@ export default function CreateCoach() {
             const res = await baseAPIAuth.post("/api/admin/check/buses", payload);
             console.log(res.data);
             alert("Tao xe thanh cong!");
-        } catch (err: any) {
-            console.error(err);
-            setValidationMessage(err.response?.data?.message || "Tao xe that bai");
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                console.error(err.message);
+            }
+            // nếu là axios error
+            if (typeof err === 'object' && err !== null && 'response' in err) {
+                const error = err as {
+                    response?: {
+                        data?: {
+                            message?: string;
+                        };
+                    };
+                };
+
+                setValidationMessage(
+                    error.response?.data?.message || "Tạo xe thất bại"
+                );
+            } else {
+                setValidationMessage("Tạo xe thất bại");
+            }
         }
     };
 

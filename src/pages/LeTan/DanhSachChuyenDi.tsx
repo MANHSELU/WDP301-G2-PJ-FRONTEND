@@ -29,7 +29,7 @@ const avatarLetters = (name: string) =>
     name.split(/\s+/).filter(Boolean).map((w) => w[0].toUpperCase()).slice(0, 2).join("");
 
 // ─── Sub Components ───────────────────────────────────────────────────────────
-
+const API_BASE = import.meta.env.VITE_API_URL;
 const TripStatusBadge: React.FC<{ status: string }> = ({ status }) => {
     const cfg: Record<string, string> = {
         SCHEDULED: "bg-yellow-100 text-yellow-700 border-yellow-200",
@@ -124,7 +124,7 @@ const ReceptionistPage: React.FC = () => {
             if (statusFilter !== "all") params.append("status", statusFilter);
 
             const res = await fetch(
-                `http://localhost:3000/api/receptionist/check/active-trips?${params}`,
+                `${API_BASE}/api/receptionist/check/active-trips?${params}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             if (!res.ok) throw new Error(`HTTP ${res.status}`);

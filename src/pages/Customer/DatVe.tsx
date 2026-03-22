@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { X, ArrowRight, Armchair, MapPin, Navigation, SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -40,10 +40,12 @@ type LocationPoint = {
 };
 
 /* ================= COMPONENT ================= */
-
+const API_BASE = import.meta.env.VITE_API_URL;
 export default function BusSeatSelection() {
     const location = useLocation();
     const route_id = location.state?.tripId ?? "";
+    const trips_id = location.state?.trip_id ?? "";
+    console.log("trips id ỏe đặt vé là: ", trips_id)
     const bus_type_id = location.state?.bus_type_id ?? "";
     const justBookedLabels: string[] = location.state?.justBookedLabels ?? [];
     const restoredPickupId: string = location.state?.restoredPickupId ?? "";
@@ -86,7 +88,7 @@ export default function BusSeatSelection() {
     /* ── Fetch sơ đồ xe ── */
     useEffect(() => {
         if (!route_id) return;
-        fetch("http://localhost:3000/api/customer/notcheck/diagram-bus", {
+        fetch(`${API_BASE}/api/customer/notcheck/diagram-bus`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ route_id }),
@@ -101,7 +103,7 @@ export default function BusSeatSelection() {
             setBookedSeatLabels(justBookedLabels);
             return;
         }
-        fetch("http://localhost:3000/api/customer/notcheck/booked-seats", {
+        fetch(`${API_BASE}/api/customer/notcheck/booked-seats`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -121,10 +123,10 @@ export default function BusSeatSelection() {
 
     useEffect(() => {
         if (!route_id) return;
-        fetch("http://localhost:3000/api/customer/notcheck/start-point", {
+        fetch(`${API_BASE}/api/customer/notcheck/start-point`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ route_id }),
+            body: JSON.stringify({ route_id, trips_id }),
         })
             .then(r => r.json())
             .then(res => {
@@ -148,7 +150,7 @@ export default function BusSeatSelection() {
         setDropoffLocationPoints([]);
         setSelectedDropoffLocationId("");
 
-        fetch("http://localhost:3000/api/customer/notcheck/end-point", {
+        fetch(`${API_BASE}/api/customer/notcheck/end-point`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ route_id, start_id: selectedPickupStopId, bus_type_id }),
@@ -174,7 +176,7 @@ export default function BusSeatSelection() {
         }
         setLoadingPickupLocations(true);
         setSelectedPickupLocationId("");
-        fetch("http://localhost:3000/api/customer/notcheck/location-point", {
+        fetch(`${API_BASE}/api/customer/notcheck/location-point`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ stop_id: selectedPickupStopId, route_id }),
@@ -199,7 +201,7 @@ export default function BusSeatSelection() {
         }
         setLoadingDropoffLocations(true);
         setSelectedDropoffLocationId("");
-        fetch("http://localhost:3000/api/customer/notcheck/location-point", {
+        fetch(`${API_BASE}/api/customer/notcheck/location-point`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ stop_id: selectedDropoffStopId, route_id }),
@@ -230,7 +232,7 @@ export default function BusSeatSelection() {
             return;
         }
         setLoadingPrice(true);
-        fetch("http://localhost:3000/api/customer/notcheck/getPrice", {
+        fetch(`${API_BASE}/api/customer/notcheck/getPrice`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ start_id, end_id, route_id, bus_type_id: bt_id }),

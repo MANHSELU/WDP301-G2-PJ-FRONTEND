@@ -58,7 +58,7 @@ const InfoBox: React.FC<{ label: string; value: string }> = ({ label, value }) =
         <p className="text-sm font-semibold text-gray-800">{value}</p>
     </div>
 );
-
+const API_BASE = import.meta.env.VITE_API_URL;
 const DriverShiftsPage: React.FC = () => {
     const [shifts, setShifts] = useState<DriverShift[]>([]);
     const [stats, setStats] = useState<ShiftStats | null>(null);
@@ -82,7 +82,7 @@ const DriverShiftsPage: React.FC = () => {
         }
         const fetchDriver = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/common/check/getprofile", {
+                const res = await fetch(`${API_BASE}/api/common/check/getprofile`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!res.ok) throw new Error("Failed to fetch driver profile");
@@ -110,7 +110,7 @@ const DriverShiftsPage: React.FC = () => {
         if (!token) return;
         const fetchStats = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/driver/check/shifts/stats", {
+                const res = await fetch(`${API_BASE}/api/driver/check/shifts/stats`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!res.ok) throw new Error("Failed to fetch stats");
@@ -143,7 +143,7 @@ const DriverShiftsPage: React.FC = () => {
                 if (statusFilter !== "all") params.append("status", statusFilter);
 
                 const res = await fetch(
-                    `http://localhost:3000/api/driver/check/getAllTripsForDrivers?${params}`,
+                    `${API_BASE}/api/driver/check/getAllTripsForDrivers?${params}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (!res.ok) throw new Error(`Failed to fetch shifts: ${res.statusText}`);
@@ -269,10 +269,10 @@ const DriverShiftsPage: React.FC = () => {
                             { label: "Hoàn thành", value: stats.completedShifts, sub: "ca", border: "border-green-200 bg-green-50", text: "text-green-700", subText: "text-green-500", labelColor: "text-green-600" },
                             { label: "Tổng giờ", value: Math.floor(stats.totalHours), sub: "giờ", border: "border-purple-200 bg-purple-50", text: "text-purple-700", subText: "text-purple-500", labelColor: "text-purple-600" },
                         ].map(({ label, value, sub, border, text, subText, labelColor }) => (
-                            <div key={label} className={`bg-white rounded-2xl border p-4 ${border}`}>
-                                <p className={`text-xs mb-1 font-semibold ${labelColor || "text-gray-500"}`}>{label}</p>
-                                <p className={`text-2xl font-black ${text}`}>{value}</p>
-                                <p className={`text-xs mt-0.5 ${subText}`}>{sub}</p>
+                            <div key={label} className={`bg - white rounded - 2xl border p - 4 ${border}`}>
+                                <p className={`text - xs mb - 1 font - semibold ${labelColor || "text-gray-500"}`}>{label}</p>
+                                <p className={`text - 2xl font - black ${text} `}>{value}</p>
+                                <p className={`text - xs mt - 0.5 ${subText} `}>{sub}</p>
                             </div>
                         ))}
                     </div>
@@ -284,10 +284,10 @@ const DriverShiftsPage: React.FC = () => {
                         <button
                             key={s}
                             onClick={() => { setStatusFilter(s); setPage(1); }}
-                            className={`px-4 py-2 rounded-full font-semibold whitespace-nowrap transition-all text-sm ${statusFilter === s
+                            className={`px - 4 py - 2 rounded - full font - semibold whitespace - nowrap transition - all text - sm ${statusFilter === s
                                 ? "bg-orange-500 text-white shadow-md"
                                 : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
-                                }`}
+                                } `}
                         >
                             {s === "all" ? "📋 Tất cả" : getStatusConfig(s).label}
                         </button>
@@ -325,7 +325,7 @@ const DriverShiftsPage: React.FC = () => {
 
                                     {/* Progress Bar */}
                                     <div className="flex items-center gap-2">
-                                        <div className={`w-3 h-3 rounded-full ${statusConfig.dot} flex-shrink-0`} />
+                                        <div className={`w - 3 h - 3 rounded - full ${statusConfig.dot} flex - shrink - 0`} />
                                         <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all"
@@ -340,10 +340,10 @@ const DriverShiftsPage: React.FC = () => {
 
                                     {/* Details Pills */}
                                     <div className="flex flex-wrap gap-2">
-                                        <StatusPill label={`📅 ${shift.date}`} color="bg-gray-100 text-gray-600" />
-                                        <StatusPill label={`⏱️ ${shift.duration}`} color="bg-orange-100 text-orange-700" />
-                                        <StatusPill label={`📍 ${shift.distance}`} color="bg-blue-100 text-blue-700" />
-                                        <StatusPill label={`🚌 ${shift.licensePlate}`} color="bg-yellow-100 text-yellow-700" />
+                                        <StatusPill label={`📅 ${shift.date} `} color="bg-gray-100 text-gray-600" />
+                                        <StatusPill label={`⏱️ ${shift.duration} `} color="bg-orange-100 text-orange-700" />
+                                        <StatusPill label={`📍 ${shift.distance} `} color="bg-blue-100 text-blue-700" />
+                                        <StatusPill label={`🚌 ${shift.licensePlate} `} color="bg-yellow-100 text-yellow-700" />
                                     </div>
 
                                     {/* Vehicle & Trip Status */}
@@ -414,7 +414,7 @@ const DriverShiftsPage: React.FC = () => {
                         <button
                             onClick={() => setPage(Math.max(1, page - 1))}
                             disabled={page === 1}
-                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${page === 1 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-700"}`}
+                            className={`px - 4 py - 2 rounded - lg text - sm font - semibold transition - colors ${page === 1 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-700"} `}
                         >
                             ← Trước
                         </button>
@@ -423,7 +423,7 @@ const DriverShiftsPage: React.FC = () => {
                                 <button
                                     key={p}
                                     onClick={() => setPage(p)}
-                                    className={`w-9 h-9 rounded-lg text-sm font-bold transition-colors ${page === p ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-orange-50"}`}
+                                    className={`w - 9 h - 9 rounded - lg text - sm font - bold transition - colors ${page === p ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-orange-50"} `}
                                 >
                                     {p}
                                 </button>
@@ -432,7 +432,7 @@ const DriverShiftsPage: React.FC = () => {
                         <button
                             onClick={() => setPage(Math.min(totalPages, page + 1))}
                             disabled={page === totalPages}
-                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${page === totalPages ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-700"}`}
+                            className={`px - 4 py - 2 rounded - lg text - sm font - semibold transition - colors ${page === totalPages ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-700"} `}
                         >
                             Sau →
                         </button>

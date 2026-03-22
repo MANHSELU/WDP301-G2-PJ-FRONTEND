@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { user } from "../model/user";
 import { useEffect, useState } from "react";
 import { loginSuccess } from "../store/slices/userSlice";
-
+const API_BASE = import.meta.env.VITE_API_URL;
 export default function Header2() {
   const users = useSelector((state: RootState) => state.user.user as user);
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ export default function Header2() {
     const fetchProfile = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/common/check/getprofile",
+          `${API_BASE}/api/common/check/getprofile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

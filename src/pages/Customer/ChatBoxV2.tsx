@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { MessageCircle, X, Send, Bot, User, RotateCcw } from "lucide-react";
 import axios from "axios";
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 interface Message {
   role: "user" | "assistant";
@@ -266,8 +266,8 @@ function SeatLayoutDiagram({ context }: { context: ChatContext }) {
                 key={f.floor}
                 onClick={() => setActiveFloor(f.floor)}
                 className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition ${activeFloor === f.floor
-                    ? "bg-gradient-to-br from-[#f7a53a] to-[#e8791c] text-white"
-                    : "bg-[#f3f4f6] text-[#6b7280] hover:bg-[#e5e7eb]"
+                  ? "bg-gradient-to-br from-[#f7a53a] to-[#e8791c] text-white"
+                  : "bg-[#f3f4f6] text-[#6b7280] hover:bg-[#e5e7eb]"
                   }`}
               >
                 Tầng {f.floor}
@@ -550,8 +550,8 @@ export default function ChatBoxV2() {
                 {/* AVATAR */}
                 <div
                   className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${msg.role === "assistant"
-                      ? "bg-gradient-to-br from-[#f7a53a] to-[#e8791c]"
-                      : "bg-[#e5e7eb]"
+                    ? "bg-gradient-to-br from-[#f7a53a] to-[#e8791c]"
+                    : "bg-[#e5e7eb]"
                     }`}
                 >
                   {msg.role === "assistant" ? (
@@ -564,8 +564,8 @@ export default function ChatBoxV2() {
                 {/* BUBBLE */}
                 <div
                   className={`max-w-[75%] rounded-[14px] px-3 py-2 text-sm leading-relaxed ${msg.role === "user"
-                      ? "rounded-br-[4px] bg-gradient-to-br from-[#f7a53a] to-[#e8791c] text-white whitespace-pre-line"
-                      : "rounded-bl-[4px] bg-[#f3f4f6] text-[#1f2937]"
+                    ? "rounded-br-[4px] bg-gradient-to-br from-[#f7a53a] to-[#e8791c] text-white whitespace-pre-line"
+                    : "rounded-bl-[4px] bg-[#f3f4f6] text-[#1f2937]"
                     }`}
                 >
                   {msg.role === "assistant" ? (

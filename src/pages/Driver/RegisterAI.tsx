@@ -8,6 +8,7 @@ type RegisterStep =
     | "BLINK"
     | "CAPTURE"
     | "DONE";
+const API_BASE = import.meta.env.VITE_API_URL;
 export default function FaceRegister() {
     const token = localStorage.getItem("accessToken");
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -270,7 +271,7 @@ export default function FaceRegister() {
                 return;
             }
 
-            await fetch("http://localhost:3000/api/driver/check/face-register", {
+            await fetch(`${API_BASE}/api/driver/check/face-register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
