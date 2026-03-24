@@ -94,13 +94,13 @@ const BustripLogin = () => {
 
       setTimeout(() => {
         if (roleName === "RECEPTIONIST") {
-          navigate("/admin");
+          navigate("/letan");
         } else if (roleName === "ADMIN") {
           navigate("/admin");
         } else if (roleName === "DRIVER") {
-          navigate("/driverBooking/viewtrip");
+          navigate("/loginCamera");
         } else if (roleName === "BUS_ASSISTANT") {
-          navigate("/assistant/chuyendi");
+          navigate("/verifi");
         } else {
           navigate("/"); // CUSTOMER
         }
