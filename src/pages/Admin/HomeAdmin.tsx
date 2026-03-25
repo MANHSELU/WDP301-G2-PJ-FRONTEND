@@ -44,6 +44,12 @@ const ADMIN_SIDEBAR_ITEMS = [
   },
   {
     id: "buses",
+    label: "Quản lý các loại xe",
+    icon: BusFront,
+    path: "/admin/types-bus",
+  },
+  {
+    id: "buses",
     label: "Quản lý xe",
     icon: BusFront,
     path: "/admin/manage-buses",
