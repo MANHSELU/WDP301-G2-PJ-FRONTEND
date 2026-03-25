@@ -10,18 +10,11 @@ import {
   MapPin,
   Plus,
   Save,
+  Loader2,
 } from "lucide-react";
 import type { recommendStops } from "../../model/recommendStops";
 import baseAPIAuth from "../../api/auth";
 import type { allStops } from "../../model/allStops";
-
-// const STATION_NOTES: Record<string, string> = {
-//   "bien-hoa": "TRẠM ĐÓN DỌC ĐƯỜNG",
-//   "long-khanh": "TRẠM TRẢ/ĐÓN KHÁCH",
-//   madagui: "NGHỈ NGƠI 30 PHÚT",
-//   "bao-loc": "TRẠM TRẢ/ĐÓN KHÁCH",
-//   "di-linh": "TRẠM TRẢ/ĐÓN KHÁCH",
-// };
 
 type DotType = "start" | "middle" | "end";
 
@@ -83,7 +76,6 @@ function StationCard({
   onDragEnd?: () => void;
   isDragging?: boolean;
 }) {
-  // Hàm format distance và duration
   function formatHourMinute(hour: number) {
     const h = Math.floor(hour);
     const m = Math.round((hour - h) * 60);
@@ -161,27 +153,28 @@ export default function CreateRoute() {
   const [stops, setStops] = useState<allStops[]>([]);
   const [showManualStopDropdown, setShowManualStopDropdown] = useState(false);
   const [manualStopSearch, setManualStopSearch] = useState("");
-  // Hàm lấy tất cả stops
+
+  // ── Loading states ──
+  const [loadingConfirm, setLoadingConfirm] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
+
   const getAllStops = async () => {
     try {
       const res = await baseAPIAuth.get("/api/admin/check/getAllStops");
-      console.log(res.data);
       setStops(res.data);
-      console.log(stops);
     } catch (error) {
       console.error(error);
     }
   };
 
-  // UseEffect hàm getAllStops
   useEffect(() => {
     getAllStops();
   }, []);
 
-
-
-  // Hàm lấy ra thông tin stops được gợi ý
+  // ── Xác nhận: gọi gợi ý trạm dừng với loading ──
   const getRecommendStops = async () => {
+    if (!departureId || !destinationId) return;
+    setLoadingConfirm(true);
     try {
       const res = await baseAPIAuth.get("/api/admin/check/recommendStops", {
         params: {
@@ -189,28 +182,23 @@ export default function CreateRoute() {
           stop_id: destinationId,
         },
       });
-      console.log("data", res.data);
-      const formatData = res.data.recommendedStops.map((stop: any) => {
-        return {
-          _id: stop._id,
-          name: stop.name,
-          province: stop.province,
-          distance_from_start: Number(
-            Number(stop.distance_from_start).toFixed(2),
-          ),
-          duration_from_start: Number(
-            Number(stop.duration_from_start).toFixed(2),
-          ),
-          selected: true,
-        };
-      });
+      const formatData = res.data.recommendedStops.map((stop: any) => ({
+        _id: stop._id,
+        name: stop.name,
+        province: stop.province,
+        distance_from_start: Number(Number(stop.distance_from_start).toFixed(2)),
+        duration_from_start: Number(Number(stop.duration_from_start).toFixed(2)),
+        selected: true,
+      }));
       setRecommendStops(formatData);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoadingConfirm(false);
     }
   };
 
-  // Hàm tạo tuyến
+  // ── Lưu tuyến với loading ──
   const createRoutes = async () => {
     if (!departure.trim() || !destination.trim()) {
       setNotice({
@@ -220,6 +208,8 @@ export default function CreateRoute() {
       });
       return;
     }
+    setLoadingSave(true);
+    setLoadingSave(true);
     try {
       const selectedStops = recommendStops
         .filter((s) => s.selected)
@@ -233,7 +223,6 @@ export default function CreateRoute() {
         stop_id: destinationId,
         stops: selectedStops,
       });
-      console.log("Create route success:", res.data);
       setNotice({
         type: "success",
         title: "Tạo tuyến thành công",
@@ -248,26 +237,23 @@ export default function CreateRoute() {
           error.response?.data?.message ||
           "Đã có lỗi xảy ra, vui lòng thử lại.",
       });
+    } finally {
+      setLoadingSave(false);
     }
   };
-  // Hàm lấy để lấy distance và duration cho các trạm thủ công
+
   const getDurationHandicraft = async (stopId: string) => {
     try {
-      const res = await baseAPIAuth.get(
-        "/api/admin/check/getDurationHandicraft",
-        {
-          params: {
-            start_id: departureId,
-            stop_id: stopId,
-          },
-        },
-      );
+      const res = await baseAPIAuth.get("/api/admin/check/getDurationHandicraft", {
+        params: { start_id: departureId, stop_id: stopId },
+      });
       return res.data;
     } catch (error) {
       console.error(error);
       return null;
     }
   };
+
   const toggleStation = (id: string) => {
     setRecommendStops((prev) =>
       prev.map((s) => (s._id === id ? { ...s, selected: !s.selected } : s)),
@@ -299,9 +285,7 @@ export default function CreateRoute() {
     });
   };
 
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-  };
+  const handleDragEnd = () => setDraggedIndex(null);
 
   const timelineStops = useMemo(() => {
     const start = {
@@ -312,7 +296,6 @@ export default function CreateRoute() {
     const end = {
       id: "da-lat",
       name: destination || "Điểm kết thúc",
-      note: "BẾN XE ĐA THIỆN (KẾT THÚC)",
       dot: "end" as const,
     };
     const middleStops = recommendStops
@@ -364,7 +347,6 @@ export default function CreateRoute() {
                       onChange={(e) => {
                         const id = e.target.value;
                         setDepartureId(id);
-
                         const selected = stops.find((s) => s._id === id);
                         if (selected) setDeparture(selected.name);
                       }}
@@ -400,7 +382,7 @@ export default function CreateRoute() {
                       }}
                       className="w-full bg-transparent text-[13px] font-black text-[#2a3444] outline-none"
                     >
-                      <option value="">Chọn điểm xuất phát</option>
+                      <option value="">Chọn điểm kết thúc</option>
                       {stops.map((stop) => (
                         <option key={stop._id} value={stop._id}>
                           {stop.province}
@@ -410,12 +392,21 @@ export default function CreateRoute() {
                   </span>
                 </label>
 
+                {/* ── Nút Xác nhận với loading ── */}
                 <button
                   type="button"
                   onClick={getRecommendStops}
-                  className="ml-auto inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 text-[13px] font-black text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+                  disabled={loadingConfirm || !departureId || !destinationId}
+                  className="ml-auto inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-[8px] bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-5 text-[13px] font-black text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition hover:from-[#f8af4f] hover:to-[#ef8a31] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Xác nhận
+                  {loadingConfirm ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" />
+                      Đang tìm...
+                    </>
+                  ) : (
+                    "Xác nhận"
+                  )}
                 </button>
               </div>
             </section>
@@ -433,37 +424,48 @@ export default function CreateRoute() {
                 </span>
               </div>
 
-              <div className="space-y-3">
-                {recommendStops.map((recommendStop, index) => (
-                  <StationCard
-                    key={recommendStop._id}
-                    order={index + 1}
-                    name={recommendStop.name}
-                    distance={recommendStop.distance_from_start}
-                    duration_from_start={recommendStop.duration_from_start}
-                    selected={recommendStop.selected}
-                    onClick={() => toggleStation(recommendStop._id)}
-                    onDragStart={handleDragStart(index)}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop(index)}
-                    onDragEnd={handleDragEnd}
-                    isDragging={draggedIndex === index}
-                  />
-                ))}
-
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowManualStopDropdown(!showManualStopDropdown)
-                    }
-                    className="flex h-[74px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#9ca6b7] transition hover:border-[#cfd6e2] hover:bg-[#fafbfc]"
-                  >
-                    <Plus size={16} />
-                    Thêm trạm thủ công
-                  </button>
+              {/* Loading state cho danh sách trạm */}
+              {loadingConfirm ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-12 text-gray-400">
+                  <Loader2 size={28} className="animate-spin text-[#e8791c]" />
+                  <p className="text-[13px] font-semibold">Đang tìm trạm dừng phù hợp...</p>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-3">
+                  {recommendStops.length === 0 && (
+                    <p className="py-6 text-center text-[13px] text-[#9ca6b7]">
+                      Chọn điểm xuất phát và điểm đến rồi bấm <strong>Xác nhận</strong> để xem gợi ý trạm dừng.
+                    </p>
+                  )}
+                  {recommendStops.map((recommendStop, index) => (
+                    <StationCard
+                      key={recommendStop._id}
+                      order={index + 1}
+                      name={recommendStop.name}
+                      distance={recommendStop.distance_from_start}
+                      duration_from_start={recommendStop.duration_from_start}
+                      selected={recommendStop.selected}
+                      onClick={() => toggleStation(recommendStop._id)}
+                      onDragStart={handleDragStart(index)}
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop(index)}
+                      onDragEnd={handleDragEnd}
+                      isDragging={draggedIndex === index}
+                    />
+                  ))}
+
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowManualStopDropdown(!showManualStopDropdown)}
+                      className="flex h-[74px] w-full items-center justify-center gap-2 rounded-[10px] border border-[#d9e0ea] bg-white text-[13px] font-bold text-[#9ca6b7] transition hover:border-[#cfd6e2] hover:bg-[#fafbfc]"
+                    >
+                      <Plus size={16} />
+                      Thêm trạm thủ công
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
           </div>
 
@@ -474,10 +476,7 @@ export default function CreateRoute() {
               <span className="pointer-events-none absolute bottom-6 left-[9px] top-[10px] w-px bg-[#e2e8f2]" />
               <div className="relative z-10 flex min-h-full flex-1 flex-col justify-between">
                 {timelineStops.map((stop) => (
-                  <article
-                    key={stop.id}
-                    className="relative flex shrink-0 flex-col"
-                  >
+                  <article key={stop.id} className="relative flex shrink-0 flex-col">
                     <span className="absolute -left-[22px] top-[4px]">
                       <Dot type={stop.dot as DotType} />
                     </span>
@@ -489,17 +488,30 @@ export default function CreateRoute() {
               </div>
             </div>
 
+            {/* ── Nút Lưu tuyến với loading ── */}
             <button
               type="button"
               onClick={createRoutes}
-              className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] text-[12px] font-black uppercase tracking-wider text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition hover:from-[#f8af4f] hover:to-[#ef8a31] hover:shadow-[0_16px_30px_-16px_rgba(216,113,28,1)]"
+              disabled={loadingSave}
+              className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#f7a53a] to-[#e8791c] text-[12px] font-black uppercase tracking-wider text-white shadow-[0_14px_28px_-16px_rgba(216,113,28,0.95)] transition hover:from-[#f8af4f] hover:to-[#ef8a31] disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Save size={16} className="text-white" />
-              LƯU TUYẾN ĐƯỜNG
+              {loadingSave ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  Đang lưu...
+                </>
+              ) : (
+                <>
+                  <Save size={16} className="text-white" />
+                  LƯU TUYẾN ĐƯỜNG
+                </>
+              )}
             </button>
           </aside>
         </div>
       </div>
+
+      {/* Modal thêm trạm thủ công */}
       {showManualStopDropdown && (
         <div
           className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40"
@@ -509,14 +521,9 @@ export default function CreateRoute() {
             className="w-full max-w-lg rounded-2xl bg-white shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* header */}
             <div className="border-b px-5 py-4">
-              <h3 className="text-[16px] font-black text-[#1f2736]">
-                Thêm trạm dừng
-              </h3>
+              <h3 className="text-[16px] font-black text-[#1f2736]">Thêm trạm dừng</h3>
             </div>
-
-            {/* search */}
             <div className="p-4">
               <input
                 type="text"
@@ -526,16 +533,11 @@ export default function CreateRoute() {
                 className="w-full rounded-lg border border-[#dbe2ee] bg-[#f5f7fb] px-3 py-2 text-[13px] font-semibold outline-none focus:border-[#e8791c]"
               />
             </div>
-
-            {/* list */}
             <ul className="max-h-80 overflow-y-auto pb-2">
               {stops
                 .filter((s) => {
-                  if (s._id === departureId || s._id === destinationId)
-                    return false;
-                  if (recommendStops.some((rs) => rs._id === s._id))
-                    return false;
-
+                  if (s._id === departureId || s._id === destinationId) return false;
+                  if (recommendStops.some((rs) => rs._id === s._id)) return false;
                   if (manualStopSearch.trim()) {
                     const keyword = manualStopSearch.toLowerCase();
                     return (
@@ -543,7 +545,6 @@ export default function CreateRoute() {
                       s.province.toLowerCase().includes(keyword)
                     );
                   }
-
                   return true;
                 })
                 .map((stop) => (
@@ -551,25 +552,18 @@ export default function CreateRoute() {
                     key={stop._id}
                     onClick={async () => {
                       const result = await getDurationHandicraft(stop._id);
-
                       if (!result) return;
-
                       setRecommendStops((prev) => [
                         ...prev,
                         {
                           _id: stop._id,
                           name: stop.name,
                           province: stop.province,
-                          distance_from_start: Number(
-                            result.estimated_distance_km.toFixed(2),
-                          ),
-                          duration_from_start: Number(
-                            result.estimated_duration.toFixed(2),
-                          ),
+                          distance_from_start: Number(result.estimated_distance_km.toFixed(2)),
+                          duration_from_start: Number(result.estimated_duration.toFixed(2)),
                           selected: true,
                         },
                       ]);
-
                       setShowManualStopDropdown(false);
                       setManualStopSearch("");
                     }}
@@ -577,17 +571,12 @@ export default function CreateRoute() {
                   >
                     <div>
                       <p className="text-[#253042]">{stop.name}</p>
-                      <p className="text-[10px] uppercase text-[#9ca6b7]">
-                        {stop.province}
-                      </p>
+                      <p className="text-[10px] uppercase text-[#9ca6b7]">{stop.province}</p>
                     </div>
-
                     <Plus size={14} className="text-[#e8791c]" />
                   </li>
                 ))}
             </ul>
-
-            {/* footer */}
             <div className="flex justify-end border-t p-4">
               <button
                 onClick={() => setShowManualStopDropdown(false)}
@@ -600,49 +589,26 @@ export default function CreateRoute() {
         </div>
       )}
 
-      {notice ? (
+      {/* Notice modal */}
+      {notice && (
         <>
           <style>{`
-          @keyframes routeNoticeIn {
-            0% {
-              opacity: 0;
-              transform: translateY(10px) scale(0.95);
+            @keyframes routeNoticeIn {
+              0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+              70% { transform: translateY(-2px) scale(1.02); }
+              100% { opacity: 1; transform: translateY(0) scale(1); }
             }
-            70% {
-              transform: translateY(-2px) scale(1.02);
+            @keyframes routeNoticeIcon {
+              0% { transform: scale(0.4) rotate(-25deg); opacity: 0; }
+              55% { transform: scale(1.18) rotate(8deg); opacity: 1; }
+              80% { transform: scale(0.95) rotate(-4deg); }
+              100% { transform: scale(1) rotate(0); }
             }
-            100% {
-              opacity: 1;
-              transform: translateY(0) scale(1);
+            @keyframes routeNoticePulse {
+              0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.32); }
+              100% { box-shadow: 0 0 0 16px rgba(16, 185, 129, 0); }
             }
-          }
-
-          @keyframes routeNoticeIcon {
-            0% {
-              transform: scale(0.4) rotate(-25deg);
-              opacity: 0;
-            }
-            55% {
-              transform: scale(1.18) rotate(8deg);
-              opacity: 1;
-            }
-            80% {
-              transform: scale(0.95) rotate(-4deg);
-            }
-            100% {
-              transform: scale(1) rotate(0);
-            }
-          }
-
-          @keyframes routeNoticePulse {
-            0% {
-              box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.32);
-            }
-            100% {
-              box-shadow: 0 0 0 16px rgba(16, 185, 129, 0);
-            }
-          }
-        `}</style>
+          `}</style>
           <div
             className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
             onClick={() => setNotice(null)}
@@ -651,46 +617,29 @@ export default function CreateRoute() {
               className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
               onClick={(event) => event.stopPropagation()}
               style={{
-                animation:
-                  notice.type === "success"
-                    ? "routeNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
-                    : "routeNoticeIn 0.35s ease",
+                animation: notice.type === "success"
+                  ? "routeNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+                  : "routeNoticeIn 0.35s ease",
               }}
             >
               <div className="flex items-start gap-3">
                 <span
-                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
-                    ? "bg-[#ecfdf3] text-[#16a34a]"
-                    : "bg-[#fff7ed] text-[#ea580c]"
-                    }`}
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success" ? "bg-[#ecfdf3] text-[#16a34a]" : "bg-[#fff7ed] text-[#ea580c]"}`}
                   style={{
-                    animation:
-                      notice.type === "success"
-                        ? "routeNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
-                        : undefined,
+                    animation: notice.type === "success"
+                      ? "routeNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                      : undefined,
                   }}
                 >
                   {notice.type === "success" ? (
-                    <CircleCheck
-                      size={20}
-                      style={{
-                        animation:
-                          notice.type === "success"
-                            ? "routeNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
-                            : undefined,
-                      }}
-                    />
+                    <CircleCheck size={20} style={{ animation: "routeNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)" }} />
                   ) : (
                     <TriangleAlert size={20} />
                   )}
                 </span>
                 <div className="flex-1">
-                  <h3 className="text-base font-black text-[#111827]">
-                    {notice.title}
-                  </h3>
-                  <p className="mt-1 text-sm font-medium text-[#4b5563]">
-                    {notice.message}
-                  </p>
+                  <h3 className="text-base font-black text-[#111827]">{notice.title}</h3>
+                  <p className="mt-1 text-sm font-medium text-[#4b5563]">{notice.message}</p>
                 </div>
               </div>
               <div className="mt-5 flex justify-end">
@@ -705,7 +654,7 @@ export default function CreateRoute() {
             </div>
           </div>
         </>
-      ) : null}
+      )}
     </>
   );
 }
