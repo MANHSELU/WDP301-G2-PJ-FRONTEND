@@ -3,6 +3,8 @@ import {
     ChevronDown,
     ChevronLeft,
     LogIn,
+    TriangleAlert,
+     CircleCheck,
     Plus,
     Trash2,
 } from "lucide-react";
@@ -19,6 +21,7 @@ import type {
     SeatLayout,
 } from "../../model/coach";
 import type { BusType } from "../../model/coachType";
+import type { allStops } from "../../model/allStops";
 
 interface ColumnFormColumn {
     enabled: boolean;
@@ -57,6 +60,12 @@ interface RowLayout {
 interface FloorLayout {
     floor: number;
     rows: RowLayout[];
+}
+
+interface NoticeState {
+  type: "success" | "error";
+  title: string;
+  message: string;
 }
 
 const COLUMN_ORDER: ColumnName[] = ["LEFT", "MIDDLE", "RIGHT"];
@@ -158,6 +167,9 @@ export default function CreateCoach() {
     const [rows, setRows] = useState(9);
     const [columns, setColumns] = useState<ColumnFormState>(INITIAL_COLUMNS);
     const [rowOverrides, setRowOverrides] = useState<RowOverrideForm[]>([]);
+    const [stop, setStop] = useState<allStops[]>([]);
+    const [stopId, setStopId] = useState("");
+    const [notice, setNotice] = useState<NoticeState | null>(null);
 
     // Validate, preview, chỉ UI
     const [previewFloor, setPreviewFloor] = useState<RowOverrideForm["floor"]>(1);
@@ -355,17 +367,39 @@ export default function CreateCoach() {
 
     // Lấy BusType
     useEffect(() => {
-        const fetchBusType = async () => {
-            const res = await baseAPIAuth.get("/api/admin/notcheck/BusType");
-
-            setBusTypes(res.data);
-            console.log("data", res.data);
-        };
         fetchBusType();
     }, []);
 
+    // Lấy Stop
+    useEffect(() => {
+        fetchStop();
+    }, []);
+
+    // Hàm lấy Bus Type 
+    const fetchBusType = async () => {
+        try {
+        const res = await baseAPIAuth.get("/api/admin/check/BusType");
+        setBusTypes(res.data);
+        console.log("data", res.data);
+        } catch (error) {
+        console.log(error)
+        }
+    };
+
+    // Hàm lấy stop
+    const fetchStop = async () =>{
+        try {
+        const res = await baseAPIAuth.get("/api/admin/check/getAllStops")
+        setStop(res.data);
+        console.log("data",res.data)
+        } catch (error) {
+        console.log(error)
+        }
+    }
+
+
     // Tạo xe
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const createBus = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!licensePlate.trim() || !busTypeId.trim() || !templateName.trim()) {
             setValidationMessage(
@@ -380,6 +414,7 @@ export default function CreateCoach() {
         const coachBase: CoachBase = {
             license_plate: licensePlate.trim().toUpperCase(),
             bus_type_id: busTypeId.trim(),
+            current_stop_id: stopId.trim()
         };
         const seatLayout: SeatLayout = {
             template_name: templateName.trim(),
@@ -398,8 +433,19 @@ export default function CreateCoach() {
             setValidationMessage("");
             const res = await baseAPIAuth.post("/api/admin/check/buses", payload);
             console.log(res.data);
-            alert("Tao xe thanh cong!");
-        } catch (err: unknown) {
+           setNotice({
+            type: "success",
+            title: "Tạo xe thành công",
+            message: res.data?.message || "Thông tin xe đã được lưu.",
+            });
+        } catch (err: any) {
+             setNotice({
+            type: "error",
+            title: "Tạo xe thất bại",
+            message:
+            err.response?.data?.message ||
+            "Đã có lỗi xảy ra, vui lòng thử lại.",
+            });
             if (err instanceof Error) {
                 console.error(err.message);
             }
@@ -448,7 +494,7 @@ export default function CreateCoach() {
 
             <div className="pt-4 grid gap-6 xl:grid-cols-[1.1fr_0.9fr] xl:items-stretch">
                 <form
-                    onSubmit={handleSubmit}
+                    onSubmit={createBus}
                     className="h-full space-y-5 rounded-[20px] border border-[#e7eaf0] bg-white p-5 shadow-[0_16px_36px_-26px_rgba(15,23,42,0.34)]"
                 >
                     <section className="space-y-3">
@@ -497,6 +543,30 @@ export default function CreateCoach() {
                                 </div>
                             </label>
                         </div>
+
+                        <label className="mt-8 block space-y-1">
+                            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                                Vị trí của xe
+                            </span>
+                            <div className="relative">
+                                <select
+                                value={stopId}
+                                onChange={(event) => setStopId(event.target.value)}
+                                    className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 pr-9 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                                >
+                                    <option value="">Chọn vị trí</option>
+                                    {stop.map((option) => (
+                                            <option key={option._id} value={option._id}>
+                                                {option.name}
+                                            </option>
+                                        ))}
+                                </select>
+                                <ChevronDown
+                                    size={16}
+                                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
+                                />
+                            </div>
+                        </label>
                     </section>
 
                     <section className="space-y-3 border-t border-[#e5e7eb] pt-4">
@@ -991,7 +1061,7 @@ export default function CreateCoach() {
                                                                     className="rounded-[8px] border border-dashed border-[#d1d5db] bg-[#f9fafb] px-2 py-2"
                                                                 >
                                                                     <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-[#6b7280]">
-                                                                        Hang dac biet
+                                                                        Hàng đặc biệt
                                                                     </p>
                                                                     <div className="flex min-h-8 items-center justify-center gap-3">
                                                                         <div className="flex min-h-8 min-w-[124px] items-center justify-end gap-1">
@@ -1156,6 +1226,112 @@ export default function CreateCoach() {
                     </pre>
                 </section>
             ) : null}
+            {notice ? (
+        <>
+          <style>{`
+          @keyframes routeNoticeIn {
+            0% {
+              opacity: 0;
+              transform: translateY(10px) scale(0.95);
+            }
+            70% {
+              transform: translateY(-2px) scale(1.02);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+
+          @keyframes routeNoticeIcon {
+            0% {
+              transform: scale(0.4) rotate(-25deg);
+              opacity: 0;
+            }
+            55% {
+              transform: scale(1.18) rotate(8deg);
+              opacity: 1;
+            }
+            80% {
+              transform: scale(0.95) rotate(-4deg);
+            }
+            100% {
+              transform: scale(1) rotate(0);
+            }
+          }
+
+          @keyframes routeNoticePulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.32);
+            }
+            100% {
+              box-shadow: 0 0 0 16px rgba(16, 185, 129, 0);
+            }
+          }
+        `}</style>
+          <div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
+            onClick={() => setNotice(null)}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
+              onClick={(event) => event.stopPropagation()}
+              style={{
+                animation:
+                  notice.type === "success"
+                    ? "routeNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+                    : "routeNoticeIn 0.35s ease",
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
+                    ? "bg-[#ecfdf3] text-[#16a34a]"
+                    : "bg-[#fff7ed] text-[#ea580c]"
+                    }`}
+                  style={{
+                    animation:
+                      notice.type === "success"
+                        ? "routeNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                        : undefined,
+                  }}
+                >
+                  {notice.type === "success" ? (
+                    <CircleCheck
+                      size={20}
+                      style={{
+                        animation:
+                          notice.type === "success"
+                            ? "routeNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
+                            : undefined,
+                      }}
+                    />
+                  ) : (
+                    <TriangleAlert size={20} />
+                  )}
+                </span>
+                <div className="flex-1">
+                  <h3 className="text-base font-black text-[#111827]">
+                    {notice.title}
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-[#4b5563]">
+                    {notice.message}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  className="rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
         </div>
 
     );

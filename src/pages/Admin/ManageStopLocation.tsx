@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search as SearchIcon,
   MapPin,
@@ -10,6 +11,7 @@ import {
   ToggleRight,
   Edit,
   Navigation,
+  Plus,
 } from "lucide-react";
 import type { allStops } from "../../model/allStops";
 import baseApiAuth from "../../api/auth";
@@ -61,6 +63,7 @@ const locationTypeLabel: Record<string, string> = {
 /* ──────────────────────── Component ──────────────────────── */
 
 const ManageStopLocation: React.FC = () => {
+  const navigate = useNavigate();
   /* ---- state: stops ---- */
   const [stops, setStops] = useState<allStops[]>([]);
   const [loadingStops, setLoadingStops] = useState(false);
@@ -218,11 +221,20 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div>
-        <h2 className="text-xl font-black text-gray-900">Quản lý Stop & StopLocation</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Chọn tỉnh thành bên trái để xem và quản lý các vị trí đón/trả khách
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-xl font-black text-gray-900">Quản lý Stop & StopLocation</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Chọn tỉnh thành bên trái để xem và quản lý các vị trí đón/trả khách
+          </p>
+        </div>
+        <button
+          onClick={() => navigate("/admin/create-stop-location")}
+          className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-600 transition-colors"
+        >
+          <Plus size={16} />
+          Tạo vị trí mới
+        </button>
       </div>
 
       {/* STATS */}
