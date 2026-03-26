@@ -221,16 +221,21 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-xl font-black text-gray-900">Quản lý Stop & StopLocation</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Chọn tỉnh thành bên trái để xem và quản lý các vị trí đón/trả khách
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button type="button" onClick={() => navigate(-1)} className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2]">
+            <ChevronLeft size={25} strokeWidth={2.3} />
+          </button>
+          <div>
+            <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">Quản lý Stop & StopLocation</h1>
+            <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
+              Chọn tỉnh thành bên trái để xem và quản lý các vị trí đón/trả khách
+            </p>
+          </div>
         </div>
         <button
           onClick={() => navigate("/admin/create-stop-location")}
-          className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-600 transition-colors"
+          className="inline-flex items-center gap-2 rounded-[10px] bg-[#f59e0b] px-4 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#d97706]"
         >
           <Plus size={16} />
           Tạo vị trí mới

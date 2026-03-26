@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Edit,
     ChevronLeft,
@@ -61,6 +62,7 @@ const mapStatusToVn = (v?: unknown): "Hoạt động" | "Tạm ngưng" => {
 };
 
 const ManageStop: React.FC = () => {
+    const navigate = useNavigate();
     const [stops, setStops] = useState<StopRow[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -260,12 +262,15 @@ const ManageStop: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* HEADER */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <button type="button" onClick={() => navigate(-1)} className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2]">
+                    <ChevronLeft size={25} strokeWidth={2.3} />
+                </button>
                 <div>
-                    <h2 className="text-xl font-black text-gray-900">
+                    <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
                         Quản lý tỉnh thành
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-1">
+                    </h1>
+                    <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
                         Xem và quản lý các tỉnh thành và điểm đón chính
                     </p>
                 </div>

@@ -17,20 +17,19 @@ import type { user } from "../../model/user";
 import { loginSuccess } from "../../store/slices/userSlice";
 
 const ADMIN_SIDEBAR_ITEMS = [
-  {
-    id: "overview",
-    label: "Tổng quan",
-    icon: LayoutDashboard,
-    path: "/admin",
-  },
 
+  {
+    id: "finance",
+    label: "Tổng quan & Quản lý thu chi",
+    icon: LayoutDashboard,
+    path: "/admin/manage-revenue",
+  },
   {
     id: "buses",
     label: "Quản lý xe",
     icon: BusFront,
     path: "/admin/manage-buses",
   },
-
   {
     id: "routes",
     label: "Quản lý tuyến xe",
@@ -74,12 +73,7 @@ const ADMIN_SIDEBAR_ITEMS = [
     icon: Shield,
     path: "/admin/order-price",
   },
-  {
-    id: "finance",
-    label: "Quản lý thu chi",
-    icon: BadgeDollarSign,
-    path: "/admin/manage-revenue",
-  },
+
 ];
 
 export default function HomeAdmin() {
@@ -166,10 +160,7 @@ export default function HomeAdmin() {
           </div>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <button className="h-7 rounded-[3px] border border-[#d9dde5] bg-[#f1f2f4] text-[11px] font-semibold text-[#6b7280]">
-            Chế độ tối
-          </button>
+        <div className="ml-3 mt-3 grid grid-cols-2 gap-2">
           <button
             onClick={() => {
               localStorage.removeItem("accessToken");

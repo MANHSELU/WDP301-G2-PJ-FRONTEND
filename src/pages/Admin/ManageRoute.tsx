@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Loader2, ChevronDown, ChevronRight as ChevronRt,
     MapPin, ToggleLeft, ToggleRight, DollarSign,
@@ -178,6 +179,7 @@ const Confirm: React.FC<{ msg: string; onOk: () => void; onCancel: () => void; l
    Main Component
 ══════════════════════════════════════════════════════════════════ */
 const ManageRoute: React.FC = () => {
+    const navigate = useNavigate();
     /* ── Data — khởi tạo luôn là [] để tránh lỗi slice ── */
     const [routes, setRoutes] = useState<RouteRow[]>([]);
     const [stops, setStops] = useState<StopOpt[]>([]);
@@ -540,9 +542,14 @@ const ManageRoute: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-xl font-bold text-gray-900">Quản lý tuyến xe</h1>
-                <p className="mt-0.5 text-sm text-gray-500">Xem và quản lý tuyến xe đang hoạt động</p>
+            <div className="flex items-center gap-4">
+                <button type="button" onClick={() => navigate(-1)} className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2]">
+                    <ChevronLeft size={25} strokeWidth={2.3} />
+                </button>
+                <div>
+                    <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">Quản lý tuyến xe</h1>
+                    <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">Xem và quản lý tuyến xe đang hoạt động</p>
+                </div>
             </div>
 
             {/* Stat cards */}

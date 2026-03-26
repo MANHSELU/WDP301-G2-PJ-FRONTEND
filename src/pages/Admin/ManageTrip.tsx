@@ -497,17 +497,22 @@ const ManageTrip: React.FC = () => {
   return (
     <div className="space-y-6 p-4 sm:p-6 bg-[#f9fafb] min-h-screen">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
-        <div className="w-full sm:w-auto">
-          <h2 className="text-[22px] sm:text-[24px] font-black text-[#111827]">
-            Quản lý chuyến
-          </h2>
-          <p className="text-[13px] text-[#6b7280] mt-1">
-            Xem và quản lý tất cả các chuyến đi
-          </p>
+        <div className="flex items-center gap-4">
+          <button type="button" onClick={() => window.history.back()} className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2]">
+            <ChevronLeft size={25} strokeWidth={2.3} />
+          </button>
+          <div>
+            <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
+              Quản lý chuyến
+            </h1>
+            <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
+              Xem và quản lý tất cả các chuyến đi
+            </p>
+          </div>
         </div>
         <button
           onClick={() => (window.location.href = "/admin/create-trips")}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg bg-[#eb8a45] px-5 py-2.5 text-[14px] font-semibold text-white hover:bg-[#d97a35] transition-colors shadow-sm"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#f59e0b] px-4 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#d97706]"
         >
           <Plus size={16} /> Thêm chuyến mới
         </button>
