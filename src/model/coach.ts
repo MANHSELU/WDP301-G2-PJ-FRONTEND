@@ -17,6 +17,7 @@ export interface RowOverride {
 export interface coach{
     license_plate : string,
     bus_type_id : string,
+    current_stop_id : string
 }
 export interface SeatLayout {
   template_name: string;

@@ -24,18 +24,21 @@ const ADMIN_SIDEBAR_ITEMS = [
     icon: LayoutDashboard,
     path: "/admin",
   },
-  {
-    id: "roles",
-    label: "Quản lý phân quyền",
-    icon: Shield,
-    path: "/admin/manage-users",
+
+    {
+    id: "buses",
+    label: "Quản lý xe",
+    icon: BusFront,
+    path: "/admin/manage-buses",
   },
+  
   {
     id: "routes",
     label: "Quản lý tuyến xe",
     icon: CalendarCheck2,
     path: "/admin/manage-routes",
   },
+  
   {
     id: "trips",
     label: "Quản lý chuyến xe",
@@ -43,22 +46,17 @@ const ADMIN_SIDEBAR_ITEMS = [
     path: "/admin/manage-trips",
   },
   {
-    id: "buses",
-    label: "Quản lý xe",
-    icon: BusFront,
-    path: "/admin/manage-buses",
-  },
-  {
-    id: "create-route",
-    label: "Thêm tuyến xe",
+    id: "stops-stopocations",
+    label: "Quản lý tỉnh thành và điểm dừng",
     icon: Bus,
-    path: "/admin/create-route",
+    path: "/admin/manage-stop-locations",
   },
-  {
-    id: "create-coach",
-    label: "Thêm xe mới",
-    icon: PlusCircle,
-    path: "/admin/create-coach",
+
+   {
+    id: "roles",
+    label: "Quản lý phân quyền",
+    icon: Shield,
+    path: "/admin/manage-users",
   },
   {
     id: "finance",

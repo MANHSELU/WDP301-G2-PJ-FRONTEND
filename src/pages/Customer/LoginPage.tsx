@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginSuccess } from "../../store/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { CircleCheck, TriangleAlert } from "lucide-react";
-
 interface NoticeState {
   type: "success" | "error";
   title: string;
