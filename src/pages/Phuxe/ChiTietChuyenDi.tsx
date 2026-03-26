@@ -26,7 +26,8 @@ interface TripDetail {
     status: string; drivers: Driver[];
 }
 interface Passenger {
-    _id: string;
+    _id: string;           // ID ảo dùng cho UI (key, loading state)
+    order_id: string;      // ID thật của BookingOrder - dùng để gọi API PATCH
     passenger_name: string;
     passenger_phone: string;
     passenger_email: string | null;
@@ -200,7 +201,7 @@ function PassengerDetailModal({ passenger, onClose }: { passenger: Passenger; on
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   PARCEL DETAIL MODAL
+   PARCEL DETAIL MODAL (giữ nguyên)
 ═══════════════════════════════════════════════════════════════════ */
 function ParcelDetailModal({ parcel, onClose }: { parcel: Parcel; onClose: () => void }) {
     const cfg = PARCEL_STATUS[parcel.status] ?? PARCEL_STATUS.RECEIVED;
@@ -258,16 +259,23 @@ export function ChiTietChuyenDi() {
 
     /* ── Fetch trip + passengers ────────────────────────────────────── */
     useEffect(() => {
-        if (!tripId) { setError("Không tìm thấy ID chuyến"); setLoading(false); return; }
+        if (!tripId) {
+            setError("Không tìm thấy ID chuyến");
+            setLoading(false);
+            return;
+        }
         (async () => {
-            setLoading(true); setError(null);
+            setLoading(true);
+            setError(null);
             try {
-                const res = await fetch(`${API_BASE}/api/assistant/check/trips/${tripId}`,
-                    { headers: { Authorization: `Bearer ${token}` } });
+                const res = await fetch(`${API_BASE}/api/assistant/check/trips/${tripId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 const json = await res.json();
                 if (!res.ok || !json.success) throw new Error(json.message || "Lỗi tải dữ liệu");
+
                 setTrip(json.data.trip);
-                setPassengers((json.data.passengers || []).map((p: Passenger) => ({
+                setPassengers((json.data.passengers || []).map((p: any) => ({
                     ...p,
                     is_alighted: p.is_alighted ?? false,
                     alighted_at: p.alighted_at ?? null,
@@ -275,26 +283,34 @@ export function ChiTietChuyenDi() {
                 })));
             } catch (e: unknown) {
                 setError(e instanceof Error ? e.message : "Lỗi kết nối");
-            } finally { setLoading(false); }
+            } finally {
+                setLoading(false);
+            }
         })();
-    }, [tripId]);
+    }, [tripId, token]);
 
     /* ── Fetch parcels ──────────────────────────────────────────────── */
     const fetchParcels = useCallback(async () => {
         if (!tripId) return;
-        setParcelsLoading(true); setParcelsError(null);
+        setParcelsLoading(true);
+        setParcelsError(null);
         try {
-            const res = await fetch(`${API_BASE}/api/assistant/check/trips/${tripId}/parcels`,
-                { headers: { Authorization: `Bearer ${token}` } });
+            const res = await fetch(`${API_BASE}/api/assistant/check/trips/${tripId}/parcels`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             const json: { success: boolean; data?: Parcel[]; message?: string } = await res.json();
             if (!res.ok || !json.success) throw new Error(json.message ?? "Lỗi tải hàng hóa");
             setParcels(json.data ?? []);
         } catch (e: unknown) {
             setParcelsError(e instanceof Error ? e.message : "Lỗi kết nối");
-        } finally { setParcelsLoading(false); }
+        } finally {
+            setParcelsLoading(false);
+        }
     }, [tripId, token]);
 
-    useEffect(() => { if (activeTab === "parcel") fetchParcels(); }, [activeTab, fetchParcels]);
+    useEffect(() => {
+        if (activeTab === "parcel") fetchParcels();
+    }, [activeTab, fetchParcels]);
 
     /* ── Patch parcel status ────────────────────────────────────────── */
     const patchParcelStatus = async (parcelId: string, newStatus: Parcel["status"], key: string) => {
@@ -312,35 +328,55 @@ export function ChiTietChuyenDi() {
             setDetailParcel((prev) => prev?._id === parcelId ? { ...prev, status: newStatus } : prev);
         } catch (e: unknown) {
             alert(e instanceof Error ? e.message : "Lỗi");
-        } finally { setUpdatingParcelId(null); }
+        } finally {
+            setUpdatingParcelId(null);
+        }
     };
 
-    /* ── Patch passenger ────────────────────────────────────────────── */
-    const patchBoarded = async (passengerId: string, body: object, key: string, patch: Partial<Passenger>) => {
+    /* ── Patch passenger (ĐÃ SỬA CHO 1 NGƯỜI 1 GHẾ) ─────────────────── */
+    const patchBoarded = async (orderId: string, rowId: string, body: object, patch: Partial<Passenger>) => {
         if (updatingId) return;
-        setUpdatingId(passengerId + key);
+        setUpdatingId(rowId);                    // Dùng rowId (ID ảo) để hiển thị loading
         try {
-            const res = await fetch(`${API_BASE}/api/assistant/check/bookings/${passengerId}/boarded`, {
+            const res = await fetch(`${API_BASE}/api/assistant/check/bookings/${orderId}/boarded`, {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
                 body: JSON.stringify(body),
             });
             const json = await res.json();
             if (!res.ok || !json.success) throw new Error(json.message || "Cập nhật thất bại");
-            setPassengers((prev) => prev.map((p) => p._id === passengerId ? { ...p, ...patch } : p));
-            setDetailPassenger((prev) => prev?._id === passengerId ? { ...prev, ...patch } : prev);
-        } catch (e: unknown) { alert(e instanceof Error ? e.message : "Lỗi"); }
-        finally { setUpdatingId(null); }
+
+            setPassengers((prev) => prev.map((p) =>
+                p._id === rowId ? { ...p, ...patch } : p
+            ));
+            setDetailPassenger((prev) =>
+                prev?._id === rowId ? { ...prev, ...patch } : prev
+            );
+        } catch (e: unknown) {
+            alert(e instanceof Error ? e.message : "Lỗi");
+        } finally {
+            setUpdatingId(null);
+        }
     };
 
-    const handleBoarded = (p: Passenger) => patchBoarded(p._id, { is_boarded: true }, "_on",
-        { is_boarded: true, boarded_updated: true, boarded_at: new Date().toISOString(), is_alighted: false, alighted_at: null });
-    const handleAbsent = (p: Passenger) => patchBoarded(p._id, { is_boarded: false }, "_off",
-        { is_boarded: false, boarded_updated: true, boarded_at: null, is_alighted: false, alighted_at: null });
-    const handleAlight = (p: Passenger) => patchBoarded(p._id, { is_boarded: true, is_alighted: true }, "_alight",
-        { is_boarded: true, boarded_updated: true, is_alighted: true, alighted_at: new Date().toISOString() });
-    const handleUndoAbsent = (p: Passenger) => patchBoarded(p._id, { is_boarded: true }, "_on",
-        { is_boarded: true, boarded_updated: true, boarded_at: new Date().toISOString(), is_alighted: false, alighted_at: null });
+    const handleBoarded = (p: Passenger) =>
+        patchBoarded(p.order_id, p._id, { is_boarded: true },
+            { is_boarded: true, boarded_updated: true, boarded_at: new Date().toISOString(), is_alighted: false, alighted_at: null });
+
+    const handleAbsent = (p: Passenger) =>
+        patchBoarded(p.order_id, p._id, { is_boarded: false },
+            { is_boarded: false, boarded_updated: true, boarded_at: null, is_alighted: false, alighted_at: null });
+
+    const handleAlight = (p: Passenger) =>
+        patchBoarded(p.order_id, p._id, { is_boarded: true, is_alighted: true },
+            { is_boarded: true, boarded_updated: true, is_alighted: true, alighted_at: new Date().toISOString() });
+
+    const handleUndoAbsent = (p: Passenger) =>
+        patchBoarded(p.order_id, p._id, { is_boarded: true },
+            { is_boarded: true, boarded_updated: true, boarded_at: new Date().toISOString(), is_alighted: false, alighted_at: null });
 
     /* ── Derived ─────────────────────────────────────────────────────── */
     const boardedCount = passengers.filter((p) => p.is_boarded).length;
@@ -514,14 +550,14 @@ export function ChiTietChuyenDi() {
                                 const showUndo = canUpdate && !isCancelled && p.boarded_updated && !p.is_boarded && !p.is_alighted;
                                 return (
                                     <div key={p._id} className={`rounded-2xl transition-all border ${p.is_alighted ? "bg-blue-50 border-blue-200"
-                                            : p.is_boarded ? "bg-green-50 border-green-200"
-                                                : p.boarded_updated && !p.is_boarded ? "bg-red-50/60 border-red-100"
-                                                    : isCancelled ? "bg-gray-50 opacity-50 border-gray-100"
-                                                        : "bg-gray-50 hover:bg-orange-50/40 border-transparent"
+                                        : p.is_boarded ? "bg-green-50 border-green-200"
+                                            : p.boarded_updated && !p.is_boarded ? "bg-red-50/60 border-red-100"
+                                                : isCancelled ? "bg-gray-50 opacity-50 border-gray-100"
+                                                    : "bg-gray-50 hover:bg-orange-50/40 border-transparent"
                                         }`}>
                                         <div className="flex items-center gap-3 p-4 flex-wrap">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0 ${p.is_alighted ? "bg-blue-200 text-blue-700" : p.is_boarded ? "bg-green-200 text-green-700"
-                                                    : p.boarded_updated && !p.is_boarded ? "bg-red-100 text-red-500" : "bg-orange-100 text-orange-600"
+                                                : p.boarded_updated && !p.is_boarded ? "bg-red-100 text-red-500" : "bg-orange-100 text-orange-600"
                                                 }`}>
                                                 {p.is_alighted ? <LogOut size={15} /> : p.is_boarded ? <UserCheck size={15} /> : p.boarded_updated ? <UserX size={15} /> : idx + 1}
                                             </div>
@@ -532,7 +568,7 @@ export function ChiTietChuyenDi() {
                                             <div className="flex items-center gap-1 flex-wrap">
                                                 {p.seat_labels.map((s) => (
                                                     <span key={s} className={`text-[11px] font-black px-2 py-0.5 rounded-md ${p.is_alighted ? "bg-blue-500 text-white" : p.is_boarded ? "bg-green-500 text-white"
-                                                            : p.boarded_updated && !p.is_boarded ? "bg-red-400 text-white" : "bg-orange-500 text-white"
+                                                        : p.boarded_updated && !p.is_boarded ? "bg-red-400 text-white" : "bg-orange-500 text-white"
                                                         }`}>{s}</span>
                                                 ))}
                                             </div>
@@ -680,13 +716,13 @@ export function ChiTietChuyenDi() {
                                         return (
                                             <div key={String(parcel._id)}
                                                 className={`rounded-2xl transition-all border overflow-hidden ${cfg.rowBg} ${isCancelled ? "border-slate-200" : isDelivered ? "border-green-200"
-                                                        : isOnBus ? "border-blue-200" : "border-transparent hover:border-orange-200"
+                                                    : isOnBus ? "border-blue-200" : "border-transparent hover:border-orange-200"
                                                     }`}
                                             >
                                                 <div className={`h-1 ${cfg.bar}`} />
                                                 <div className="flex items-center gap-3 p-4 flex-wrap">
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isDelivered ? "bg-green-200" : isOnBus ? "bg-blue-200"
-                                                            : isCancelled ? "bg-slate-200" : "bg-amber-100"
+                                                        : isCancelled ? "bg-slate-200" : "bg-amber-100"
                                                         }`}>
                                                         {isDelivered ? <PackageCheck size={15} className="text-green-600" />
                                                             : isCancelled ? <PackageX size={15} className="text-slate-500" />

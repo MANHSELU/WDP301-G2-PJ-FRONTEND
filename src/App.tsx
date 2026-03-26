@@ -52,6 +52,8 @@ import ManageStopLocation from "./pages/Admin/ManageStopLocation";
 
 import DatHangParcelOrder from "./pages/Customer/Profile/ParcelHistoryCard";
 import LeTanRefundPage from "./pages/LeTan/DanhSachHoanTien";
+import ManageBusType from "./pages/Admin/BusType";
+import ManagePricing from "./pages/Admin/Managepricing";
 export default function App() {
   const location = useLocation();
   const isCustomerPage = !location.pathname.startsWith("/admin") &&
@@ -65,6 +67,7 @@ export default function App() {
           {/* <Route path="create-coach" element={<CreateCoach />} /> */}
           <Route index element={<AdminDashboard />} />
           <Route path="create-route" element={<CreateRoute />} />
+          <Route path="types-bus" element={<ManageBusType />} />
           <Route path="manage-buses" element={<ManageBus />} />
           <Route path="manage-routes" element={<ManageRoute />} />
           <Route path="manage-users" element={<ManageUser />} />
@@ -76,7 +79,7 @@ export default function App() {
           <Route path="bulk-create-trips" element={<BulkCreateTrips />} />
           <Route path="manage-stops" element={<ManageStop />} />
           <Route path="manage-stop-locations" element={<ManageStopLocation />} />
-
+          <Route path="order-price" element={<ManagePricing />} />
         </Route>
         <Route
           path="/admin/create-stop-location"
