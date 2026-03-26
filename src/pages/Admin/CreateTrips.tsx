@@ -51,7 +51,7 @@ const [assistantId, setAssistantId] = useState("");
     getAllRoutes();
   }, []);
 
-  // Use Effect lấy tất cả buses
+  // Use Effect lấy tất cả buses availble
   useEffect(() => {
     if (departureTime && scheduledDuration && routeId) {
       getAllBuses();
@@ -169,7 +169,7 @@ const getAssistantStatusIcon = (status: string) => {
     }
   };
 
-// Hàm get Tài xế đang rảnh ca
+// Hàm get Lơ xe đang rảnh ca
   const getAvailableAssistant = async () => {
     if (!departureTime) return;
     const shiftEnd = calcShiftEnd();
@@ -197,7 +197,7 @@ const getAssistantStatusIcon = (status: string) => {
     }
   };
 
-    // Hàm lấy tất cả các buses
+    // Hàm lấy tất cả các buses đang rảnh 
   const getAllBuses = async () => {
         if (!departureTime) return;
     const shiftEnd = calcShiftEnd();
@@ -358,23 +358,33 @@ const getAssistantStatusIcon = (status: string) => {
       <section className="w-full">
         <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 pb-16 pt-10 lg:px-4">
           {/* HEADER */}
-          <div className="mb-6 flex items-center gap-4">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2]"
+              >
+                <ChevronLeft size={25} strokeWidth={2.3} />
+              </button>
+              <div>
+                <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
+                  Tạo chuyến đi mới
+                </h1>
+                <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
+                  Định nghĩa chuyến đi theo tuyến, xe, tài xế và thời gian dự
+                  kiến.
+                </p>
+              </div>
+            </div>
             <button
               type="button"
-              onClick={() => navigate(-1)}
-              className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2]"
+              onClick={() => navigate("/admin/bulk-create-trips")}
+              className="inline-flex items-center gap-2 rounded-[10px] bg-[#f59e0b] px-4 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#d97706]"
             >
-              <ChevronLeft size={25} strokeWidth={2.3} />
+              <Plus size={18} />
+              Tạo hàng loạt
             </button>
-            <div>
-              <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
-                Tạo chuyến đi mới
-              </h1>
-              <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
-                Định nghĩa chuyến đi theo tuyến, xe, tài xế và thời gian dự
-                kiến.
-              </p>
-            </div>
           </div>
 
           {/* FORM */}
