@@ -7,7 +7,6 @@ import {
   Map,
   CalendarCheck2,
   LayoutDashboard,
-  PlusCircle,
   Shield,
   Menu,
   X,
@@ -52,16 +51,10 @@ const ADMIN_SIDEBAR_ITEMS = [
     path: "/admin/types-bus",
   },
   {
-    id: "buses",
-    label: "Quản lý xe",
-    icon: BusFront,
-    path: "/admin/manage-buses",
-  },
-  {
     id: "create-route",
     label: "Thêm tuyến xe",
     icon: Bus,
-    path: "/admin/manage-stop-locations",
+    path: "/admin/create-route",
   },
   {
     id: "stops-stopocations",
@@ -76,13 +69,17 @@ const ADMIN_SIDEBAR_ITEMS = [
     path: "/admin/manage-users",
   },
   {
+    id: "pracel",
+    label: "Quản lý giá vé đặt hàng",
+    icon: Shield,
+    path: "/admin/order-price",
+  },
+  {
     id: "finance",
     label: "Quản lý thu chi",
     icon: BadgeDollarSign,
     path: "/admin/manage-revenue",
   },
-
-  // --- NHÓM TẠO MỚI ---
 ];
 
 export default function HomeAdmin() {
