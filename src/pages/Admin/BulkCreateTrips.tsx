@@ -9,6 +9,7 @@ interface NoticeState {
   title: string;
   message: string;
 }
+
 export default function BulkCreateTrips() {
   const navigate = useNavigate();
   const [routes, setRoutes] = useState<AllRoutes[]>([]);
