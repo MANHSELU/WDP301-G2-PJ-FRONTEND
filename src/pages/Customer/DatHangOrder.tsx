@@ -34,23 +34,30 @@ type ParcelItem = {
   dropoff_location_id: { location_name: string } | null;
 };
 type Pagination = { page: number; limit: number; total: number; totalPages: number };
-type LocationState = { tripId?: string; bus_type_id?: string, trips_id?: string };
+type LocationState = { tripId?: string; bus_type_id?: string; trips_id?: string };
 type ItemCategory = "DOCUMENT" | "PARCEL" | "BICYCLE" | "MOTORCYCLE" | "OTHER";
 type SizeCategory = "SMALL" | "MEDIUM" | "LARGE";
 
-/* ═══════════════ PRICING CONFIG ══════════════════════════════════ */
-const PRICING = {
-  PRICE_PER_KG: 20_000,
-  VOLUMETRIC_DIVISOR: 5_000,
-  DOCUMENT_PRICE_PER_KG: 15_000,
-  BICYCLE: { SMALL: 100_000, MEDIUM: 150_000, LARGE: 200_000 },
-  MOTORCYCLE: { SMALL: 250_000, MEDIUM: 350_000, LARGE: 500_000 },
+/* ═══════════════ PRICING TYPE + FALLBACK ═════════════════════════ */
+type PricingData = {
+  price_per_kg: number;
+  document_price_per_kg: number;
+  volumetric_divisor: number;
+  bicycle_price: { SMALL: number; MEDIUM: number; LARGE: number };
+  motorcycle_price: { SMALL: number; MEDIUM: number; LARGE: number };
+  name?: string;
+  type?: string;
 };
 
-/**
- * Khối lượng ước tính (kg) dùng để kiểm tra tải trọng xe ở BE.
- * Người dùng không nhập — tự điền theo size.
- */
+const PRICING_FALLBACK: PricingData = {
+  price_per_kg: 20_000,
+  document_price_per_kg: 15_000,
+  volumetric_divisor: 5_000,
+  bicycle_price: { SMALL: 100_000, MEDIUM: 150_000, LARGE: 200_000 },
+  motorcycle_price: { SMALL: 250_000, MEDIUM: 350_000, LARGE: 500_000 },
+};
+
+/* ═══════════════ ESTIMATED WEIGHT ═══════════════════════════════ */
 const ESTIMATED_WEIGHT: Record<"BICYCLE" | "MOTORCYCLE", Record<SizeCategory, number>> = {
   BICYCLE: { SMALL: 12, MEDIUM: 18, LARGE: 24 },
   MOTORCYCLE: { SMALL: 85, MEDIUM: 120, LARGE: 165 },
@@ -66,39 +73,36 @@ const CATEGORY_META: Record<ItemCategory, { label: string; icon: React.ReactNode
 
 const SIZE_META: Record<string, Record<SizeCategory, string>> = {
   BICYCLE: { SMALL: "Xe đạp mini", MEDIUM: "Xe đạp thường", LARGE: "Xe đạp thể thao" },
-  MOTORCYCLE: { SMALL: "Xe ≤50cc / xe điện nhỏ", MEDIUM: "Xe 51–150cc (Vision, Grande)", LARGE: "Xe >150cc (SH, Exciter…)" },
-  OTHER: { SMALL: "Hàng nhỏ (<50cm/cạnh)", MEDIUM: "Hàng vừa", LARGE: "Hàng lớn" },
+  MOTORCYCLE: { SMALL: "Xe ≤50cc / xe điện", MEDIUM: "Xe 51–150cc (Vision…)", LARGE: "Xe >150cc (SH, Exciter)" },
+  OTHER: { SMALL: "Hàng nhỏ (<50cm)", MEDIUM: "Hàng vừa", LARGE: "Hàng lớn" },
 };
 
-/* ═══════════════ HELPERS ═════════════════════════════════════════ */
-function calcVolumetric(l: string, w: string, h: string) {
+/* ═══════════════ HELPERS ════════════════════════════════════════ */
+function calcVolumetric(l: string, w: string, h: string, divisor = 5000) {
   const lv = Number(l), wv = Number(w), hv = Number(h);
   if (!lv || !wv || !hv) return { volume_m3: null, volumetric_weight_kg: null };
   const cm3 = lv * wv * hv;
   return {
     volume_m3: +(cm3 / 1_000_000).toFixed(4),
-    volumetric_weight_kg: +(cm3 / PRICING.VOLUMETRIC_DIVISOR).toFixed(2),
+    volumetric_weight_kg: +(cm3 / divisor).toFixed(2),
   };
 }
 
 function calcPrice(
   cat: ItemCategory, size: SizeCategory | "",
-  weight: number, volumetricKg: number | null
+  weight: number, volumetricKg: number | null,
+  p: PricingData,
 ): number {
-  if (cat === "MOTORCYCLE") return PRICING.MOTORCYCLE[(size as SizeCategory) || "MEDIUM"];
-  if (cat === "BICYCLE") return PRICING.BICYCLE[(size as SizeCategory) || "MEDIUM"];
-  if (cat === "DOCUMENT") return Math.max(1, weight) * PRICING.DOCUMENT_PRICE_PER_KG;
+  if (cat === "MOTORCYCLE") return p.motorcycle_price[(size as SizeCategory) || "MEDIUM"];
+  if (cat === "BICYCLE") return p.bicycle_price[(size as SizeCategory) || "MEDIUM"];
+  if (cat === "DOCUMENT") return Math.max(1, weight) * p.document_price_per_kg;
   const charged = Math.max(weight, volumetricKg ?? 0);
-  return Math.max(1, charged) * PRICING.PRICE_PER_KG;
+  return Math.max(1, charged) * p.price_per_kg;
 }
 
-/** Trả về weight_kg thực tế sẽ gửi lên BE */
-function resolveWeightKg(
-  cat: ItemCategory, size: SizeCategory | "", manualWeight: number
-): number {
+function resolveWeightKg(cat: ItemCategory, size: SizeCategory | "", manualWeight: number): number {
   if (cat === "BICYCLE" || cat === "MOTORCYCLE") {
-    const sz = (size as SizeCategory) || "MEDIUM";
-    return ESTIMATED_WEIGHT[cat][sz];
+    return ESTIMATED_WEIGHT[cat][(size as SizeCategory) || "MEDIUM"];
   }
   return manualWeight;
 }
@@ -107,24 +111,196 @@ const fmtCurrency = (n: number) => n.toLocaleString("vi-VN") + "đ";
 const fmtTime = (d?: string) => d ? new Date(d).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }) : "--:--";
 const fmtDate = (d?: string) => d ? new Date(d).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "--/--/----";
 
-/* ═══════════════ STATUS LABELS ═══════════════════════════════════ */
+/* ═══════════════ STATUS LABELS ══════════════════════════════════ */
 const PARCEL_STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  RECEIVED: { label: "Chờ xử lý", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+  PENDING: { label: "Chờ thanh toán", color: "bg-gray-100 text-gray-500 border-gray-200" },
+  RECEIVED: { label: "Đã nhận hàng", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
   ON_BUS: { label: "Trên xe", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  IN_TRANSIT: { label: "Đang giao", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
+  IN_TRANSIT: { label: "Đang vận chuyển", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
   DELIVERED: { label: "Đã giao", color: "bg-green-100 text-green-700 border-green-200" },
   CANCELLED: { label: "Đã hủy", color: "bg-slate-100 text-slate-500 border-slate-200" },
+  RETURNED: { label: "Hoàn hàng", color: "bg-red-100 text-red-500 border-red-200" },
 };
 
-const API = "http://localhost:3000";
+const API = import.meta.env.VITE_API_URL;
+const BANK_CODE = import.meta.env.VITE_BANK_NAME ?? "MB";
+const BANK_ACCOUNT = import.meta.env.VITE_BANK_ACCOUNT ?? "0123456789";
 
-/* ═══════════════ MAIN COMPONENT ══════════════════════════════════ */
+function buildQrUrl(amount: number, content: string): string {
+  return `https://qr.sepay.vn/img?acc=${BANK_ACCOUNT}&bank=${BANK_CODE}&amount=${amount}&des=${encodeURIComponent(content)}&template=compact&download=false`;
+}
+
+/* ═══════════════ QR PAYMENT MODAL ══════════════════════════════ */
+type QRData = {
+  parcelId: string;
+  parcelCode: string;
+  qrUrl: string;
+  bankCode: string;
+  accountNumber: string;
+  amount: number;
+  transferContent: string;
+};
+
+function CopyBtn({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+      className={`shrink-0 ml-2 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${copied ? "bg-green-100 text-green-600" : "bg-orange-100 text-orange-600 hover:bg-orange-200"}`}
+    >
+      {copied ? "✓ Đã copy" : "copy"}
+    </button>
+  );
+}
+
+function QRPaymentModal({ data, onClose, onPaid }: { data: QRData; onClose: () => void; onPaid: () => void }) {
+  const [paid, setPaid] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [imgError, setImgError] = useState(false);
+
+  // ✅ Polling mỗi 3 giây — cleanup đúng, dừng khi paid
+  useEffect(() => {
+    if (paid) return;
+    const token = localStorage.getItem("accessToken") ?? "";
+
+    const iv = setInterval(async () => {
+      try {
+        // ✅ fix typo: "pracel" → "parcel"
+        const r = await fetch(
+          `${API}/api/customer/check/payment-status-parcel/${data.parcelId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const json = await r.json();
+        if (json?.data?.paid) {
+          setPaid(true);
+          clearInterval(iv);
+          setTimeout(onPaid, 2200);
+        }
+      } catch { /* bỏ qua lỗi mạng, tiếp tục polling */ }
+    }, 3000);
+
+    const tick = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => { clearInterval(iv); clearInterval(tick); };
+  }, [data.parcelId, paid]);
+
+  const fmt = (n: number) => n.toLocaleString("vi-VN") + "đ";
+
+  return (
+    <div className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="w-full sm:max-w-md bg-white sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden animate-slide-up">
+
+        {/* Header */}
+        <div className="relative bg-gradient-to-br from-orange-500 via-orange-500 to-amber-400 px-6 pt-6 pb-5">
+          <button onClick={onClose}
+            className="absolute right-4 top-4 w-8 h-8 rounded-full bg-white/25 hover:bg-white/40 flex items-center justify-center transition-all active:scale-90">
+            <X size={16} className="text-white" />
+          </button>
+          <p className="text-orange-100 text-xs font-semibold mb-1">Quét mã để thanh toán</p>
+          <p className="text-white text-3xl font-black tracking-tight">{fmt(data.amount)}</p>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-xs bg-white/20 text-white px-2.5 py-1 rounded-full font-mono font-semibold">{data.parcelCode}</span>
+            {!paid && (
+              <span className="text-xs bg-white/15 text-orange-100 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-300 animate-pulse" />
+                {seconds}s đang chờ...
+              </span>
+            )}
+            {paid && <span className="text-xs bg-green-400/30 text-white px-2.5 py-1 rounded-full font-bold">✓ Đã thanh toán</span>}
+          </div>
+        </div>
+
+        {paid ? (
+          <div className="px-6 py-10 text-center space-y-4">
+            <div className="relative mx-auto w-20 h-20">
+              <div className="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-30" />
+              <div className="relative w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+            <div>
+              <p className="text-xl font-black text-gray-900">Thanh toán thành công!</p>
+              <p className="text-sm text-gray-500 mt-1">Đơn hàng đã được xác nhận 🎉</p>
+            </div>
+            <div className="w-5 h-5 border-2 border-orange-400 border-t-transparent rounded-full animate-spin mx-auto" />
+          </div>
+        ) : (
+          <div className="px-5 py-5 space-y-4">
+            <div className="flex gap-4 items-start">
+              {/* QR code */}
+              <div className="shrink-0 w-[130px] h-[130px] rounded-2xl overflow-hidden border-2 border-orange-100 bg-gray-50 flex items-center justify-center shadow-sm">
+                {imgError ? (
+                  <div className="text-center p-2">
+                    <p className="text-[10px] text-gray-400">Không tải được QR</p>
+                    <p className="text-[10px] text-orange-500 mt-1">Nhập tay thông tin bên cạnh</p>
+                  </div>
+                ) : (
+                  <img src={data.qrUrl} alt="QR" className="w-full h-full object-contain" onError={() => setImgError(true)} />
+                )}
+              </div>
+
+              {/* Bank info */}
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="rounded-xl bg-gray-50 border border-gray-100 px-3 py-2">
+                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Ngân hàng</p>
+                  <p className="text-sm font-bold text-gray-800 mt-0.5">{data.bankCode}</p>
+                </div>
+                <div className="rounded-xl bg-gray-50 border border-gray-100 px-3 py-2 flex items-center justify-between gap-1">
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Số TK</p>
+                    <p className="text-sm font-bold text-gray-800 mt-0.5 truncate">{data.accountNumber}</p>
+                  </div>
+                  <CopyBtn text={data.accountNumber} />
+                </div>
+              </div>
+            </div>
+
+            {/* Nội dung CK */}
+            <div className="rounded-2xl bg-orange-50 border-2 border-orange-200 px-4 py-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[11px] font-bold text-orange-500 uppercase tracking-wide">⚠️ Nội dung chuyển khoản</p>
+                <CopyBtn text={data.transferContent} />
+              </div>
+              <p className="text-lg font-black text-orange-700 font-mono tracking-widest">{data.transferContent}</p>
+              <p className="text-[10px] text-orange-400 mt-1">Nhập đúng nội dung này để hệ thống tự xác nhận</p>
+            </div>
+
+            {/* Số tiền */}
+            <div className="rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 flex items-center justify-between">
+              <div>
+                <p className="text-orange-100 text-[10px] font-bold uppercase tracking-wide">Số tiền cần chuyển</p>
+                <p className="text-white text-xl font-black mt-0.5">{fmt(data.amount)}</p>
+              </div>
+              <CopyBtn text={String(data.amount)} />
+            </div>
+
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-400 pb-1">
+              <div className="w-3 h-3 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
+              Đang tự động kiểm tra thanh toán mỗi 3 giây...
+            </div>
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @keyframes slide-up {
+          from { transform: translateY(100%); opacity: 0; }
+          to   { transform: translateY(0);    opacity: 1; }
+        }
+        .animate-slide-up { animation: slide-up 0.3s cubic-bezier(0.32,0.72,0,1) forwards; }
+      `}</style>
+    </div>
+  );
+}
+
+/* ═══════════════ MAIN COMPONENT ════════════════════════════════ */
 export default function DatHangOrder() {
   const location = useLocation();
   const navigate = useNavigate();
   const { tripId, bus_type_id } = (location.state ?? {}) as LocationState;
   const trips_id = location.state?.trip_id ?? "";
-  console.log("trip_id trong đặt hàng là : ", trips_id)
+
   const [trip, setTrip] = useState<TripData | null>(null);
   const [pickupPoints, setPickupPoints] = useState<StopPoint[]>([]);
   const [dropoffPoints, setDropoffPoints] = useState<StopPoint[]>([]);
@@ -140,24 +316,28 @@ export default function DatHangOrder() {
   const [receiverName, setReceiverName] = useState("");
   const [receiverPhone, setReceiverPhone] = useState("");
   const [parcelType, setParcelType] = useState("");
-  const [weight, setWeight] = useState("0");   // chỉ dùng với PARCEL/DOCUMENT/OTHER
-
+  const [weight, setWeight] = useState("0");
   const [itemCategory, setItemCategory] = useState<ItemCategory>("PARCEL");
   const [sizeCategory, setSizeCategory] = useState<SizeCategory | "">("");
-
   const [dimL, setDimL] = useState("");
   const [dimW, setDimW] = useState("");
   const [dimH, setDimH] = useState("");
 
-  /* ── Computed ─────────────────────────────────────────────────── */
+  /* ── Pricing động từ API ── */
+  const [pricing, setPricing] = useState<PricingData>(PRICING_FALLBACK);
+  const [pricingLoading, setPricingLoading] = useState(true);
+  const [pricingName, setPricingName] = useState<string | null>(null);
+
+  /* ── Computed ── */
   const meta = CATEGORY_META[itemCategory];
   const weightNum = Number(weight);
-  const { volume_m3, volumetric_weight_kg } = calcVolumetric(dimL, dimW, dimH);
-  const totalPrice = calcPrice(itemCategory, sizeCategory, weightNum, volumetric_weight_kg);
+  const isVehicle = itemCategory === "BICYCLE" || itemCategory === "MOTORCYCLE";
+  const { volume_m3, volumetric_weight_kg } = calcVolumetric(dimL, dimW, dimH, pricing.volumetric_divisor);
+  const totalPrice = calcPrice(itemCategory, sizeCategory, weightNum, volumetric_weight_kg, pricing);
   const chargedWeight = Math.max(weightNum, volumetric_weight_kg ?? 0);
   const actualWeightKg = resolveWeightKg(itemCategory, sizeCategory, weightNum);
 
-  /* ── UI state ─────────────────────────────────────────────────── */
+  /* ── UI state ── */
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -165,8 +345,9 @@ export default function DatHangOrder() {
   const [remainingWeight, setRemainingWeight] = useState<number | null>(null);
   const [remainingVolume, setRemainingVolume] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"order" | "history">("order");
+  const [qrData, setQrData] = useState<QRData | null>(null);
 
-  /* ── History ──────────────────────────────────────────────────── */
+  /* ── History ── */
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [historyPage, setHistoryPage] = useState(1);
@@ -181,7 +362,31 @@ export default function DatHangOrder() {
   const pickupLoc = pickupLocations.find((p) => p._id === selectedPickupLocId) ?? null;
   const dropoffLoc = dropoffLocations.find((p) => p._id === selectedDropoffLocId) ?? null;
 
-  /* ── Effects ──────────────────────────────────────────────────── */
+  /* ═══ Effects ═══ */
+
+  // Fetch pricing config khi mount
+  useEffect(() => {
+    setPricingLoading(true);
+    fetch(`${API}/api/customer/notcheck/pricing/active`)
+      .then((r) => r.json())
+      .then((json) => {
+        const d = json?.data;
+        if (!d) return;
+        setPricing({
+          price_per_kg: d.price_per_kg,
+          document_price_per_kg: d.document_price_per_kg,
+          volumetric_divisor: d.volumetric_divisor,
+          bicycle_price: d.bicycle_price,
+          motorcycle_price: d.motorcycle_price,
+          name: d.name,
+          type: d.type,
+        });
+        if (d.type === "HOLIDAY") setPricingName(d.name);
+      })
+      .catch(() => { /* giữ fallback */ })
+      .finally(() => setPricingLoading(false));
+  }, []);
+
   useEffect(() => {
     if (!tripId) return;
     setLoading(true);
@@ -196,7 +401,7 @@ export default function DatHangOrder() {
     if (!trip?.route_id?._id) return;
     fetch(`${API}/api/customer/notcheck/start-point`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ route_id: trip.route_id._id, trips_id: trips_id }),
+      body: JSON.stringify({ route_id: trip.route_id._id, trips_id }),
     }).then((r) => r.json()).then((res: { data?: StopPoint[] }) =>
       setPickupPoints((res.data ?? []).sort((a, b) => a.stop_order - b.stop_order))
     ).catch(console.error);
@@ -240,7 +445,7 @@ export default function DatHangOrder() {
   useEffect(() => { if (activeTab === "history") fetchParcelHistory(historyPage); }, [activeTab, historyPage]);
   useEffect(() => { setSizeCategory(""); setWeight("0"); setDimL(""); setDimW(""); setDimH(""); }, [itemCategory]);
 
-  /* ── History helpers ──────────────────────────────────────────── */
+  /* ═══ History helpers ═══ */
   const fetchParcelHistory = useCallback(async (page: number) => {
     setHistoryError(null); setHistoryLoading(true);
     try {
@@ -261,7 +466,8 @@ export default function DatHangOrder() {
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) return;
-      const res = await fetch(`${API}/api/customer/check/parcels/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API}/api/customer/check/parcels/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } });
       const json: { data?: ParcelItem; message?: string } = await res.json();
       if (!res.ok) { setHistoryError(json.message ?? "Lỗi tải chi tiết."); return; }
       if (json.data) setSelectedParcel(json.data);
@@ -284,7 +490,7 @@ export default function DatHangOrder() {
     finally { setCancelingId(null); }
   }, [historyPage, selectedParcel, fetchParcelHistory, fetchParcelDetail]);
 
-  /* ── Submit ───────────────────────────────────────────────────── */
+  /* ═══ Submit ═══ */
   const canSubmit =
     !!trip && !!pickupPoint && !!dropoffPoint &&
     receiverName.trim().length > 0 && receiverPhone.trim().length > 0 &&
@@ -305,7 +511,7 @@ export default function DatHangOrder() {
         receiver_phone: receiverPhone.trim(),
         start_id: pickupPoint!._id,
         end_id: dropoffPoint!._id,
-        weight_kg: actualWeightKg,   // ← luôn gửi kg (tự tính với xe)
+        weight_kg: actualWeightKg,
         payment_method: "ONLINE",
         item_category: itemCategory,
         size_category: sizeCategory || null,
@@ -322,14 +528,25 @@ export default function DatHangOrder() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
       });
+
+      // ✅ Type đầy đủ — có _id và total_price
       const json: {
         message?: string;
-        data?: { parcel?: { code?: string; approval_status?: string; status?: string } };
+        data?: {
+          parcel?: {
+            _id?: string;         // ✅ fix: thêm _id
+            code?: string;
+            approval_status?: string;
+            status?: string;
+            total_price?: number; // ✅ fix: thêm total_price
+          };
+        };
         remaining_weight_kg?: number;
         remaining_volume_m3?: number;
       } = await res.json();
 
       if (!res.ok) { setError(json.message ?? "Đặt hàng thất bại"); return; }
+
       const parcel = json.data?.parcel;
       if (parcel?.approval_status === "REJECTED" || parcel?.status === "CANCELLED") {
         setError(json.message ?? "Đơn không được chấp nhận.");
@@ -337,12 +554,32 @@ export default function DatHangOrder() {
         setRemainingVolume(json.remaining_volume_m3 ?? null);
         return;
       }
-      setSuccess(`Đặt hàng thành công. Mã đơn: ${parcel?.code ?? "(n/a)"}`);
+
+      // ✅ fix: lấy đúng _id, validate trước khi mở QR
+      const parcelId = parcel?._id ?? "";
+      const parcelCode = parcel?.code ?? "";
+      const amount = parcel?.total_price ?? totalPrice;
+
+      if (!parcelId || !parcelCode) {
+        setError("Không lấy được thông tin đơn hàng. Vui lòng thử lại.");
+        return;
+      }
+
+      const content = `DH${parcelCode}`;
+      setQrData({
+        parcelId,
+        parcelCode,
+        qrUrl: buildQrUrl(amount, content),
+        bankCode: BANK_CODE,
+        accountNumber: BANK_ACCOUNT,
+        amount,
+        transferContent: content,
+      });
     } catch { setError("Lỗi kết nối. Vui lòng thử lại."); }
     finally { setSubmitting(false); }
   };
 
-  /* ═══════════════ HERO ════════════════════════════════════════════ */
+  /* ═══════════════ HERO ════════════════════════════════════════ */
   const renderHero = () => (
     <>
       <div className="absolute inset-0 bg-[linear-gradient(96deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.93)_34%,rgba(255,255,255,0.64)_56%,rgba(255,255,255,0.16)_78%,rgba(255,255,255,0)_100%)]" />
@@ -375,7 +612,7 @@ export default function DatHangOrder() {
     </>
   );
 
-  /* ═══════════════ ORDER FORM ══════════════════════════════════════ */
+  /* ═══════════════ ORDER FORM ══════════════════════════════════ */
   const renderOrderForm = () => {
     if (!tripId || !trip) {
       return (
@@ -390,11 +627,21 @@ export default function DatHangOrder() {
     }
 
     const sizeOptions = SIZE_META[itemCategory] as Record<SizeCategory, string> | undefined;
-    const isVehicle = itemCategory === "BICYCLE" || itemCategory === "MOTORCYCLE";
 
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
+
+          {/* Banner giá ngày lễ */}
+          {pricingName && (
+            <div className="flex items-center gap-3 rounded-2xl bg-amber-50 border border-amber-200 px-5 py-3.5">
+              <span className="text-amber-500 text-lg">🎉</span>
+              <div>
+                <p className="text-sm font-bold text-amber-700">Giá ngày lễ đang áp dụng</p>
+                <p className="text-xs text-amber-600">{pricingName}</p>
+              </div>
+            </div>
+          )}
 
           {/* Trip info */}
           <div className="bg-white rounded-2xl shadow border border-orange-100 p-6">
@@ -420,7 +667,8 @@ export default function DatHangOrder() {
                   <div className="w-8 h-8 flex items-center justify-center rounded-full bg-green-500 text-white font-bold">A</div>
                   <p className="text-sm font-semibold text-slate-700">Điểm đón</p>
                 </div>
-                <select value={selectedPickupId} onChange={(e) => { setSelectedPickupId(e.target.value); setSelectedPickupStopId(pickupPoints.find((p) => p._id === e.target.value)?.stop_id?._id ?? ""); }}
+                <select value={selectedPickupId}
+                  onChange={(e) => { setSelectedPickupId(e.target.value); setSelectedPickupStopId(pickupPoints.find((p) => p._id === e.target.value)?.stop_id?._id ?? ""); }}
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-green-400 focus:ring-2 focus:ring-green-100">
                   <option value="">Chọn điểm đón</option>
                   {pickupPoints.map((p) => <option key={p._id} value={p._id}>{p.stop_order}. {p.stop_id.province}</option>)}
@@ -438,7 +686,8 @@ export default function DatHangOrder() {
                   <div className="w-8 h-8 flex items-center justify-center rounded-full bg-orange-500 text-white font-bold">B</div>
                   <p className="text-sm font-semibold text-slate-700">Điểm trả</p>
                 </div>
-                <select value={selectedDropoffId} onChange={(e) => { setSelectedDropoffId(e.target.value); setSelectedDropoffStopId(dropoffPoints.find((p) => p._id === e.target.value)?.stop_id?._id ?? ""); }}
+                <select value={selectedDropoffId}
+                  onChange={(e) => { setSelectedDropoffId(e.target.value); setSelectedDropoffStopId(dropoffPoints.find((p) => p._id === e.target.value)?.stop_id?._id ?? ""); }}
                   disabled={!selectedPickupId}
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-orange-400 focus:ring-2 focus:ring-orange-100 disabled:opacity-60">
                   <option value="">{selectedPickupId ? "Chọn điểm trả" : "Chọn điểm đón trước"}</option>
@@ -465,9 +714,7 @@ export default function DatHangOrder() {
                   <button key={cat} onClick={() => setItemCategory(cat)}
                     className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 text-xs font-bold transition-all ${itemCategory === cat
                       ? "border-orange-500 bg-orange-50 text-orange-700"
-                      : "border-slate-200 bg-white text-slate-500 hover:border-orange-300 hover:text-orange-600"
-                      }`}
-                  >
+                      : "border-slate-200 bg-white text-slate-500 hover:border-orange-300 hover:text-orange-600"}`}>
                     <span className={itemCategory === cat ? "text-orange-500" : "text-slate-400"}>{m.icon}</span>
                     {m.label}
                   </button>
@@ -475,30 +722,32 @@ export default function DatHangOrder() {
               })}
             </div>
 
-            {/* Size category */}
             {meta.needsSize && sizeOptions && (
               <div className="mt-3">
-                <p className="text-sm font-semibold text-slate-700 mb-2">
-                  Phân loại <span className="text-red-500">*</span>
-                </p>
+                <p className="text-sm font-semibold text-slate-700 mb-2">Phân loại <span className="text-red-500">*</span></p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {(Object.keys(sizeOptions) as SizeCategory[]).map((s) => {
-                    const price = itemCategory === "MOTORCYCLE" ? PRICING.MOTORCYCLE[s] : itemCategory === "BICYCLE" ? PRICING.BICYCLE[s] : null;
+                    const price = itemCategory === "MOTORCYCLE"
+                      ? pricing.motorcycle_price[s]
+                      : itemCategory === "BICYCLE"
+                        ? pricing.bicycle_price[s]
+                        : null;
                     const estKg = isVehicle ? ESTIMATED_WEIGHT[itemCategory as "BICYCLE" | "MOTORCYCLE"][s] : null;
                     return (
                       <button key={s} onClick={() => setSizeCategory(s)}
-                        className={`p-3 rounded-2xl border-2 text-left transition-all ${sizeCategory === s ? "border-orange-500 bg-orange-50" : "border-slate-200 bg-white hover:border-orange-300"
-                          }`}
-                      >
+                        className={`p-3 rounded-2xl border-2 text-left transition-all ${sizeCategory === s ? "border-orange-500 bg-orange-50" : "border-slate-200 bg-white hover:border-orange-300"}`}>
                         <p className={`text-xs font-black ${sizeCategory === s ? "text-orange-700" : "text-slate-700"}`}>{s}</p>
                         <p className="text-xs text-slate-500 mt-0.5">{sizeOptions[s]}</p>
-                        {price && <p className="text-xs font-bold text-orange-600 mt-1">{fmtCurrency(price)}</p>}
+                        {price != null && (
+                          <p className="text-xs font-bold text-orange-600 mt-1">
+                            {pricingLoading ? "..." : fmtCurrency(price)}
+                          </p>
+                        )}
                         {estKg && <p className="text-[11px] text-slate-400 mt-0.5">~{estKg} kg</p>}
                       </button>
                     );
                   })}
                 </div>
-                {/* Ghi chú kg ước tính */}
                 {isVehicle && sizeCategory && (
                   <p className="mt-2 text-xs text-slate-400 italic">
                     * Khối lượng ước tính ~{ESTIMATED_WEIGHT[itemCategory as "BICYCLE" | "MOTORCYCLE"][sizeCategory as SizeCategory]} kg
@@ -525,13 +774,9 @@ export default function DatHangOrder() {
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
                   placeholder="SĐT người nhận" />
               </div>
-
-              {/* Khối lượng — ẨN với xe đạp / xe máy */}
               {meta.needsWeight && (
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Khối lượng (kg) <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Khối lượng (kg) <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Weight size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input type="number" min={0} value={weight} onChange={(e) => setWeight(e.target.value)}
@@ -540,7 +785,6 @@ export default function DatHangOrder() {
                   </div>
                 </div>
               )}
-
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">Mô tả hàng</label>
                 <input value={parcelType} onChange={(e) => setParcelType(e.target.value)}
@@ -549,7 +793,6 @@ export default function DatHangOrder() {
               </div>
             </div>
 
-            {/* Kích thước — chỉ hiện với PARCEL / OTHER */}
             {(itemCategory === "PARCEL" || itemCategory === "OTHER") && (
               <div className="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-200">
                 <div className="flex items-center gap-2 mb-3">
@@ -557,7 +800,7 @@ export default function DatHangOrder() {
                   <p className="text-sm font-bold text-slate-700">Kích thước (cm) – tuỳ chọn</p>
                 </div>
                 <p className="text-xs text-slate-400 mb-3">
-                  Nếu hàng cồng kềnh hãy nhập kích thước. Hệ thống tính KL thể tích (L×W×H÷5000)
+                  Nếu hàng cồng kềnh hãy nhập kích thước. Hệ thống tính KL thể tích (L×W×H÷{pricing.volumetric_divisor})
                   và lấy trị số lớn hơn để tính giá.
                 </p>
                 <div className="grid grid-cols-3 gap-3">
@@ -579,16 +822,17 @@ export default function DatHangOrder() {
               </div>
             )}
 
-            {/* Submit */}
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs text-slate-500">Tổng giá</p>
+                <p className="text-xs text-slate-500">
+                  Tổng giá {pricingLoading && <span className="text-orange-400">(đang tải giá...)</span>}
+                </p>
                 <p className="text-2xl font-black text-orange-600">{fmtCurrency(totalPrice)}</p>
                 {!isVehicle && volumetric_weight_kg && volumetric_weight_kg > weightNum && (
                   <p className="text-[11px] text-slate-400">* Tính theo KL thể tích ({volumetric_weight_kg} kg)</p>
                 )}
               </div>
-              <button onClick={handleSubmit} disabled={submitting || !canSubmit}
+              <button onClick={handleSubmit} disabled={submitting || !canSubmit || pricingLoading}
                 className="w-full sm:w-auto rounded-xl bg-orange-500 px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-orange-600 disabled:opacity-60">
                 {submitting ? "Đang gửi..." : "Đặt hàng ngay"}
               </button>
@@ -615,15 +859,12 @@ export default function DatHangOrder() {
               <Row label="Chuyến" value={`${trip.route_id.start_id.province} → ${trip.route_id.stop_id.province}`} />
               <Row label="Loại hàng" value={CATEGORY_META[itemCategory].label} />
               {sizeCategory && <Row label="Phân loại" value={SIZE_META[itemCategory]?.[sizeCategory] ?? sizeCategory} />}
-
-              {/* Kg: hiện thực tế với hàng thường, hiện ước tính với xe */}
               {isVehicle && sizeCategory
                 ? <Row label="KL ước tính" value={`~${ESTIMATED_WEIGHT[itemCategory as "BICYCLE" | "MOTORCYCLE"][sizeCategory as SizeCategory]} kg`} />
                 : meta.needsWeight && <Row label="Khối lượng" value={`${weightNum.toLocaleString()} kg`} />
               }
               {volume_m3 && <Row label="Thể tích" value={`${volume_m3} m³`} />}
               {volumetric_weight_kg && <Row label="KL quy đổi" value={`${volumetric_weight_kg} kg`} />}
-
               <div className="pt-2 border-t border-slate-100">
                 <Row label="Giá" value={<span className="font-black text-orange-600">{fmtCurrency(totalPrice)}</span>} />
                 <Row label="Thanh toán" value="Online" />
@@ -631,16 +872,18 @@ export default function DatHangOrder() {
             </div>
 
             <details className="mt-4">
-              <summary className="text-xs font-semibold text-slate-400 cursor-pointer hover:text-slate-600">Bảng giá tham khảo</summary>
+              <summary className="text-xs font-semibold text-slate-400 cursor-pointer hover:text-slate-600">
+                Bảng giá tham khảo {pricingName ? `(${pricingName})` : ""}
+              </summary>
               <div className="mt-2 text-xs text-slate-600 space-y-1">
                 <p className="font-semibold text-slate-700">Hàng thông thường / cồng kềnh</p>
-                <p>20.000đ/kg (dùng KL lớn hơn giữa thực tế và thể tích)</p>
+                <p>{fmtCurrency(pricing.price_per_kg)}/kg</p>
                 <p className="font-semibold text-slate-700 mt-2">Giấy tờ</p>
-                <p>15.000đ/kg</p>
+                <p>{fmtCurrency(pricing.document_price_per_kg)}/kg</p>
                 <p className="font-semibold text-slate-700 mt-2">Xe đạp (giá cố định)</p>
-                <p>Mini: 100k · Thường: 150k · Thể thao: 200k</p>
+                <p>Mini: {fmtCurrency(pricing.bicycle_price.SMALL)} · Thường: {fmtCurrency(pricing.bicycle_price.MEDIUM)} · Thể thao: {fmtCurrency(pricing.bicycle_price.LARGE)}</p>
                 <p className="font-semibold text-slate-700 mt-2">Xe máy (giá cố định)</p>
-                <p>≤50cc: 250k · 51–150cc: 350k · &gt;150cc: 500k</p>
+                <p>≤50cc: {fmtCurrency(pricing.motorcycle_price.SMALL)} · 51–150cc: {fmtCurrency(pricing.motorcycle_price.MEDIUM)} · &gt;150cc: {fmtCurrency(pricing.motorcycle_price.LARGE)}</p>
               </div>
             </details>
           </div>
@@ -649,7 +892,7 @@ export default function DatHangOrder() {
     );
   };
 
-  /* ═══════════════ HISTORY ═════════════════════════════════════════ */
+  /* ═══════════════ HISTORY ══════════════════════════════════════ */
   const renderHistory = () => {
     const getPageNumbers = (): number[] => {
       const total = historyPagination.totalPages;
@@ -692,8 +935,8 @@ export default function DatHangOrder() {
           <div className="space-y-4">
             {parcels.map((parcel) => {
               const stCfg = PARCEL_STATUS_LABEL[parcel.status] ?? PARCEL_STATUS_LABEL.RECEIVED;
-              const canCancel = parcel.status === "RECEIVED";
-              const hint = parcel.status === "CANCELLED" ? "Đơn đã hủy." : canCancel ? null : "Đơn đang giao, không thể hủy.";
+              const canCancel = parcel.status === "PENDING" || parcel.status === "RECEIVED";
+              const hint = parcel.status === "CANCELLED" ? "Đơn đã hủy." : canCancel ? null : "Đơn đang xử lý, không thể hủy.";
               const pIsVehicle = parcel.item_category === "BICYCLE" || parcel.item_category === "MOTORCYCLE";
               return (
                 <div key={parcel._id} className="bg-white rounded-2xl shadow-md border border-orange-100/60 overflow-hidden">
@@ -767,6 +1010,7 @@ export default function DatHangOrder() {
           </div>
         )}
 
+        {/* Detail modal */}
         {selectedParcel && (
           <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/50">
             <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
@@ -779,7 +1023,8 @@ export default function DatHangOrder() {
               </div>
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-700">
                 <div className="space-y-2">
-                  <div className="font-semibold">Trạng thái</div><div>{PARCEL_STATUS_LABEL[selectedParcel.status]?.label ?? selectedParcel.status}</div>
+                  <div className="font-semibold">Trạng thái</div>
+                  <div>{PARCEL_STATUS_LABEL[selectedParcel.status]?.label ?? selectedParcel.status}</div>
                   <div className="font-semibold mt-2">Loại hàng</div>
                   <div>
                     {CATEGORY_META[selectedParcel.item_category as ItemCategory]?.label ?? selectedParcel.item_category ?? "—"}
@@ -795,13 +1040,15 @@ export default function DatHangOrder() {
                 <div className="space-y-2">
                   <div className="font-semibold">Tuyến</div>
                   <div>{selectedParcel.trip_id ? `${selectedParcel.trip_id.route_id.start_id.province} → ${selectedParcel.trip_id.route_id.stop_id.province}` : "-"}</div>
-                  <div className="font-semibold mt-2">Điểm đón</div><div>{selectedParcel.pickup_location_id?.location_name ?? selectedParcel.start_id?.stop_id?.province}</div>
-                  <div className="font-semibold mt-2">Điểm trả</div><div>{selectedParcel.dropoff_location_id?.location_name ?? selectedParcel.end_id?.stop_id?.province}</div>
+                  <div className="font-semibold mt-2">Điểm đón</div>
+                  <div>{selectedParcel.pickup_location_id?.location_name ?? selectedParcel.start_id?.stop_id?.province}</div>
+                  <div className="font-semibold mt-2">Điểm trả</div>
+                  <div>{selectedParcel.dropoff_location_id?.location_name ?? selectedParcel.end_id?.stop_id?.province}</div>
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-2">
                 <button onClick={() => setSelectedParcel(null)} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Đóng</button>
-                {selectedParcel.status === "RECEIVED" && (
+                {(selectedParcel.status === "PENDING" || selectedParcel.status === "RECEIVED") && (
                   <button onClick={() => cancelParcel(selectedParcel._id)} className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600">Hủy đơn</button>
                 )}
               </div>
@@ -812,7 +1059,7 @@ export default function DatHangOrder() {
     );
   };
 
-  /* ═══════════════ MAIN RENDER ══════════════════════════════════════ */
+  /* ═══════════════ MAIN RENDER ════════════════════════════════ */
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-slate-100">
       {renderHero()}
@@ -821,6 +1068,19 @@ export default function DatHangOrder() {
           <Loader2 className="animate-spin text-orange-500" size={40} />
         </div>
       )}
+
+      {/* QR Payment Modal */}
+      {qrData && (
+        <QRPaymentModal
+          data={qrData}
+          onClose={() => setQrData(null)}
+          onPaid={() => {
+            setQrData(null);
+            navigate("/user/parcel-history"); // ✅ redirect sang trang dathang
+          }}
+        />
+      )}
+
       <div className="relative z-20 mx-auto max-w-6xl px-4 pb-16">
         <div className="flex flex-wrap items-center justify-between gap-4 pt-8">
           <div>
@@ -831,7 +1091,9 @@ export default function DatHangOrder() {
             {(["order", "history"] as const).map((tab) => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${activeTab === tab ? "bg-orange-500 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
-                {tab === "order" ? <><Truck size={16} className="inline -mt-0.5 mr-1" />Đặt hàng</> : <><List size={16} className="inline -mt-0.5 mr-1" />Lịch sử</>}
+                {tab === "order"
+                  ? <><Truck size={16} className="inline -mt-0.5 mr-1" />Đặt hàng</>
+                  : <><List size={16} className="inline -mt-0.5 mr-1" />Lịch sử</>}
               </button>
             ))}
           </div>
