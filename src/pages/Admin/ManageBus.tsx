@@ -12,6 +12,7 @@ import {
   CheckCircle,
   Wrench,
   Save,
+  ChevronLeft,
 } from "lucide-react";
 
 type BusTypeModel = {
@@ -496,16 +497,21 @@ const ManageBus: React.FC = () => {
     <div className="space-y-6 p-4 sm:p-6 bg-[#f9fafb] min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Quản lý xe</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            Xem và quản lý danh sách xe trong hệ thống
-          </p>
+        <div className="flex items-center gap-4">
+          <button type="button" onClick={() => navigate(-1)} className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2]">
+            <ChevronLeft size={25} strokeWidth={2.3} />
+          </button>
+          <div>
+            <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">Quản lý xe</h1>
+            <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
+              Xem và quản lý danh sách xe trong hệ thống
+            </p>
+          </div>
         </div>
 
         <button
           onClick={handleAddNew}
-          className="flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 transition-colors"
+          className="inline-flex items-center gap-2 rounded-[10px] bg-[#f59e0b] px-4 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#d97706]"
         >
           <Plus size={18} />
           Thêm xe mới

@@ -11,7 +11,13 @@ import {
   Calendar,
   Clock,
   MapPin,
+  CircleCheck,
+   TriangleAlert,
 } from "lucide-react";
+import baseAPIAuth from "../../api/auth";
+import type { getBuses } from "../../model/getBuses";
+import type { getDrivers } from "../../model/getAvailableDriver";
+import type { getAssistants } from "../../model/getAvailableAssistant";
 
 // ==================== TYPES ====================
 interface Avatar {
@@ -80,7 +86,7 @@ interface Trip {
   actual_arrival_time?: string;
   scheduled_distance?: number;
   scheduled_duration: number;
-  status: "SCHEDULED" | "RUNNING" | "FINISHED" | "CANCELLED";
+  status: "SCHEDULED" | "RUNNING" | "FINISHED" | "CANCELLED" | "UNASSIGNED";
   created_at: string;
 }
 
@@ -96,7 +102,11 @@ interface PaginationData {
   totalItems: number;
   itemsPerPage: number;
 }
-
+interface NoticeState {
+  type: "success" | "error";
+  title: string;
+  message: string;
+}
 // ==================== HELPERS ====================
 const extractMessage = (payload: unknown): string | undefined => {
   if (!payload || typeof payload !== "object") return undefined;
@@ -142,6 +152,8 @@ const fromLocalInputToIso = (val?: string): string | undefined => {
 const statusToVn = (s?: string) => {
   if (!s) return "—";
   switch (s.toUpperCase()) {
+      case "UNASSIGNED":
+      return "Chưa gán";
     case "SCHEDULED":
       return "Đã lên lịch";
     case "RUNNING":
@@ -185,7 +197,7 @@ const ManageTrip: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeTab, setActiveTab] = useState<
-    "Tất cả" | "Hoạt động" | "Đã lên lịch" | "Tạm ngừng"
+    "Tất cả" | "Hoạt động" | "Đã lên lịch" | "Tạm ngừng" | "Chưa gán"
   >("Tất cả");
 
   const [selected, setSelected] = useState<Trip | null>(null);
@@ -195,6 +207,15 @@ const ManageTrip: React.FC = () => {
   const [formStatus, setFormStatus] = useState<string>("");
   const [updating, setUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<NoticeState | null>(null);
+
+  // State cho gán xe, tài xế, phụ xe
+    const [buses, setBuses] = useState<getBuses[]>([]);
+   const [availableDrivers, setAvailableDrivers] = useState<getDrivers[]>([]);
+  const [availableAssistants, setAvailableAssistants] = useState<getAssistants[]>([]);
+  const [formBusId, setFormBusId] = useState<string>("");
+  const [formDriverId, setFormDriverId] = useState<string>("");
+  const [formAssistantId, setFormAssistantId] = useState<string>("");
   const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   // ==================== API ====================
@@ -306,6 +327,8 @@ const ManageTrip: React.FC = () => {
             ? "SCHEDULED"
             : activeTab === "Tạm ngừng"
             ? "FINISHED"
+            : activeTab === "Chưa gán"
+            ? "UNASSIGNED"
             : undefined;
         if (want && String(trip.status).toUpperCase() !== want) return false;
       }
@@ -330,14 +353,80 @@ const ManageTrip: React.FC = () => {
     });
   }, [trips, activeTab, searchQuery]);
 
+  // ==================== FETCH AVAILABLE ====================
+  const getAvailableBuses = async (trip: Trip) => {
+    if (!trip.departure_time || !trip.arrival_time || !trip.route_id) return;
+    try {
+      const res = await baseAPIAuth.get("/api/admin/check/getBuses", {
+        params: {
+          shift_start: new Date(trip.departure_time).toISOString(),
+          shift_end: new Date(trip.arrival_time).toISOString(),
+          start_stop_id: trip.route_id.start_id?._id,
+          travel_duration: trip.scheduled_duration,
+        },
+      });
+      console.log("Các xe đang rảnh: ", res.data);
+      setBuses(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getAvailableDrivers = async (trip: Trip) => {
+    if (!trip.departure_time || !trip.arrival_time || !trip.route_id) return;
+    try {
+      const res = await baseAPIAuth.get("/api/admin/check/getAvailableDrivers", {
+        params: {
+          shift_start: new Date(trip.departure_time).toISOString(),
+          shift_end: new Date(trip.arrival_time).toISOString(),
+          start_stop_id: trip.route_id.start_id?._id,
+          travel_duration: trip.scheduled_duration,
+        },
+      });
+      console.log("Các tài xế đang rảnh: ", res.data);
+      setAvailableDrivers(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getAvailableAssistant = async (trip: Trip) => {
+    if (!trip.departure_time || !trip.arrival_time || !trip.route_id) return;
+    try {
+      const res = await baseAPIAuth.get("/api/admin/check/getAvailableAssistant", {
+        params: {
+          shift_start: new Date(trip.departure_time).toISOString(),
+          shift_end: new Date(trip.arrival_time).toISOString(),
+          start_stop_id: trip.route_id.start_id?._id,
+        },
+      });
+      console.log("Các lơ xe đang rảnh: ", res.data);
+      setAvailableAssistants(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   // ==================== MODAL ====================
   const openEdit = (trip: Trip) => {
     setSelected(trip);
     setFormDeparture(toLocalInputValue(trip.departure_time));
     setFormArrival(toLocalInputValue(trip.arrival_time));
     setFormStatus(trip.status ?? "SCHEDULED");
+    setFormBusId(trip.bus_id?._id ?? "");
+    setFormDriverId(
+      trip.drivers.length > 0
+        ? typeof trip.drivers[0].driver_id === "string"
+          ? trip.drivers[0].driver_id
+          : (trip.drivers[0].driver_id as User)._id
+        : ""
+    );
+    setFormAssistantId(trip.assistant_id?._id ?? "");
     setUpdateError(null);
     setIsModalOpen(true);
+    getAvailableBuses(trip);
+    getAvailableDrivers(trip);
+    getAvailableAssistant(trip);
   };
 
   const closeModal = () => {
@@ -351,34 +440,45 @@ const ManageTrip: React.FC = () => {
     setUpdating(true);
     setUpdateError(null);
     try {
-      const token = localStorage.getItem("accessToken") ?? "";
       const payload: Record<string, unknown> = {};
       if (formStatus) payload.status = formStatus;
       const depIso = fromLocalInputToIso(formDeparture);
       if (depIso) payload.departure_time = depIso;
       const arrIso = fromLocalInputToIso(formArrival);
       if (arrIso) payload.arrival_time = arrIso;
+      if (formBusId) payload.bus_id = formBusId;
+      if (formDriverId) {
+        payload.drivers = [{
+          driver_id: formDriverId,
+          shift_start: depIso,
+          shift_end: arrIso,
+          status: "PENDING",
+        }];
+      }
+      if (formAssistantId) payload.assistant_id = formAssistantId;
 
-      const res = await fetch(
-        `${API_BASE}/api/admin/check/trips/${selected._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify(payload),
-        }
+      const res = await baseAPIAuth.put(
+        `/api/admin/check/trips/${selected._id}`,
+        payload
       );
 
-      const parsed = await res.json().catch(() => ({} as ApiResponse<unknown>));
-      if (!res.ok)
-        throw new Error(extractMessage(parsed) ?? "Cập nhật thất bại");
+      setNotice({
+        type: "success",
+        title: "Cập nhật chuyến thành công",
+        message: res.data?.message || "Thông tin chuyến đã được cập nhật.",
+      });
 
       await fetchTrips(pagination.currentPage);
       closeModal();
-    } catch (err) {
-      setUpdateError(err instanceof Error ? err.message : "Lỗi khi cập nhật");
+    } catch (error : any) {
+      setNotice({
+        type: "error",
+        title: "Cập nhật chuyến thất bại",
+        message:
+          error.response?.data?.message ||
+          "Đã có lỗi xảy ra, vui lòng thử lại.",
+      });
+      setUpdateError(error instanceof Error ? error.message : "Lỗi khi cập nhật");
     } finally {
       setUpdating(false);
     }
@@ -397,17 +497,22 @@ const ManageTrip: React.FC = () => {
   return (
     <div className="space-y-6 p-4 sm:p-6 bg-[#f9fafb] min-h-screen">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
-        <div className="w-full sm:w-auto">
-          <h2 className="text-[22px] sm:text-[24px] font-black text-[#111827]">
-            Quản lý chuyến
-          </h2>
-          <p className="text-[13px] text-[#6b7280] mt-1">
-            Xem và quản lý tất cả các chuyến đi
-          </p>
+        <div className="flex items-center gap-4">
+          <button type="button" onClick={() => window.history.back()} className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2]">
+            <ChevronLeft size={25} strokeWidth={2.3} />
+          </button>
+          <div>
+            <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">
+              Quản lý chuyến
+            </h1>
+            <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">
+              Xem và quản lý tất cả các chuyến đi
+            </p>
+          </div>
         </div>
         <button
           onClick={() => (window.location.href = "/admin/create-trips")}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg bg-[#eb8a45] px-5 py-2.5 text-[14px] font-semibold text-white hover:bg-[#d97a35] transition-colors shadow-sm"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#f59e0b] px-4 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#d97706]"
         >
           <Plus size={16} /> Thêm chuyến mới
         </button>
@@ -445,7 +550,7 @@ const ManageTrip: React.FC = () => {
       <div className="rounded-lg border border-[#dde2ea] bg-white shadow-sm">
         <div className="flex flex-col gap-4 border-b border-[#dde2ea] p-4 sm:p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            {(["Tất cả", "Hoạt động", "Đã lên lịch", "Tạm ngừng"] as const).map(
+            {(["Tất cả", "Hoạt động", "Đã lên lịch", "Tạm ngừng", "Chưa gán"] as const).map(
               (tab) => (
                 <button
                   key={tab}
@@ -800,32 +905,24 @@ const ManageTrip: React.FC = () => {
                   <h4 className="text-[13px] font-bold text-[#111827] mb-3">
                     Thông tin xe
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[12px] font-medium text-[#374151] mb-1.5">
-                        Loại xe
-                      </label>
-                      <div className="flex items-center gap-2 rounded-lg border border-[#dde2ea] bg-white px-3 py-2.5">
-                        <Bus size={16} className="text-[#6b7280]" />
-                        <input
-                          value={selected.bus_id?.bus_type_id?.name ?? "N/A"}
-                          disabled
-                          className="flex-1 bg-transparent text-[13px] text-[#111827] font-medium"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[12px] font-medium text-[#374151] mb-1.5">
-                        Biển số xe
-                      </label>
-                      <div className="flex items-center gap-2 rounded-lg border border-[#dde2ea] bg-white px-3 py-2.5">
-                        <Bus size={16} className="text-[#6b7280]" />
-                        <input
-                          value={selected.bus_id?.license_plate ?? "N/A"}
-                          disabled
-                          className="flex-1 bg-transparent text-[13px] text-[#111827] font-medium"
-                        />
-                      </div>
+                  <div>
+                    <label className="block text-[12px] font-medium text-[#374151] mb-1.5">
+                      Chọn xe
+                    </label>
+                    <div className="flex items-center gap-2 rounded-lg border border-[#dde2ea] bg-white px-3 py-0.5">
+                      <Bus size={16} className="text-[#6b7280]" />
+                      <select
+                        value={formBusId}
+                        onChange={(e) => setFormBusId(e.target.value)}
+                        className="flex-1 bg-transparent text-[13px] text-[#111827] font-medium py-2.5 outline-none"
+                      >
+                        <option value="">Chưa gán xe</option>
+                        {buses.map((bus) => (
+                          <option key={bus._id} value={bus._id}>
+                            {bus.license_plate ?? "N/A"} — {bus.bus_type_id?.name ?? "N/A"}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -839,36 +936,40 @@ const ManageTrip: React.FC = () => {
                       <label className="block text-[12px] font-medium text-[#374151] mb-1.5">
                         Tài xế
                       </label>
-                      <div className="flex items-center gap-2 rounded-lg border border-[#dde2ea] bg-white px-3 py-2.5">
+                      <div className="flex items-center gap-2 rounded-lg border border-[#dde2ea] bg-white px-3 py-0.5">
                         <UserIcon size={16} className="text-[#6b7280]" />
-                        <input
-                          value={selected.drivers
-                            .map((d) => {
-                              const dr = d.driver_id as User;
-                              return (
-                                dr?.name ??
-                                (typeof d.driver_id === "string"
-                                  ? d.driver_id
-                                  : "—")
-                              );
-                            })
-                            .join(", ")}
-                          disabled
-                          className="flex-1 bg-transparent text-[13px] text-[#111827] font-medium"
-                        />
+                        <select
+                          value={formDriverId}
+                          onChange={(e) => setFormDriverId(e.target.value)}
+                          className="flex-1 bg-transparent text-[13px] text-[#111827] font-medium py-2.5 outline-none"
+                        >
+                          <option value="">Chưa gán tài xế</option>
+                          {availableDrivers.map((driver) => (
+                            <option key={driver._id} value={driver._id}>
+                              {driver.name} {driver.phone ? `— ${driver.phone}` : ""}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                     <div>
                       <label className="block text-[12px] font-medium text-[#374151] mb-1.5">
                         Phụ xe
                       </label>
-                      <div className="flex items-center gap-2 rounded-lg border border-[#dde2ea] bg-white px-3 py-2.5">
+                      <div className="flex items-center gap-2 rounded-lg border border-[#dde2ea] bg-white px-3 py-0.5">
                         <UserIcon size={16} className="text-[#6b7280]" />
-                        <input
-                          value={selected.assistant_id?.name ?? "Không có"}
-                          disabled
-                          className="flex-1 bg-transparent text-[13px] text-[#111827] font-medium"
-                        />
+                        <select
+                          value={formAssistantId}
+                          onChange={(e) => setFormAssistantId(e.target.value)}
+                          className="flex-1 bg-transparent text-[13px] text-[#111827] font-medium py-2.5 outline-none"
+                        >
+                          <option value="">Không có</option>
+                          {availableAssistants.map((assistant) => (
+                            <option key={assistant._id} value={assistant._id}>
+                              {assistant.name} {assistant.phone ? `— ${assistant.phone}` : ""}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -932,6 +1033,7 @@ const ManageTrip: React.FC = () => {
                     <option value="RUNNING">Đang chạy</option>
                     <option value="FINISHED">Kết thúc</option>
                     <option value="CANCELLED">Đã hủy</option>
+                    <option value="UNASSIGNED">Chưa gán</option>
                   </select>
                 </div>
 
@@ -980,6 +1082,112 @@ const ManageTrip: React.FC = () => {
           </div>
         </div>
       )}
+        {notice ? (
+        <>
+          <style>{`
+          @keyframes routeNoticeIn {
+            0% {
+              opacity: 0;
+              transform: translateY(10px) scale(0.95);
+            }
+            70% {
+              transform: translateY(-2px) scale(1.02);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+
+          @keyframes routeNoticeIcon {
+            0% {
+              transform: scale(0.4) rotate(-25deg);
+              opacity: 0;
+            }
+            55% {
+              transform: scale(1.18) rotate(8deg);
+              opacity: 1;
+            }
+            80% {
+              transform: scale(0.95) rotate(-4deg);
+            }
+            100% {
+              transform: scale(1) rotate(0);
+            }
+          }
+
+          @keyframes routeNoticePulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.32);
+            }
+            100% {
+              box-shadow: 0 0 0 16px rgba(16, 185, 129, 0);
+            }
+          }
+        `}</style>
+          <div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
+            onClick={() => setNotice(null)}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
+              onClick={(event) => event.stopPropagation()}
+              style={{
+                animation:
+                  notice.type === "success"
+                    ? "routeNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+                    : "routeNoticeIn 0.35s ease",
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
+                    ? "bg-[#ecfdf3] text-[#16a34a]"
+                    : "bg-[#fff7ed] text-[#ea580c]"
+                    }`}
+                  style={{
+                    animation:
+                      notice.type === "success"
+                        ? "routeNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                        : undefined,
+                  }}
+                >
+                  {notice.type === "success" ? (
+                    <CircleCheck
+                      size={20}
+                      style={{
+                        animation:
+                          notice.type === "success"
+                            ? "routeNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
+                            : undefined,
+                      }}
+                    />
+                  ) : (
+                    <TriangleAlert size={20} />
+                  )}
+                </span>
+                <div className="flex-1">
+                  <h3 className="text-base font-black text-[#111827]">
+                    {notice.title}
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-[#4b5563]">
+                    {notice.message}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  className="rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

@@ -585,23 +585,49 @@ export default function DatHangOrder() {
       <div className="absolute inset-0 bg-[linear-gradient(96deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.93)_34%,rgba(255,255,255,0.64)_56%,rgba(255,255,255,0.16)_78%,rgba(255,255,255,0)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#f3ece5] to-[#ece7e2]" />
       <div className="absolute inset-x-0 bottom-0 h-px bg-[#ece7e2]" />
-      <div className="pointer-events-none absolute top-[18%] right-[0%] z-10 w-[66%] max-w-[860px] md:top-[9%] md:w-[62%]">
+      <div className="pointer-events-none absolute top-[18%] right-[0%] z-10 w-[66%] max-w-[860px] md:top-[9%] md:w-[62%] hidden md:block">
+        <div className="bus-aero-overlay absolute inset-[-16%] z-0">
+          <span className="bus-cloud bus-cloud-1 absolute left-[-10%] top-[-10%] h-[28%] w-[68%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.25)_54%,rgba(255,255,255,0)_100%)] blur-[30px]" />
+          <span className="bus-cloud bus-cloud-2 absolute left-[-20%] top-[28%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.66)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
+          <span className="bus-cloud bus-cloud-3 absolute right-[-16%] top-[34%] h-[26%] w-[42%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.18)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
+          <span className="bus-cloud bus-cloud-4 absolute left-[-16%] top-[66%] h-[30%] w-[58%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.24)_54%,rgba(255,255,255,0)_100%)] blur-[28px]" />
+          <span className="bus-cloud bus-cloud-5 absolute right-[-4%] top-[70%] h-[28%] w-[54%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.64)_0%,rgba(255,255,255,0.2)_54%,rgba(255,255,255,0)_100%)] blur-[26px]" />
+          <span className="bus-cloud bus-cloud-6 absolute left-[4%] top-[90%] h-[16%] w-[72%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.56)_0%,rgba(255,255,255,0.14)_54%,rgba(255,255,255,0)_100%)] blur-[24px]" />
+        </div>
+        <div className="bus-aero-trail absolute right-[-14%] top-[30%] z-0 h-[54%] w-[46%]">
+          <span className="bus-tail-cloud bus-tail-cloud-1 absolute right-[10%] top-[14%] h-[42%] w-[34%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.48)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-2 absolute right-[28%] top-[28%] h-[38%] w-[32%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.84)_0%,rgba(255,255,255,0.4)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-3 absolute right-[12%] top-[50%] h-[34%] w-[30%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,rgba(255,255,255,0.36)_54%,rgba(255,255,255,0)_100%)] blur-[10px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-4 absolute right-[38%] top-[20%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.32)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+          <span className="bus-tail-cloud bus-tail-cloud-6 absolute right-[24%] top-[44%] h-[26%] w-[24%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.38)_54%,rgba(255,255,255,0)_100%)] blur-[8px]" />
+        </div>
         <div className="bus-bob relative z-10">
-          <img src="/images/bus7.png" alt="Bus overlay" className="w-full object-contain block relative"
-            style={{ imageRendering: "auto", filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))" }} />
+          <img
+            src="/images/bus7.png"
+            alt="Bus overlay"
+            className="w-full object-contain block relative -top-100"
+            style={{
+              imageRendering: "auto",
+              filter: "drop-shadow(0 24px 28px rgba(15,23,42,0.28)) drop-shadow(0 0 22px rgba(255,255,255,0.5))",
+            }}
+          />
           <div className="pointer-events-none absolute inset-0">
-            <div className="bus-front-left-passenger"><img src="/images/loxe1.png" alt="Front passenger" className="bus-front-left-passenger-img" /></div>
-            <div className="bus-driver-fit"><img src="/images/1me1.png" alt="Driver" className="bus-driver-fit-img" /></div>
+            <div className="bus-front-left-passenger">
+              <img src="/images/loxe1.png" alt="Front passenger" className="bus-front-left-passenger-img" />
+            </div>
+            <div className="bus-driver-fit">
+              <img src="/images/1me1.png" alt="Driver" className="bus-driver-fit-img" />
+            </div>
           </div>
         </div>
       </div>
-      <div className="relative z-20 mx-auto flex min-h-[520px] w-full max-w-[1240px] items-center px-4 pb-16 pt-24 lg:min-h-[580px] lg:pt-20">
-        <div className="page-enter-copy relative isolate -ml-8 max-w-[760px] space-y-6 sm:-ml-14 lg:-ml-24">
+      <div className="relative z-20 mx-auto flex min-h-[320px] w-full max-w-[1240px] items-center px-4 pt-20 pb-6 md:min-h-[680px] md:pt-24 md:pb-24 lg:min-h-[780px] lg:pt-20">
+        <div className="page-enter-copy relative isolate w-full max-w-[760px] space-y-3 md:space-y-6 md:-ml-14 lg:-ml-24">
           <h1 className="hero-title relative z-10 py-1 text-[48px] font-black leading-[1.05] tracking-[-0.03em] text-[#0d142a] sm:text-[58px] lg:text-[72px]">
             <span className="hero-title-line block whitespace-nowrap">Gửi hàng dễ dàng</span>
             <span className="hero-title-line mt-2 block whitespace-nowrap">Giữa các chặng đường</span>
             <span className="hero-title-line mt-2 block whitespace-nowrap font-extrabold italic">
-              <span className="text-[#0d142a]">Nhanh</span> <span className="hero-title-shimmer">-</span> <span className="text-[#0d142a]">An toàn</span>
+              <span className="hero-title-shimmer">Nhanh</span> <span className="hero-title-shimmer">-</span> <span className="hero-title-shimmer">An toàn</span>
             </span>
           </h1>
           <p className="relative z-10 max-w-[510px] text-base leading-relaxed text-[#475569] lg:text-lg">
@@ -1061,8 +1087,9 @@ export default function DatHangOrder() {
 
   /* ═══════════════ MAIN RENDER ════════════════════════════════ */
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-slate-100">
-      {renderHero()}
+    <>
+    {renderHero()}
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-slate-100 -mt-52">
       {loading && (
         <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-white/70">
           <Loader2 className="animate-spin text-orange-500" size={40} />
@@ -1082,7 +1109,7 @@ export default function DatHangOrder() {
       )}
 
       <div className="relative z-20 mx-auto max-w-6xl px-4 pb-16">
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-8">
+        <div className="flex flex-wrap items-center gap-4 pt-8">
           <div>
             <h1 className="text-3xl font-black text-slate-900">Gửi hàng</h1>
             <p className="text-sm text-slate-600">Chọn chuyến, loại hàng, kích thước – giá tự tính.</p>
@@ -1101,6 +1128,76 @@ export default function DatHangOrder() {
         <div className="mt-8">{activeTab === "order" ? renderOrderForm() : renderHistory()}</div>
       </div>
     </div>
+
+    <style>{`
+      .hero-title-shimmer {
+        color: #ff7a1b; display: inline-block; line-height: 1.12;
+        padding-bottom: 0.14em; margin-bottom: 0;
+        background-image: repeating-linear-gradient(100deg,#ff7a1b 0px,#ff7a1b 120px,#ff9226 185px,#ffb347 260px,#ff9226 335px,#ff7a1b 400px,#e8791c 520px);
+        background-size: 520px 100%; background-position: 0 50%; background-repeat: repeat;
+        background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        text-shadow: 0 1px 0 rgba(255,181,88,0.36),0 2px 0 rgba(234,121,27,0.38),0 4px 0 rgba(178,76,16,0.3),0 10px 16px rgba(94,40,9,0.22);
+        -webkit-text-stroke: 0.26px rgba(136,57,12,0.26);
+        filter: saturate(1.16) contrast(1.12) brightness(1.06);
+        animation: hero-title-shimmer-soft 5.8s linear infinite; will-change: background-position;
+      }
+      @keyframes hero-title-shimmer-soft { 0%{background-position:0 50%} 100%{background-position:-520px 50%} }
+      .bus-bob { animation: bus-bob 1.9s cubic-bezier(0.36,0.06,0.29,0.97) infinite; transform-origin: 56% 74%; will-change: transform; }
+      .bus-aero-overlay { transform: rotate(12deg); transform-origin: 22% 50%; }
+      .bus-cloud { animation: bus-cloud-drift 1.75s ease-out infinite; will-change: transform, opacity; }
+      .bus-cloud-1 { animation-delay: 0.06s; animation-duration: 1.95s; }
+      .bus-cloud-2 { animation-delay: 0.26s; animation-duration: 1.55s; }
+      .bus-cloud-3 { animation-delay: 0.42s; animation-duration: 1.58s; }
+      .bus-cloud-4 { animation-delay: 0.62s; animation-duration: 1.84s; }
+      .bus-cloud-5 { animation-delay: 0.78s; animation-duration: 1.72s; }
+      .bus-cloud-6 { animation-delay: 0.94s; animation-duration: 1.6s; }
+      .bus-aero-trail { transform: rotate(12deg); transform-origin: 22% 50%; will-change: transform; }
+      .bus-tail-cloud { animation: bus-trail-cloud 1.55s ease-out infinite; will-change: transform, opacity; }
+      .bus-tail-cloud-1 { animation-delay: 0.06s; }
+      .bus-tail-cloud-2 { animation-delay: 0.32s; }
+      .bus-tail-cloud-3 { animation-delay: 0.54s; }
+      .bus-tail-cloud-4 { animation-delay: 0.76s; }
+      .bus-tail-cloud-6 { animation-delay: 0.22s; animation-duration: 1.45s; }
+      .bus-driver-fit {
+        position: absolute; left: 26.3%; top: 30.7%; width: 11.6%; height: 15.8%;
+        overflow: hidden; clip-path: polygon(8% 1%, 96% 5%, 100% 95%, 22% 98%, 2% 56%);
+        transform: perspective(760px) rotateY(-12deg) rotate(-0.55deg); transform-origin: 54% 50%;
+        animation: bus-driver-settle 1.9s cubic-bezier(0.36,0.06,0.29,0.97) infinite; will-change: transform;
+      }
+      .bus-driver-fit-img {
+        position: absolute; left: -2%; top: 3%; width: 95%; height: 112%;
+        object-fit: cover; object-position: center 8%;
+        filter: saturate(0.82) contrast(1.08) brightness(0.9); opacity: 0.95;
+        transform: scaleX(-1) rotate(5deg);
+        animation: bus-driver-idle 1.65s ease-in-out infinite; will-change: transform; z-index: 1;
+      }
+      .bus-front-left-passenger {
+        position: absolute; left: 48.4%; top: 26.2%; width: 11.6%; height: 15.6%;
+        overflow: hidden; clip-path: polygon(18% 2%, 94% 6%, 98% 95%, 10% 97%, 4% 52%);
+        transform: perspective(760px) rotateY(14deg) rotate(0.7deg); transform-origin: 50% 50%;
+        animation: bus-driver-settle 2s cubic-bezier(0.36,0.06,0.29,0.97) infinite; will-change: transform; z-index: 1;
+      }
+      .bus-front-left-passenger-img {
+        position: absolute; left: 2%; top: 3%; width: 130%; height: 166%;
+        object-fit: cover; object-position: center 10%;
+        filter: saturate(0.8) contrast(1.05) brightness(0.88); opacity: 0.93;
+        transform: scaleX(-1) rotate(-2deg);
+        animation: bus-passenger-idle 1.8s ease-in-out infinite; will-change: transform;
+      }
+      @keyframes bus-bob { 0%,100%{transform:translateY(0) rotate(-0.35deg)} 32%{transform:translateY(-4px) rotate(0.12deg)} 62%{transform:translateY(-8px) rotate(0.24deg)} 82%{transform:translateY(2px) rotate(-0.16deg)} }
+      @keyframes bus-cloud-drift { 0%{opacity:.2;transform:translateX(-18px) scale(.84)} 36%{opacity:.76} 100%{opacity:0;transform:translateX(172px) scale(1.3)} }
+      @keyframes bus-trail-cloud { 0%{opacity:.62;transform:translateX(-6px) scale(.78)} 34%{opacity:.96} 100%{opacity:0;transform:translateX(92px) scale(1.22)} }
+      @keyframes bus-driver-settle { 0%,100%{transform:perspective(760px) rotateY(-12deg) rotate(-0.55deg) translateY(0)} 34%{transform:perspective(760px) rotateY(-12deg) rotate(-0.4deg) translateY(-1px)} 68%{transform:perspective(760px) rotateY(-12deg) rotate(-0.75deg) translateY(1px)} }
+      @keyframes bus-driver-idle { 0%,100%{transform:scaleX(-1) rotate(5deg) translateY(0)} 28%{transform:scaleX(-1) rotate(4.1deg) translateY(-1px)} 62%{transform:scaleX(-1) rotate(5.9deg) translateY(1px)} 82%{transform:scaleX(-1) rotate(4.6deg) translateY(0)} }
+      @keyframes bus-passenger-idle { 0%,100%{transform:scaleX(-1) rotate(-2deg) translateY(0)} 34%{transform:scaleX(-1) rotate(-1.3deg) translateY(-1px)} 72%{transform:scaleX(-1) rotate(-2.6deg) translateY(1px)} }
+      @media (prefers-reduced-motion: reduce) {
+        .bus-bob,.bus-cloud,.bus-tail-cloud,
+        .bus-front-left-passenger,.bus-front-left-passenger-img,.bus-driver-fit,.bus-driver-fit-img {
+          animation: none !important; opacity: 1 !important; transform: none !important;
+        }
+      }
+    `}</style>
+    </>
   );
 }
 

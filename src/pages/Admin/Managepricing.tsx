@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Plus, Edit, Trash2, X, Save, Loader2,
     AlertTriangle, ToggleLeft, ToggleRight,
     DollarSign, Calendar, Tag, CheckCircle2,
-    ChevronDown, ChevronUp, Bike, Truck,
+    ChevronDown, ChevronUp, Bike, Truck, ChevronLeft,
 } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_URL;
@@ -77,6 +78,7 @@ const PriceInput: React.FC<{ label: string; value: string; onChange: (v: string)
    Main
 ═══════════════════════════════════════════════ */
 const ManagePricing: React.FC = () => {
+    const navigate = useNavigate();
     const [configs, setConfigs] = useState<PricingRow[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -226,12 +228,17 @@ const ManagePricing: React.FC = () => {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-xl font-bold text-gray-900">Quản lý bảng giá</h1>
-                    <p className="mt-0.5 text-sm text-gray-500">Cấu hình giá vận chuyển hàng hoá</p>
+                <div className="flex items-center gap-4">
+                    <button type="button" onClick={() => navigate(-1)} className="inline-flex h-12 w-12 items-center justify-center rounded-[10px] border border-[#e1e5ec] bg-white text-[#c2c8d2]">
+                        <ChevronLeft size={25} strokeWidth={2.3} />
+                    </button>
+                    <div>
+                        <h1 className="text-[24px] font-black leading-[1.05] tracking-[-0.015em] text-[#111827]">Quản lý bảng giá</h1>
+                        <p className="mt-1 text-[13px] font-medium text-[#9aa2af]">Cấu hình giá vận chuyển hàng hoá</p>
+                    </div>
                 </div>
                 <button onClick={openCreate}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#FF5722] text-white text-sm font-semibold rounded-xl hover:bg-[#e64a19] transition shadow-sm shrink-0">
+                    className="inline-flex items-center gap-2 rounded-[10px] bg-[#f59e0b] px-4 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#d97706] shrink-0">
                     <Plus size={17} /> Thêm bảng giá
                 </button>
             </div>

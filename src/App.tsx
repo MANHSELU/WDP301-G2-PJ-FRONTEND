@@ -39,6 +39,7 @@ import AssistantShiftsPage from "./pages/Phuxe/DanhSachCalai";
 import DriverShiftsPage from "./pages/Driver/DanhSachCaLai";
 import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageTrip from "./pages/Admin/ManageTrip";
+import BulkCreateTrips from "./pages/Admin/BulkCreateTrips";
 import FaceVerificationPhuXe from "./pages/Phuxe/VerifileCam";
 import ChatBox from "./pages/Customer/ChatBoxV2";
 import News from "./pages/Customer/News";
@@ -75,6 +76,7 @@ export default function App() {
           <Route path="create-stop-location" element={<CreateStopLocation />} />
           <Route path="create-trips" element={<CreateTrip />} />
           <Route path="manage-trips" element={<ManageTrip />} />
+          <Route path="bulk-create-trips" element={<BulkCreateTrips />} />
           <Route path="manage-stops" element={<ManageStop />} />
           <Route path="manage-stop-locations" element={<ManageStopLocation />} />
           <Route path="order-price" element={<ManagePricing />} />
