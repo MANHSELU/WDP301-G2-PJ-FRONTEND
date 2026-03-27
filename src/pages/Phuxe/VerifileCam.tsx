@@ -242,13 +242,61 @@ export default function FaceVerificationPhuXe() {
         isVerifyingRef.current = true;
 
         try {
-            // Chụp frame
-            const tempCanvas = document.createElement("canvas");
-            tempCanvas.width = 640;
-            tempCanvas.height = 480;
-            tempCanvas.getContext("2d")?.drawImage(videoRef.current!, 0, 0);
-            const image = tempCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
+            const video = videoRef.current!;
+            if (!video) {
+                safeSetStatus("❌ Không tìm thấy camera");
+                isVerifyingRef.current = false;
+                return;
+            }
 
+            // 🔥 detect face trước khi crop
+            const detection = await faceapi
+                .detectSingleFace(
+                    video,
+                    new faceapi.TinyFaceDetectorOptions({
+                        inputSize: 256,
+                        scoreThreshold: 0.3
+                    })
+                )
+                .withFaceLandmarks();
+
+            if (!detection) {
+                safeSetStatus("❌ Không tìm thấy khuôn mặt");
+                isVerifyingRef.current = false;
+                return;
+            }
+
+            const { box } = detection.detection;
+
+            // 🔥 tạo canvas
+            const tempCanvas = document.createElement("canvas");
+            const ctx = tempCanvas.getContext("2d")!;
+
+            tempCanvas.width = 640;
+            tempCanvas.height = 640;
+
+            // 🔥 padding để không crop quá sát
+            const padding = 60;
+
+            const sx = Math.max(0, box.x - padding);
+            const sy = Math.max(0, box.y - padding);
+            const sw = Math.min(video.videoWidth - sx, box.width + padding * 2);
+            const sh = Math.min(video.videoHeight - sy, box.height + padding * 2);
+
+            // 🔥 FIX QUAN TRỌNG: mirror giống video
+            ctx.translate(tempCanvas.width, 0);
+            ctx.scale(-1, 1);
+
+            ctx.drawImage(
+                video,
+                sx, sy, sw, sh,   // source (crop mặt)
+                0, 0, tempCanvas.width, tempCanvas.height // output
+            );
+
+            // 🔥 tăng chất lượng ảnh
+            const image = tempCanvas.toDataURL("image/jpeg", 0.95).split(",")[1];
+
+            // 🔥 gọi API
             const res = await fetch(`${API_BASE}/api/common/check/face-login`, {
                 method: "POST",
                 headers: {
@@ -257,25 +305,31 @@ export default function FaceVerificationPhuXe() {
                 },
                 body: JSON.stringify({ image })
             });
+
             const data = await res.json();
+
+            console.log("🔥 Similarity:", data.similarity);
 
             if (data.success) {
                 setLoggedIn(true);
                 setIsCompleted(true);
                 setStatus(`✅ Thành công (${data.similarity?.toFixed(1)}%)`);
                 stopCamera(true);
-                navigate("/assistant/chuyendi")
+                navigate("/assistant/chuyendi");
             } else {
-                safeSetStatus("❌ Không khớp, vui lòng thử lại");
+                safeSetStatus(`❌ Không khớp (${data.similarity?.toFixed(1)}%)`);
                 updateStep("TURN_LEFT", "👈 Thử lại: Quay mặt sang trái");
                 isVerifyingRef.current = false;
             }
+
         } catch (err) {
-            safeSetStatus("❌ Lỗi kết nối server");
-            console.log("lỗi chương trình trên là : ", err)
+            console.error("Verify error:", err);
+            safeSetStatus("❌ Lỗi server");
             isVerifyingRef.current = false;
         }
     };
+
+
 
     const handleGoBack = () => {
         stopCamera();
