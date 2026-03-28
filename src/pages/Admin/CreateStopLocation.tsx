@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { ChevronLeft, ChevronDown, Plus, UploadCloud, X, CircleCheck,TriangleAlert  } from "lucide-react";
+import { ChevronLeft, ChevronDown, UploadCloud, X, CircleCheck, TriangleAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import baseAPIAuth from "../../api/auth";
 import type { allStops } from "../../model/allStops";
@@ -63,9 +63,9 @@ export default function CreateStopLocation() {
       console.log(res.data);
       setNotice({ type: "success", title: "Thành công", message: "Lấy tọa độ vị trí thành công" });
 
-    } catch (error : any) {
+    } catch (error: any) {
       console.error(error);
-    setNotice({ type: "error", title: "Thất bại", message: error.response?.data?.message || "Lấy vị trí thất bại, không đúng địa chỉ hoặc địa chỉ ko tồn tại." });
+      setNotice({ type: "error", title: "Thất bại", message: error.response?.data?.message || "Lấy vị trí thất bại, không đúng địa chỉ hoặc địa chỉ ko tồn tại." });
     }
   };
 
@@ -77,16 +77,16 @@ export default function CreateStopLocation() {
         {
           stop_id: stopId,
           location_name: locationName,
-          address : address,
-          status : status,
+          address: address,
+          status: status,
           location: location,
           location_type: locationType,
         },
       );
       console.log(res.data);
       setNotice({ type: "success", title: "Thành công", message: "Thêm mới vị trí thành công" });
-    } catch (error : any) {
-      console.error(error );
+    } catch (error: any) {
+      console.error(error);
       setNotice({ type: "error", title: "Thất bại", message: error.response?.data?.message || "Thêm mới vị trí thất bại" });
     }
   };
@@ -140,8 +140,8 @@ export default function CreateStopLocation() {
       console.error(err);
       setImportError(
         err?.response?.data?.message ??
-          err?.message ??
-          "Import StopLocation thất bại.",
+        err?.message ??
+        "Import StopLocation thất bại.",
       );
     } finally {
       setIsImporting(false);
@@ -171,7 +171,7 @@ export default function CreateStopLocation() {
                     Cấu hình vị trí đón/trả khách cố định cho từng tỉnh thành
                   </p>
                 </div>
-          
+
               </div>
             </div>
           </div>
@@ -187,31 +187,31 @@ export default function CreateStopLocation() {
                   <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
                     Tỉnh thành
                   </span>
-                    <div className="relative">
-                  <select
-                    value={stopId}
-                    onChange={(e) => {
-                      const id = e.target.value;
-                      setStopId(id);
+                  <div className="relative">
+                    <select
+                      value={stopId}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        setStopId(id);
 
-                      const selected = stops.find((s) => s._id === id);
-                      if (selected) setNewStops(selected.province);
-                    }}
-                    className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]
+                        const selected = stops.find((s) => s._id === id);
+                        if (selected) setNewStops(selected.province);
+                      }}
+                      className="h-11 w-full appearance-none rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]
 "
-                  >
-                    <option value="">Chọn điểm xuất phát</option>
-                    {stops.map((stop) => (
-                      <option key={stop._id} value={stop._id}>
-                        {stop.province}
-                      </option>
-                    ))}    
-                  </select>
-                      <ChevronDown
+                    >
+                      <option value="">Chọn điểm xuất phát</option>
+                      {stops.map((stop) => (
+                        <option key={stop._id} value={stop._id}>
+                          {stop.province}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
                       size={16}
                       className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280]"
-                    />  
-                    </div>
+                    />
+                  </div>
                 </label>
 
                 <label className="space-y-1">
@@ -292,14 +292,12 @@ export default function CreateStopLocation() {
                       {status ? "Đang sử dụng (true)" : "Không sử dụng (false)"}
                     </span>
                     <span
-                      className={`inline-flex h-5 w-10 items-center rounded-full p-[2px] transition ${
-                        status ? "bg-green-500" : "bg-gray-300"
-                      }`}
+                      className={`inline-flex h-5 w-10 items-center rounded-full p-[2px] transition ${status ? "bg-green-500" : "bg-gray-300"
+                        }`}
                     >
                       <span
-                        className={`h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                          status ? "translate-x-5" : "translate-x-0"
-                        }`}
+                        className={`h-4 w-4 rounded-full bg-white shadow transition-transform ${status ? "translate-x-5" : "translate-x-0"
+                          }`}
                       />
                     </span>
                   </button>
@@ -414,7 +412,7 @@ export default function CreateStopLocation() {
           </div>
         </div>
       )}
-       {notice ? (
+      {notice ? (
         <>
           <style>{`
           @keyframes routeNoticeIn {
