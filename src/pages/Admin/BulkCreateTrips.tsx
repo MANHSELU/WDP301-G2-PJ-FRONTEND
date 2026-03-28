@@ -18,7 +18,6 @@ export default function BulkCreateTrips() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [formError, setFormError] = useState("");
-  const [formSuccess, setFormSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState<NoticeState | null>(null);
 
@@ -28,16 +27,16 @@ export default function BulkCreateTrips() {
   }, []);
 
   // Hàm lấy route
- const fetchRoutes = async () => {
-      try {
-        const res = await baseAPIAuth.get("/api/admin/check/getRoutes");
-        setRoutes(res.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  const fetchRoutes = async () => {
+    try {
+      const res = await baseAPIAuth.get("/api/admin/check/getRoutes");
+      setRoutes(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    
+
   const selectedRoute = routes.find((r) => r._id === routeId);
 
   const createSeriesOfTrip = async () => {
@@ -48,16 +47,40 @@ export default function BulkCreateTrips() {
         start_date: startDate,
         end_date: endDate,
       });
-        setNotice({
+      setNotice({
         type: "success",
         title: "Tạo hàng loạt chuyến thành công",
         message: res.data?.message || "Thông tin chuyến đã được tạo.",
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setFormError(
-        err?.response?.data?.message ?? err?.message ?? "Tạo chuyến thất bại."
-      );
+
+      let message = "Tạo chuyến thất bại.";
+
+      if (err instanceof Error) {
+        message = err.message;
+      }
+
+      // check kiểu object có response (kiểu axios)
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err
+      ) {
+        const response = (err as {
+          response?: {
+            data?: {
+              message?: string;
+            };
+          };
+        }).response;
+
+        if (response?.data?.message) {
+          message = response.data.message;
+        }
+      }
+
+      setFormError(message);
     } finally {
       setLoading(false);
     }
@@ -186,12 +209,6 @@ export default function BulkCreateTrips() {
                 {formError}
               </div>
             )}
-            {formSuccess && (
-              <div className="rounded-[10px] border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-600">
-                {formSuccess}
-              </div>
-            )}
-
             {/* Submit */}
             <button
               type="button"
@@ -204,9 +221,9 @@ export default function BulkCreateTrips() {
           </form>
         </div>
       </section>
-         {notice ? (
-              <>
-                <style>{`
+      {notice ? (
+        <>
+          <style>{`
                 @keyframes routeNoticeIn {
                   0% {
                     opacity: 0;
@@ -247,69 +264,69 @@ export default function BulkCreateTrips() {
                   }
                 }
               `}</style>
-                <div
-                  className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
-                  onClick={() => setNotice(null)}
+          <div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-[#0f172a]/35 px-4"
+            onClick={() => setNotice(null)}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
+              onClick={(event) => event.stopPropagation()}
+              style={{
+                animation:
+                  notice.type === "success"
+                    ? "routeNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+                    : "routeNoticeIn 0.35s ease",
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
+                    ? "bg-[#ecfdf3] text-[#16a34a]"
+                    : "bg-[#fff7ed] text-[#ea580c]"
+                    }`}
+                  style={{
+                    animation:
+                      notice.type === "success"
+                        ? "routeNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
+                        : undefined,
+                  }}
                 >
-                  <div
-                    className="w-full max-w-md rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-[0_24px_60px_-28px_rgba(15,23,42,0.7)]"
-                    onClick={(event) => event.stopPropagation()}
-                    style={{
-                      animation:
-                        notice.type === "success"
-                          ? "routeNoticeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
-                          : "routeNoticeIn 0.35s ease",
-                    }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span
-                        className={`mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full ${notice.type === "success"
-                          ? "bg-[#ecfdf3] text-[#16a34a]"
-                          : "bg-[#fff7ed] text-[#ea580c]"
-                          }`}
-                        style={{
-                          animation:
-                            notice.type === "success"
-                              ? "routeNoticePulse 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards"
-                              : undefined,
-                        }}
-                      >
-                        {notice.type === "success" ? (
-                          <CircleCheck
-                            size={20}
-                            style={{
-                              animation:
-                                notice.type === "success"
-                                  ? "routeNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
-                                  : undefined,
-                            }}
-                          />
-                        ) : (
-                          <TriangleAlert size={20} />
-                        )}
-                      </span>
-                      <div className="flex-1">
-                        <h3 className="text-base font-black text-[#111827]">
-                          {notice.title}
-                        </h3>
-                        <p className="mt-1 text-sm font-medium text-[#4b5563]">
-                          {notice.message}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-5 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setNotice(null)}
-                        className="rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
-                      >
-                        Đóng
-                      </button>
-                    </div>
-                  </div>
+                  {notice.type === "success" ? (
+                    <CircleCheck
+                      size={20}
+                      style={{
+                        animation:
+                          notice.type === "success"
+                            ? "routeNoticeIcon 0.55s cubic-bezier(0.22, 1, 0.36, 1)"
+                            : undefined,
+                      }}
+                    />
+                  ) : (
+                    <TriangleAlert size={20} />
+                  )}
+                </span>
+                <div className="flex-1">
+                  <h3 className="text-base font-black text-[#111827]">
+                    {notice.title}
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-[#4b5563]">
+                    {notice.message}
+                  </p>
                 </div>
-              </>
-            ) : null}
+              </div>
+              <div className="mt-5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  className="rounded-lg bg-gradient-to-r from-[#f7a53a] to-[#e8791c] px-4 py-2 text-sm font-bold text-white transition duration-200 hover:from-[#f8af4f] hover:to-[#ef8a31]"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
