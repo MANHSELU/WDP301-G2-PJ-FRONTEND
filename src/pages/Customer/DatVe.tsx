@@ -534,10 +534,10 @@ export default function BusSeatSelection() {
             ══════════════════════════════════════════════ */}
             <div className="relative z-20 lg:min-h-screen bg-gradient-to-br lg:from-slate-50 lg:via-orange-50/20 lg:to-slate-100 py-0 lg:py-8 pb-28 lg:pb-8 pt-[56px] lg:pt-0">
                 <div className="max-w-7xl mx-auto px-0 lg:px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-0 lg:gap-8">
+                    <div className="grid grid-cols-1 gap-0 lg:gap-8">
 
-                        {/* ── SIDEBAR — desktop only ── */}
-                        <aside className="hidden lg:block space-y-6 mt-6">
+                        {/* ── SIDEBAR — desktop only (hidden) ── */}
+                        <aside className="hidden space-y-6 mt-6">
                             <div className="relative group">
                                 <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-orange-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
                                 <div className="relative bg-white rounded-2xl shadow-xl border-2 border-orange-100/50 p-6">
@@ -565,7 +565,7 @@ export default function BusSeatSelection() {
                         {/* ── MAIN CONTENT ── */}
                         <main className="relative group">
                             <div className="absolute inset-0 bg-gradient-to-br from-orange-400/10 to-orange-500/5 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl hidden lg:block" />
-                            <div className="relative bg-white lg:rounded-3xl shadow-none lg:shadow-2xl border-0 lg:border-2 lg:border-orange-100/50 p-0 lg:p-8 lg:mt-12">
+                            <div className="relative bg-white lg:rounded-3xl shadow-none lg:shadow-2xl border-0 lg:border-2 lg:border-orange-100/50 p-0 lg:p-8 lg:mt-32">
 
                                 {/* ══ TRIP HEADER ══ */}
 
