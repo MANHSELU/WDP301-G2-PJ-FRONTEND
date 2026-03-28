@@ -95,7 +95,7 @@ const BustripLogin = () => {
         if (roleName === "RECEPTIONIST") {
           navigate("/letan");
         } else if (roleName === "ADMIN") {
-          navigate("/admin");
+          navigate("/admin/manage-revenue");
         } else if (roleName === "DRIVER") {
           navigate("/loginCamera");
         } else if (roleName === "BUS_ASSISTANT") {

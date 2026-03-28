@@ -68,7 +68,8 @@ export default function FaceVerification() {
             setCameraOn(true);
             updateStep("TURN_LEFT", "👈 Quay mặt sang trái");
             startDetectLoop();
-        } catch {
+        } catch (error : any){
+            console.log("lỗi cam : ",error.message)
             setStatus("❌ Không thể mở camera");
         }
     };
