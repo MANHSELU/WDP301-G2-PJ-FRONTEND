@@ -81,12 +81,12 @@ export default function HomeAdmin() {
   const users = useSelector((state: RootState) => state.user.user as user);
   const dispatch = useDispatch();
   const token = localStorage.getItem("accessToken");
-
+  const api = import.meta.env.VITE_API_URL
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/common/check/getprofile",
+          `${api}/api/common/check/getprofile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

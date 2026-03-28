@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {CircleCheck,TriangleAlert} from "lucide-react";
+import { Link } from "react-router-dom";
+import { CircleCheck, TriangleAlert } from "lucide-react";
 import baseAPIAuth from "../../../api/auth";
 
 interface NoticeState {
@@ -10,107 +10,107 @@ interface NoticeState {
 }
 
 const BustripChangePassword: React.FC = () => {
-    const [oldPass, setOldPass] = useState("");
-    const [newPass, setNewPass] = useState("");
-    const [confirmNewPass, setConfirmNewPass] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [notice, setNotice] = useState<NoticeState | null>(null);
+  const [oldPass, setOldPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmNewPass, setConfirmNewPass] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState<NoticeState | null>(null);
 
-    const changePass = async () => {
-        try {
-            const res = await baseAPIAuth.put("/api/customer/check/changPassword",
-            {
-                oldPass: oldPass,
-                newPass: newPass,
-                confirmNewPass: confirmNewPass
-            });
-             setNotice({
-            type: "success",
-            title: "Đổi mật khẩu thành công",
-            message: res.data?.message || "Thông tin đã được lưu.",
-            });
-        } catch (error : any) {
-            setNotice({
-            type: "error",
-            title: "Đổi mật khẩu thất bại",
-            message:
-            error.response?.data?.message ||
-            "Đã có lỗi xảy ra, vui lòng thử lại.",
-            });
-        }
+  const changePass = async () => {
+    try {
+      const res = await baseAPIAuth.put("/api/customer/check/changPassword",
+        {
+          oldPass: oldPass,
+          newPass: newPass,
+          confirmNewPass: confirmNewPass
+        });
+      setNotice({
+        type: "success",
+        title: "Đổi mật khẩu thành công",
+        message: res.data?.message || "Thông tin đã được lưu.",
+      });
+    } catch (error: any) {
+      setNotice({
+        type: "error",
+        title: "Đổi mật khẩu thất bại",
+        message:
+          error.response?.data?.message ||
+          "Đã có lỗi xảy ra, vui lòng thử lại.",
+      });
     }
-   
+  }
 
-    return (
-        <div className="flex items-center justify-center px-4 py-8">
 
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-lg p-8">
+  return (
+    <div className="flex items-center justify-center px-4 py-8">
 
-                <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">
-                    Đổi <span className="text-orange-500">Mật Khẩu</span>
-                </h1>
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-lg p-8">
 
-                <form className="space-y-5">
+        <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">
+          Đổi <span className="text-orange-500">Mật Khẩu</span>
+        </h1>
 
-                    {/* Old Password */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Mật khẩu cũ
-                        </label>
-                        <input
-                            type="password"
-                            value={oldPass}
-                            onChange={(e) => setOldPass(e.target.value)}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
-                        />
-                    </div>
+        <form className="space-y-5">
 
-                    {/* New Password */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Mật khẩu mới
-                        </label>
-                        <input
-                            type="password"
-                            value={newPass}
-                            onChange={(e) => setNewPass(e.target.value)}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
-                        />
-                    </div>
+          {/* Old Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mật khẩu cũ
+            </label>
+            <input
+              type="password"
+              value={oldPass}
+              onChange={(e) => setOldPass(e.target.value)}
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
+            />
+          </div>
 
-                    {/* Confirm Password */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Xác nhận mật khẩu mới
-                        </label>
-                        <input
-                            type="password"
-                            value={confirmNewPass}
-                            onChange={(e) => setConfirmNewPass(e.target.value)}
-                            required
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
-                        />
-                    </div>
+          {/* New Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mật khẩu mới
+            </label>
+            <input
+              type="password"
+              value={newPass}
+              onChange={(e) => setNewPass(e.target.value)}
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
+            />
+          </div>
 
-                    <button
-                        type="button"
-                        onClick={changePass}
-                        disabled={loading}
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow-md transition disabled:opacity-50"
-                    >
-                        {loading ? "Đang xử lý..." : "Xác Nhận Đổi Mật Khẩu"}
-                    </button>
-                </form>
+          {/* Confirm Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Xác nhận mật khẩu mới
+            </label>
+            <input
+              type="password"
+              value={confirmNewPass}
+              onChange={(e) => setConfirmNewPass(e.target.value)}
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
+            />
+          </div>
 
-                <p className="text-center text-sm text-gray-600 mt-6">
-                    Quay lại{" "}
-                    <Link to="/user/profile" className="text-orange-500 hover:underline font-medium">
-                        Trang cá nhân
-                    </Link>
-                </p>
-            </div> {notice ? (
+          <button
+            type="button"
+            onClick={changePass}
+            disabled={loading}
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg shadow-md transition disabled:opacity-50"
+          >
+            {loading ? "Đang xử lý..." : "Xác Nhận Đổi Mật Khẩu"}
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-gray-600 mt-6">
+          Quay lại{" "}
+          <Link to="/user/profile" className="text-orange-500 hover:underline font-medium">
+            Trang cá nhân
+          </Link>
+        </p>
+      </div> {notice ? (
         <>
           <style>{`
           @keyframes routeNoticeIn {
@@ -216,8 +216,8 @@ const BustripChangePassword: React.FC = () => {
           </div>
         </>
       ) : null}
-        </div>
-    );
+    </div>
+  );
 };
 
 export default BustripChangePassword;

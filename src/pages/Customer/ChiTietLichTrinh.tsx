@@ -263,6 +263,7 @@ function FilterContent({
 
 /* ================= MAIN COMPONENT ================= */
 export default function BusTripSearch() {
+  const api = import.meta.env.VITE_API_URL
   const location = useLocation();
   const locationState = location.state as LocationState | null;
   const id = locationState?.id;
@@ -295,7 +296,7 @@ export default function BusTripSearch() {
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/customer/notcheck/viewTrip", {
+        const response = await fetch(`${api}/api/customer/notcheck/viewTrip`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ route_id: id }),

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search as SearchIcon,
@@ -9,14 +9,14 @@ import {
   Star,
   ToggleLeft,
   ToggleRight,
-  Edit,
+
   Navigation,
   Plus,
 } from "lucide-react";
 import type { allStops } from "../../model/allStops";
 import baseApiAuth from "../../api/auth";
 import type { getAllStopLocation } from "../../model/getAllLocationOfStop";
-import {CircleCheck,TriangleAlert} from "lucide-react";
+import { CircleCheck, TriangleAlert } from "lucide-react";
 
 
 type StopLocationModel = {
@@ -93,99 +93,100 @@ const ManageStopLocation: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 12;
 
-// Hàm userEffect cho getAllStops
-useEffect(()=>{
-  getAllStops();
-},[])
+  // Hàm userEffect cho getAllStops
+  useEffect(() => {
+    getAllStops();
+  }, [])
 
-// Hàm lấy tất cả các Stop ko co'status
-const getAllStops = async () =>{
-  try {
-    const res = await baseApiAuth.get("/api/admin/check/getAllStopsNotFilter");
-    console.log("Data : ", res.data);
-    setStops(res.data);
-  } catch (error) {
-    console.error(error);
-  }
-}
-const handleSelectStop = (stop: allStops) => {
-  setSelectedStop(stop);
-  // Auto set mainLocId từ stopLocation_id
-  const ref = stop.stopLocation_id;
-  if (ref && typeof ref === "object" && ref._id) {
-    setMainLocId(ref._id);
-  } else {
-    setMainLocId("");
-  }
-};
-// Hàm userEffect cho getAllStopLocationOfStops
-useEffect(()=>{
-  console.log("Id la",selectedStop?._id)
-  if (selectedStop?._id) {
-    getAllStopLocationOfStops(selectedStop._id);
-  }},[selectedStop]);
-// Hàm Lấy tất cả stoplocation thuộc stop
-const getAllStopLocationOfStops = async (stopId: string) =>{
-  try {
-    const res = await baseApiAuth.get("/api/admin/check/getStopLocationOfStop", {params: { stop_id: stopId }});
-    console.log("Data StopLocation: ", res.data);
-    setLocations(res.data);
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-// Hàm update status của Stop
-const updateStopStatus = async (stopId : string) =>{
-  try {
-    const res = await baseApiAuth.patch("/api/admin/check/updateStopStatus",null, {params: { stop_id: stopId }});
-     console.log("Data Update: ", res.data);
-     await getAllStops();
-    setSelectedStop(prev => prev ? { ...prev, is_active: !prev.is_active } : null);
-  } catch (error) {
-    console.log(error);
-  }
-}
-// Hàm update status của Stop
-const updateStopLocationStatus = async (stopLocationId: string) => {
-  try {
-    const res = await baseApiAuth.patch("/api/admin/check/updateStopLocationStatus", null, {
-      params: { stopLocation_id: stopLocationId }
-    });
-    console.log("Data Update:", res.data);
-    
-    // Refresh lại danh sách locations
-    if (selectedStop?._id) {
-      await getAllStopLocationOfStops(selectedStop._id);
+  // Hàm lấy tất cả các Stop ko co'status
+  const getAllStops = async () => {
+    try {
+      const res = await baseApiAuth.get("/api/admin/check/getAllStopsNotFilter");
+      console.log("Data : ", res.data);
+      setStops(res.data);
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.log(error);
   }
-};
-// Hàm update main stop location cho stop
-const updateMainStopLocation = async (stopId : string, newStopLocationID: string) =>{
-  try {
-    const res = await baseApiAuth.patch("/api/admin/check/updateMainStopLocation",null,{params: {stop_id: stopId,newStopLocation_id: newStopLocationID}});
-        setShowSetMain(false);
+  const handleSelectStop = (stop: allStops) => {
+    setSelectedStop(stop);
+    // Auto set mainLocId từ stopLocation_id
+    const ref = stop.stopLocation_id;
+    if (ref && typeof ref === "object" && ref._id) {
+      setMainLocId(ref._id);
+    } else {
+      setMainLocId("");
+    }
+  };
+  // Hàm userEffect cho getAllStopLocationOfStops
+  useEffect(() => {
+    console.log("Id la", selectedStop?._id)
+    if (selectedStop?._id) {
+      getAllStopLocationOfStops(selectedStop._id);
+    }
+  }, [selectedStop]);
+  // Hàm Lấy tất cả stoplocation thuộc stop
+  const getAllStopLocationOfStops = async (stopId: string) => {
+    try {
+      const res = await baseApiAuth.get("/api/admin/check/getStopLocationOfStop", { params: { stop_id: stopId } });
+      console.log("Data StopLocation: ", res.data);
+      setLocations(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
-     setNotice({
+  // Hàm update status của Stop
+  const updateStopStatus = async (stopId: string) => {
+    try {
+      const res = await baseApiAuth.patch("/api/admin/check/updateStopStatus", null, { params: { stop_id: stopId } });
+      console.log("Data Update: ", res.data);
+      await getAllStops();
+      setSelectedStop(prev => prev ? { ...prev, is_active: !prev.is_active } : null);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  // Hàm update status của Stop
+  const updateStopLocationStatus = async (stopLocationId: string) => {
+    try {
+      const res = await baseApiAuth.patch("/api/admin/check/updateStopLocationStatus", null, {
+        params: { stopLocation_id: stopLocationId }
+      });
+      console.log("Data Update:", res.data);
+
+      // Refresh lại danh sách locations
+      if (selectedStop?._id) {
+        await getAllStopLocationOfStops(selectedStop._id);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // Hàm update main stop location cho stop
+  const updateMainStopLocation = async (stopId: string, newStopLocationID: string) => {
+    try {
+      const res = await baseApiAuth.patch("/api/admin/check/updateMainStopLocation", null, { params: { stop_id: stopId, newStopLocation_id: newStopLocationID } });
+      setShowSetMain(false);
+
+      setNotice({
         type: "success",
         title: "Cập nhật thành công",
         message: res.data?.message || "Thông tin tuyến đã được lưu.",
       });
-  } catch (error: any) {
-    console.log(error);
-    
-    setShowSetMain(false);
-    setNotice({
+    } catch (error: any) {
+      console.log(error);
+
+      setShowSetMain(false);
+      setNotice({
         type: "error",
         title: "Tạo tuyến thất bại",
         message:
           error.response?.data?.message ||
           "Đã có lỗi xảy ra, vui lòng thử lại.",
       });
+    }
   }
-}
 
 
 
@@ -210,7 +211,7 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
   /* ──────────── Get main location name ──────────── */
   const getMainLocName = () => {
     const ref = selectedStop?.stopLocation_id;
-    
+
     if (ref && typeof ref === "object" && ref.location_name) return ref.location_name;
     return "Chưa gán";
   };
@@ -302,16 +303,14 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
                     <button
                       key={stop._id}
                       onClick={() => handleSelectStop(stop)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${
-                        isSelected
-                          ? "bg-[#FFF4EB] border-l-4 border-l-[#FF5722]"
-                          : "border-l-4 border-l-transparent hover:bg-gray-50"
-                      }`}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 ${isSelected
+                        ? "bg-[#FFF4EB] border-l-4 border-l-[#FF5722]"
+                        : "border-l-4 border-l-transparent hover:bg-gray-50"
+                        }`}
                     >
                       <div
-                        className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          isSelected ? "bg-orange-500 text-white" : "bg-orange-100 text-orange-500"
-                        }`}
+                        className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isSelected ? "bg-orange-500 text-white" : "bg-orange-100 text-orange-500"
+                          }`}
                       >
                         <MapPin size={16} />
                       </div>
@@ -320,9 +319,8 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
                         <div className="text-xs text-gray-400 mt-0.5 truncate">{getMainLocName()}</div>
                       </div>
                       <span
-                        className={`flex-shrink-0 inline-flex w-2 h-2 rounded-full ${
-                          stop.is_active !== false ? "bg-green-500" : "bg-red-400"
-                        }`}
+                        className={`flex-shrink-0 inline-flex w-2 h-2 rounded-full ${stop.is_active !== false ? "bg-green-500" : "bg-red-400"
+                          }`}
                       />
                     </button>
                   );
@@ -379,13 +377,12 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
                     </div>
                   </div>
                   <button
-                   onClick={() => updateStopStatus(selectedStop._id)}
+                    onClick={() => updateStopStatus(selectedStop._id)}
                     disabled={togglingStopStatus}
-                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 ${
-                      selectedStop.is_active !== false
-                        ? "bg-green-100 text-green-700 hover:bg-green-200"
-                        : "bg-red-100 text-red-700 hover:bg-red-200"
-                    }`}
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 ${selectedStop.is_active !== false
+                      ? "bg-green-100 text-green-700 hover:bg-green-200"
+                      : "bg-red-100 text-red-700 hover:bg-red-200"
+                      }`}
                     title={selectedStop.is_active !== false ? "Click để tạm ngưng" : "Click để kích hoạt"}
                   >
                     {selectedStop.is_active !== false ? (
@@ -437,15 +434,13 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
                       return (
                         <div
                           key={loc._id}
-                          className={`px-5 py-4 flex items-start gap-4 transition-all ${
-                            !loc.is_active ? "opacity-50" : ""
-                          } ${isMain ? "bg-orange-50/50" : "hover:bg-gray-50"}`}
+                          className={`px-5 py-4 flex items-start gap-4 transition-all ${!loc.is_active ? "opacity-50" : ""
+                            } ${isMain ? "bg-orange-50/50" : "hover:bg-gray-50"}`}
                         >
                           {/* Icon */}
                           <div
-                            className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                              isMain ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-500"
-                            }`}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${isMain ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-500"
+                              }`}
                           >
                             {isMain ? <Star size={14} /> : <MapPin size={14} />}
                           </div>
@@ -467,20 +462,18 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
                             )}
                             <div className="flex items-center gap-3 mt-1.5">
                               <span
-                                className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                                  loc.location_type === "PICKUP"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : loc.location_type === "DROPOFF"
+                                className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${loc.location_type === "PICKUP"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : loc.location_type === "DROPOFF"
                                     ? "bg-purple-100 text-purple-700"
                                     : "bg-gray-100 text-gray-600"
-                                }`}
+                                  }`}
                               >
                                 {locationTypeLabel[loc.location_type ?? "BOTH"] ?? "Đón & Trả"}
                               </span>
                               <span
-                                className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                                  loc.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
-                                }`}
+                                className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${loc.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+                                  }`}
                               >
                                 {loc.is_active ? "Hoạt động" : "Tạm ngưng"}
                               </span>
@@ -490,17 +483,16 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
                           {/* Actions */}
                           <div className="flex items-center gap-2 flex-shrink-0">
                             {/* Toggle status */}
-                              <button
+                            <button
                               onClick={() => updateStopLocationStatus(loc._id)}
                               title={loc.is_active ? "Tắt hoạt động" : "Bật hoạt động"}
-                              className={`p-1.5 rounded-md transition-colors ${
-                                loc.is_active
-                                  ? "text-green-600 hover:bg-green-50"
-                                  : "text-gray-400 hover:bg-gray-100"
-                              }`}
+                              className={`p-1.5 rounded-md transition-colors ${loc.is_active
+                                ? "text-green-600 hover:bg-green-50"
+                                : "text-gray-400 hover:bg-gray-100"
+                                }`}
                             >
                               {loc.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
-                            </button>                
+                            </button>
                           </div>
                         </div>
                       );
@@ -604,11 +596,10 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
                     .map((loc) => (
                       <label
                         key={loc._id}
-                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                          mainLocId === loc._id
-                            ? "border-orange-400 bg-orange-50"
-                            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                        }`}
+                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${mainLocId === loc._id
+                          ? "border-orange-400 bg-orange-50"
+                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                          }`}
                       >
                         <input
                           type="radio"
@@ -639,7 +630,7 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
                 Hủy
               </button>
               <button
-                onClick={() => updateMainStopLocation(selectedStop._id,mainLocId)}
+                onClick={() => updateMainStopLocation(selectedStop._id, mainLocId)}
                 disabled={savingMain || !mainLocId}
                 className="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
               >
@@ -649,7 +640,7 @@ const updateMainStopLocation = async (stopId : string, newStopLocationID: string
           </div>
         </div>
       )}
-       {notice ? (
+      {notice ? (
         <>
           <style>{`
           @keyframes routeNoticeIn {

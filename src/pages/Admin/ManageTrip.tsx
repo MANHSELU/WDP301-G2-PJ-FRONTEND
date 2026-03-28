@@ -12,7 +12,7 @@ import {
   Clock,
   MapPin,
   CircleCheck,
-   TriangleAlert,
+  TriangleAlert,
 } from "lucide-react";
 import baseAPIAuth from "../../api/auth";
 import type { getBuses } from "../../model/getBuses";
@@ -152,7 +152,7 @@ const fromLocalInputToIso = (val?: string): string | undefined => {
 const statusToVn = (s?: string) => {
   if (!s) return "—";
   switch (s.toUpperCase()) {
-      case "UNASSIGNED":
+    case "UNASSIGNED":
       return "Chưa gán";
     case "SCHEDULED":
       return "Đã lên lịch";
@@ -210,13 +210,13 @@ const ManageTrip: React.FC = () => {
   const [notice, setNotice] = useState<NoticeState | null>(null);
 
   // State cho gán xe, tài xế, phụ xe
-    const [buses, setBuses] = useState<getBuses[]>([]);
-   const [availableDrivers, setAvailableDrivers] = useState<getDrivers[]>([]);
+  const [buses, setBuses] = useState<getBuses[]>([]);
+  const [availableDrivers, setAvailableDrivers] = useState<getDrivers[]>([]);
   const [availableAssistants, setAvailableAssistants] = useState<getAssistants[]>([]);
   const [formBusId, setFormBusId] = useState<string>("");
   const [formDriverId, setFormDriverId] = useState<string>("");
   const [formAssistantId, setFormAssistantId] = useState<string>("");
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   // ==================== API ====================
   const fetchTrips = async (page: number = 1): Promise<void> => {
@@ -251,7 +251,7 @@ const ManageTrip: React.FC = () => {
       if (!res.ok) {
         throw new Error(
           extractMessage(parsed) ??
-            `HTTP ${res.status}: Không thể lấy danh sách chuyến`
+          `HTTP ${res.status}: Không thể lấy danh sách chuyến`
         );
       }
 
@@ -324,19 +324,18 @@ const ManageTrip: React.FC = () => {
           activeTab === "Hoạt động"
             ? "RUNNING"
             : activeTab === "Đã lên lịch"
-            ? "SCHEDULED"
-            : activeTab === "Tạm ngừng"
-            ? "FINISHED"
-            : activeTab === "Chưa gán"
-            ? "UNASSIGNED"
-            : undefined;
+              ? "SCHEDULED"
+              : activeTab === "Tạm ngừng"
+                ? "FINISHED"
+                : activeTab === "Chưa gán"
+                  ? "UNASSIGNED"
+                  : undefined;
         if (want && String(trip.status).toUpperCase() !== want) return false;
       }
       if (!q) return true;
 
-      const routeName = `${trip.route_id?.start_id?.name ?? ""} → ${
-        trip.route_id?.stop_id?.name ?? ""
-      }`;
+      const routeName = `${trip.route_id?.start_id?.name ?? ""} → ${trip.route_id?.stop_id?.name ?? ""
+        }`;
       const drivers = trip.drivers
         .map((d) => {
           const dr = d.driver_id as User;
@@ -470,7 +469,7 @@ const ManageTrip: React.FC = () => {
 
       await fetchTrips(pagination.currentPage);
       closeModal();
-    } catch (error : any) {
+    } catch (error: any) {
       setNotice({
         type: "error",
         title: "Cập nhật chuyến thất bại",
@@ -555,11 +554,10 @@ const ManageTrip: React.FC = () => {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    activeTab === tab
+                  className={`rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors ${activeTab === tab
                       ? "bg-[#eb8a45] text-white shadow-sm"
                       : "text-[#6b7280] hover:bg-[#f3f4f6]"
-                  }`}
+                    }`}
                 >
                   {tab}
                 </button>
@@ -649,9 +647,8 @@ const ManageTrip: React.FC = () => {
                   </tr>
                 ) : (
                   filtered.map((trip) => {
-                    const routeName = `${
-                      trip.route_id?.start_id?.name ?? "N/A"
-                    } → ${trip.route_id?.stop_id?.name ?? "N/A"}`;
+                    const routeName = `${trip.route_id?.start_id?.name ?? "N/A"
+                      } → ${trip.route_id?.stop_id?.name ?? "N/A"}`;
                     const distance =
                       trip.route_id?.distance_km ??
                       trip.scheduled_distance ??
@@ -811,11 +808,10 @@ const ManageTrip: React.FC = () => {
                     )}
                     <button
                       onClick={() => handlePageChange(p)}
-                      className={`min-w-[36px] rounded-lg px-3 py-2 text-[13px] font-medium transition-colors ${
-                        pagination.currentPage === p
+                      className={`min-w-[36px] rounded-lg px-3 py-2 text-[13px] font-medium transition-colors ${pagination.currentPage === p
                           ? "bg-[#eb8a45] text-white shadow-sm"
                           : "text-[#6b7280] hover:bg-white border border-transparent hover:border-[#dde2ea]"
-                      }`}
+                        }`}
                     >
                       {p}
                     </button>
@@ -873,9 +869,8 @@ const ManageTrip: React.FC = () => {
                       <div className="flex items-center gap-2 rounded-lg border border-[#dde2ea] bg-white px-3 py-2.5">
                         <MapPin size={16} className="text-[#6b7280]" />
                         <input
-                          value={`${
-                            selected.route_id?.start_id?.name ?? "N/A"
-                          } → ${selected.route_id?.stop_id?.name ?? "N/A"}`}
+                          value={`${selected.route_id?.start_id?.name ?? "N/A"
+                            } → ${selected.route_id?.stop_id?.name ?? "N/A"}`}
                           disabled
                           className="flex-1 bg-transparent text-[13px] text-[#111827] font-medium"
                         />
@@ -888,11 +883,10 @@ const ManageTrip: React.FC = () => {
                       <div className="flex items-center gap-2 rounded-lg border border-[#dde2ea] bg-white px-3 py-2.5">
                         <MapPin size={16} className="text-[#6b7280]" />
                         <input
-                          value={`${
-                            selected.route_id?.distance_km ??
+                          value={`${selected.route_id?.distance_km ??
                             selected.scheduled_distance ??
                             0
-                          } km`}
+                            } km`}
                           disabled
                           className="flex-1 bg-transparent text-[13px] text-[#111827] font-medium"
                         />
@@ -1082,7 +1076,7 @@ const ManageTrip: React.FC = () => {
           </div>
         </div>
       )}
-        {notice ? (
+      {notice ? (
         <>
           <style>{`
           @keyframes routeNoticeIn {

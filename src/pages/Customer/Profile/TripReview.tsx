@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Star, Loader2, AlertCircle, RefreshCw, MapPin, Bus, MessageSquare, X, CircleCheck,TriangleAlert } from "lucide-react";
+import { Star, Loader2, RefreshCw, MapPin, Bus, MessageSquare, X, CircleCheck, TriangleAlert } from "lucide-react";
 import baseApiAuth from "../../../api/auth";
 import type { getTripFinished } from "../../../model/getTripFinishedHistory";
 import type { reviewForm } from "../../../model/reviewForm";
@@ -38,11 +38,10 @@ function StarRating({ value, onChange, label }: { value: number; onChange: (v: n
           >
             <Star
               size={22}
-              className={`transition-colors ${
-                star <= (hover || value)
+              className={`transition-colors ${star <= (hover || value)
                   ? "fill-yellow-400 text-yellow-400"
                   : "fill-none text-slate-300"
-              }`}
+                }`}
             />
           </button>
         ))}
@@ -56,8 +55,8 @@ function StarRating({ value, onChange, label }: { value: number; onChange: (v: n
 export default function TripReview() {
   const [loading, setLoading] = useState(false);
   const [TripFinishedHistory, setTripFinishedHistory] = useState<getTripFinished[]>([]);
-   const [notice, setNotice] = useState<NoticeState | null>(null);
-  const [reviewingOrder, setReviewingOrder] = useState<getTripFinished | null>( null,);
+  const [notice, setNotice] = useState<NoticeState | null>(null);
+  const [reviewingOrder, setReviewingOrder] = useState<getTripFinished | null>(null,);
   const [reviewForm, setReviewForm] = useState<reviewForm>({
     booking_id: "",
     trip_id: "",
@@ -114,7 +113,7 @@ export default function TripReview() {
   };
 
   // Hàm review trip
-  const reviewTrip = async ()  => {
+  const reviewTrip = async () => {
     try {
       console.log("data gửi", reviewForm);
       const res = await baseApiAuth.post("/api/customer/check/reviewTrip",
@@ -123,7 +122,7 @@ export default function TripReview() {
       closeReview();
       getTripFinishedHistory();
       setNotice({ type: "success", title: "Thành công", message: "Gửi đánh giá thành công" });
-    } catch (error : any) {
+    } catch (error: any) {
       setNotice({ type: "error", title: "Thất bại", message: error.response?.data?.message || "Gửi đánh giá thất bại" });
     }
   };
@@ -380,11 +379,10 @@ export default function TripReview() {
               {/* Submit result */}
               {submitResult && (
                 <div
-                  className={`rounded-xl px-4 py-3 text-sm font-semibold ${
-                    submitResult.type === "success"
+                  className={`rounded-xl px-4 py-3 text-sm font-semibold ${submitResult.type === "success"
                       ? "bg-green-50 text-green-700 border border-green-200"
                       : "bg-red-50 text-red-700 border border-red-200"
-                  }`}
+                    }`}
                 >
                   {submitResult.message}
                 </div>
@@ -415,7 +413,7 @@ export default function TripReview() {
           </div>
         </div>
       )}
-       {notice ? (
+      {notice ? (
         <>
           <style>{`
           @keyframes routeNoticeIn {

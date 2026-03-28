@@ -186,14 +186,14 @@ const ManageBus: React.FC = () => {
     ) : (
       <Wrench size={14} className="mr-1" />
     );
-
+  const api = import.meta.env.VITE_API_URL
   const fetchBuses = async (): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem("accessToken") ?? "";
       const url =
-        "http://localhost:3000/api/admin/check/viewBuses?page=1&limit=200";
+        `${api}/api/admin/check/viewBuses?page=1&limit=200`;
       const res = await fetch(url, {
         method: "GET",
         headers: {
@@ -277,7 +277,7 @@ const ManageBus: React.FC = () => {
     try {
       const token = localStorage.getItem("accessToken") ?? "";
       const res = await fetch(
-        "http://localhost:3000/api/admin/notcheck/BusType",
+        `${api}/api/admin/notcheck/BusType`,
         {
           method: "GET",
           headers: {
@@ -372,7 +372,7 @@ const ManageBus: React.FC = () => {
     try {
       const token = localStorage.getItem("accessToken") ?? "";
       const res = await fetch(
-        `http://localhost:3000/api/admin/check/buses/${editingBus.id}`,
+        `${api}/api/admin/check/buses/${editingBus.id}`,
         {
           method: "PUT",
           headers: {
