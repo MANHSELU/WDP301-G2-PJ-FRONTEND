@@ -24,7 +24,7 @@ export default function CreateTrip() {
   const [buses, setBuses] = useState<getBuses[]>([]);
   const [routeId, setRouteId] = useState("");
   const [busId, setBusId] = useState("");
-const [assistantId, setAssistantId] = useState("");
+  const [assistantId, setAssistantId] = useState("");
 
   const [departureTime, setDepartureTime] = useState("");
   const [arrivalTime, setArrivalTime] = useState("");
@@ -64,8 +64,8 @@ const [assistantId, setAssistantId] = useState("");
       getAvailableDrivers();
     }
   }, [departureTime, scheduledDuration, routeId]);
-  
-    //Hàm lấy lơ xe availble
+
+  //Hàm lấy lơ xe availble
   useEffect(() => {
     if (departureTime && scheduledDuration && routeId) {
       getAvailableAssistant();
@@ -73,8 +73,8 @@ const [assistantId, setAssistantId] = useState("");
   }, [departureTime, scheduledDuration, routeId]);
 
   const getNow = () => {
-  return formatLocalDateTime(new Date());
-};
+    return formatLocalDateTime(new Date());
+  };
   //format time
   const formatLocalDateTime = (date: Date) => {
     const year = date.getFullYear();
@@ -116,36 +116,36 @@ const [assistantId, setAssistantId] = useState("");
     return "D" + id.slice(0, 3); // 3 ký tự đầu trong id
   };
   //Hàm đổi màu
-const getDriverStatusIcon = (status: string) => {
-  if (status === "GREEN") return "🟢";
-  if (status === "YELLOW") return "⚠️ Lưu ý thời gian giữa các chuyến";
-  return "";
-};
+  const getDriverStatusIcon = (status: string) => {
+    if (status === "GREEN") return "🟢";
+    if (status === "YELLOW") return "⚠️ Lưu ý thời gian giữa các chuyến";
+    return "";
+  };
   // Hàm format hiển thị id xe
   const getBusCode = (id: string) => {
     return "D" + id.slice(0, 3); // 3 ký tự đầu trong id
   };
   //Hàm đổi màu 
-const getBusStatusIcon = (status: string) => {
-  if (status === "GREEN") return "🟢";
-  if (status === "YELLOW") return "⚠️ Lưu ý thời gian giữa các chuyến";
-  return "";
-};
- // Hàm format hiển thị id lơ xe
+  const getBusStatusIcon = (status: string) => {
+    if (status === "GREEN") return "🟢";
+    if (status === "YELLOW") return "⚠️ Lưu ý thời gian giữa các chuyến";
+    return "";
+  };
+  // Hàm format hiển thị id lơ xe
   const getAssistantCode = (id: string) => {
     return "D" + id.slice(0, 3); // 3 ký tự đầu trong id
   };
   //Hàm đổi màu
-const getAssistantStatusIcon = (status: string) => {
-  if (status === "GREEN") return "🟢";
-  if (status === "YELLOW") return "⚠️ Lưu ý thời gian giữa các chuyến";
-  return "";
-};
+  const getAssistantStatusIcon = (status: string) => {
+    if (status === "GREEN") return "🟢";
+    if (status === "YELLOW") return "⚠️ Lưu ý thời gian giữa các chuyến";
+    return "";
+  };
   // Hàm get Tài xế đang rảnh ca
   const getAvailableDrivers = async () => {
     if (!departureTime) return;
     const shiftEnd = calcShiftEnd();
-    
+
     if (!shiftEnd) return;
     const selectedRoute = routes.find((r) => r._id === routeId);
     if (!selectedRoute) return;
@@ -163,17 +163,17 @@ const getAssistantStatusIcon = (status: string) => {
       );
       console.log("Các tài xế đang rảnh: ", res.data);
       setAvailableDrivers(res.data);
-      
+
     } catch (error) {
       console.error(error);
     }
   };
 
-// Hàm get Lơ xe đang rảnh ca
+  // Hàm get Lơ xe đang rảnh ca
   const getAvailableAssistant = async () => {
     if (!departureTime) return;
     const shiftEnd = calcShiftEnd();
-    
+
     if (!shiftEnd) return;
     const selectedRoute = routes.find((r) => r._id === routeId);
     if (!selectedRoute) return;
@@ -191,21 +191,21 @@ const getAssistantStatusIcon = (status: string) => {
       );
       console.log("Các lơ đang rảnh: ", res.data);
       setAvailableAssistants(res.data);
-      
+
     } catch (error) {
       console.error(error);
     }
   };
 
-    // Hàm lấy tất cả các buses đang rảnh 
+  // Hàm lấy tất cả các buses đang rảnh 
   const getAllBuses = async () => {
-        if (!departureTime) return;
+    if (!departureTime) return;
     const shiftEnd = calcShiftEnd();
     if (!shiftEnd) return;
     const selectedRoute = routes.find((r) => r._id === routeId);
     if (!selectedRoute) return;
     try {
-          const res = await baseAPIAuth.get(
+      const res = await baseAPIAuth.get(
         "/api/admin/check/getBuses",
         {
           params: {
@@ -328,7 +328,7 @@ const getAssistantStatusIcon = (status: string) => {
       setFormError("");
       setRouteId("");
       setBusId("");
-       setAssistantId("");
+      setAssistantId("");
       setDepartureTime("");
       setArrivalTime("");
       setScheduledDuration("");
@@ -344,11 +344,11 @@ const getAssistantStatusIcon = (status: string) => {
       ]);
       alert(" Tạo chuyến thành công!");
     } catch (err: any) {
-      console.error(err);
+      console.error("Full error:", err?.response?.data);
       setFormError(
         err?.response?.data?.message ??
-          err?.message ??
-          "Tạo chuyến đi thất bại.",
+        err?.message ??
+        "Tạo chuyến đi thất bại.",
       );
     }
   };
@@ -478,7 +478,7 @@ const getAssistantStatusIcon = (status: string) => {
                   <input
                     type="datetime-local"
                     value={arrivalTime}
-                     min={departureTime || getNow()}
+                    min={departureTime || getNow()}
                     onChange={(e) => setArrivalTime(e.target.value)}
                     className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#e8f4f8] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
                     required
@@ -507,30 +507,30 @@ const getAssistantStatusIcon = (status: string) => {
                   >
                     <option value="">-- Chọn xe --</option>
                     {buses.map((bus) => (
-                          <option key={bus._id} value={bus._id}>
-                              [{getBusCode(bus._id)}] - {bus.bus_type_id.name} - [{bus.license_plate}] - {getBusStatusIcon(bus.status)}
-                              </option>
+                      <option key={bus._id} value={bus._id}>
+                        [{getBusCode(bus._id)}] - {bus.bus_type_id.name} - [{bus.license_plate}] - {getBusStatusIcon(bus.status)}
+                      </option>
                     ))}
                   </select>
                 </label>
 
-              <label className="space-y-1">
-  <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
-    Phụ xe (tùy chọn)
-  </span>
-  <select
-    value={assistantId}           // ✅ state riêng cho assistant
-    onChange={(e) => setAssistantId(e.target.value)}
-    className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
-  >
-    <option value="">-- Chọn phụ xe --</option>
-    {availableAssistants.map((a) => (
-      <option key={a._id} value={a._id}>
-      [{getAssistantCode(a._id)}] - {a.name} - {getAssistantStatusIcon(a.status)}
-      </option>
-    ))}
-  </select>
-</label>
+                <label className="space-y-1">
+                  <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
+                    Phụ xe (tùy chọn)
+                  </span>
+                  <select
+                    value={assistantId}           // ✅ state riêng cho assistant
+                    onChange={(e) => setAssistantId(e.target.value)}
+                    className="h-11 w-full rounded-[8px] border border-[#d1d5db] bg-[#f8fafc] px-3 text-sm font-semibold text-[#374151] outline-none transition focus:border-[#9ca3af]"
+                  >
+                    <option value="">-- Chọn phụ xe --</option>
+                    {availableAssistants.map((a) => (
+                      <option key={a._id} value={a._id}>
+                        [{getAssistantCode(a._id)}] - {a.name} - {getAssistantStatusIcon(a.status)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
             </section>
 
@@ -593,7 +593,7 @@ const getAssistantStatusIcon = (status: string) => {
                             <option value="">-- Chọn tài xế rảnh --</option>
                             {availableDrivers.map((driver) => (
                               <option key={driver._id} value={driver._id}>
-                              [{getDriverCode(driver._id)}] - {driver.name} - {getDriverStatusIcon(driver.status)}
+                                [{getDriverCode(driver._id)}] - {driver.name} - {getDriverStatusIcon(driver.status)}
                               </option>
                             ))}
                           </select>
@@ -657,7 +657,7 @@ const getAssistantStatusIcon = (status: string) => {
                         <input
                           type="datetime-local"
                           value={d.shift_start}
-                           min={departureTime || getNow()}
+                          min={departureTime || getNow()}
                           onChange={(e) =>
                             handleUpdateDriver(
                               d.id,
@@ -677,7 +677,7 @@ const getAssistantStatusIcon = (status: string) => {
                         <input
                           type="datetime-local"
                           value={d.shift_end}
-                            min={d.shift_start || departureTime || getNow()} 
+                          min={d.shift_start || departureTime || getNow()}
                           onChange={(e) =>
                             handleUpdateDriver(
                               d.id,
