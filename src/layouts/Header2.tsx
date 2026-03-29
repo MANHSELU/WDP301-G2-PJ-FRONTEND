@@ -38,21 +38,19 @@ export default function Header2() {
   const navItems = [
     { name: "Trang chủ", path: "/" },
     { name: "Lịch trình", path: "/lichtrinh" },
-<<<<<<< HEAD
-    { name: "Tra cứu vé", path: "/tra-cuu" },
-    { name: "Hóa đơn", path: "/hoa-don" },
-=======
-    { name: "Tra cứu vé", path: "/user/orderhistory" },
->>>>>>> bfdc21f63441129f4b822716054b1d9c7790038d
+
     { name: "Tin tức", path: "/news" },
     { name: "Gửi hàng", path: "/dathang" },
   ];
   const location = useLocation();
-<<<<<<< HEAD
-  const noBgExact = ["/loginCamera", "/registerCamera", "/changePass", "/news"];
-=======
-  const noBgExact = ["/loginCamera", "/registerCamera", "/changePass", "/verifi", "/news"];
->>>>>>> bfdc21f63441129f4b822716054b1d9c7790038d
+
+  const noBgExact = [
+    "/loginCamera",
+    "/registerCamera",
+    "/changePass",
+    "/verifi",
+    "/news",
+  ];
 
   const showBackground =
     !noBgExact.includes(location.pathname) &&
@@ -102,9 +100,10 @@ export default function Header2() {
                     key={item.name}
                     to={item.path}
                     className={({ isActive }) =>
-                      `relative py-7 text-[13px] font-semibold ${isActive
-                        ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
-                        : "text-[#7c5f4a]"
+                      `relative py-7 text-[13px] font-semibold ${
+                        isActive
+                          ? "text-[#2f2118] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:rounded-full after:bg-[#e8a255]"
+                          : "text-[#7c5f4a]"
                       }`
                     }
                   >
@@ -200,10 +199,11 @@ export default function Header2() {
 
             {/* Mobile menu panel */}
             <div
-              className={`md:hidden absolute inset-x-0 top-[74px] z-50 transform origin-top-right transition-all ${mobileOpen
-                ? "scale-y-100 opacity-100"
-                : "scale-y-0 opacity-0 pointer-events-none"
-                }`}
+              className={`md:hidden absolute inset-x-0 top-[74px] z-50 transform origin-top-right transition-all ${
+                mobileOpen
+                  ? "scale-y-100 opacity-100"
+                  : "scale-y-0 opacity-0 pointer-events-none"
+              }`}
               style={{ transformOrigin: "top" }}
             >
               <div className="mx-auto w-full max-w-[1240px] px-4">
@@ -215,9 +215,10 @@ export default function Header2() {
                         to={item.path}
                         onClick={() => setMobileOpen(false)}
                         className={({ isActive }) =>
-                          `block rounded-md px-3 py-2 text-base font-semibold ${isActive
-                            ? "text-[#2f2118] bg-[#fff3e7]"
-                            : "text-[#4b3a2e] hover:bg-[#fff6f0]"
+                          `block rounded-md px-3 py-2 text-base font-semibold ${
+                            isActive
+                              ? "text-[#2f2118] bg-[#fff3e7]"
+                              : "text-[#4b3a2e] hover:bg-[#fff6f0]"
                           }`
                         }
                       >

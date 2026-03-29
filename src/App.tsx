@@ -39,9 +39,6 @@ import AssistantShiftsPage from "./pages/Phuxe/DanhSachCalai";
 import DriverShiftsPage from "./pages/Driver/DanhSachCaLai";
 import { ChiTietChuyenDi } from "./pages/Phuxe/ChiTietChuyenDi";
 import ManageTrip from "./pages/Admin/ManageTrip";
-<<<<<<< HEAD
-import News from "./pages/Customer/News";
-=======
 import FaceVerificationPhuXe from "./pages/Phuxe/VerifileCam";
 import ChatBox from "./pages/Customer/ChatBoxV2";
 import News from "./pages/Customer/News";
@@ -51,13 +48,12 @@ import TripReview from "./pages/Customer/Profile/TripReview";
 import TripReviewHistory from "./pages/Customer/Profile/TripReviewHistory";
 import ManageStop from "./pages/Admin/ManageStop";
 import ManageStopLocation from "./pages/Admin/ManageStopLocation";
-
 import DatHangParcelOrder from "./pages/Customer/Profile/ParcelHistoryCard";
 import LeTanRefundPage from "./pages/LeTan/DanhSachHoanTien";
->>>>>>> bfdc21f63441129f4b822716054b1d9c7790038d
 export default function App() {
   const location = useLocation();
-  const isCustomerPage = !location.pathname.startsWith("/admin") &&
+  const isCustomerPage =
+    !location.pathname.startsWith("/admin") &&
     !location.pathname.startsWith("/driverBooking") &&
     !location.pathname.startsWith("/assistant") &&
     !location.pathname.startsWith("/letan");
@@ -77,8 +73,10 @@ export default function App() {
           <Route path="create-trips" element={<CreateTrip />} />
           <Route path="manage-trips" element={<ManageTrip />} />
           <Route path="manage-stops" element={<ManageStop />} />
-          <Route path="manage-stop-locations" element={<ManageStopLocation />} />
-
+          <Route
+            path="manage-stop-locations"
+            element={<ManageStopLocation />}
+          />
         </Route>
         <Route
           path="/admin/create-stop-location"
