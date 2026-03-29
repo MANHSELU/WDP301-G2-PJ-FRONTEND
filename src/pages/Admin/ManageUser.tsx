@@ -486,9 +486,9 @@ const ManageUser: React.FC = () => {
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                     {/* ── Left: Table ── */}
-                    <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="border-b border-gray-100 flex px-1 pt-1">
                             {(["list", "search"] as const).map((tab) => (
                                 <button key={tab} type="button" onClick={() => setActiveTab(tab)}
@@ -612,42 +612,6 @@ const ManageUser: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* ── Right: Permissions ── */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                        <h3 className="text-sm font-bold text-gray-900 mb-5">Quản lý quyền hạn</h3>
-                        <div className="space-y-6">
-                            {[
-                                {
-                                    section: "Hệ thống & báo cáo",
-                                    items: [
-                                        { key: "view_revenue_report" as PermissionKey, label: "Xem báo cáo doanh thu" },
-                                        { key: "manage_staff" as PermissionKey, label: "Quản lý nhân sự" },
-                                    ],
-                                },
-                                {
-                                    section: "Vận hành",
-                                    items: [
-                                        { key: "edit_route_schedule" as PermissionKey, label: "Sửa tuyến xe / Lịch trình" },
-                                        { key: "manage_booking" as PermissionKey, label: "Quản lý đặt vé" },
-                                        { key: "cancel_refund" as PermissionKey, label: "Hủy vé / Hoàn tiền" },
-                                    ],
-                                },
-                            ].map(({ section, items }) => (
-                                <div key={section}>
-                                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">{section}</p>
-                                    <div className="space-y-3.5">
-                                        {items.map(({ key, label }) => (
-                                            <div key={key} className="flex items-center justify-between gap-3">
-                                                <span className="text-sm text-gray-700">{label}</span>
-                                                <Toggle checked={permissions[key]}
-                                                    onChange={() => setPermissions((p) => ({ ...p, [key]: !p[key] }))} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                 </div>
 
                 {/* ══ Modal: Thêm nhân sự ══ */}
